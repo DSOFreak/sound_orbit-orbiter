@@ -10,8 +10,7 @@
 #include "wiringPi.h"
 #include "cmaxonmotor.h"
 #include <GL/glut.h>
-
-
+#include "fmod.hpp"
 
 
 enum eTasten {
@@ -226,7 +225,23 @@ void		TimerFunc(int value) {
 		cTaste = SUB_10;
 		iTargetPosition = iTargetPosition - 1000;
 	}
-
+	if (szTxt2.find("KEY_VOLUMEUP") != -1 /*&& cTaste != NEXT*/) {
+		cTaste = SUB_10;
+		result = fsystem->playDSP(dsp, 0, true, &channel);
+		if (vol < 1.0f) vol += 0.1f;
+		result = channel->setVolume(vol);
+		result = dsp->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 0);
+		result = channel->setPaused(false);
+	}
+	if (szTxt2.find("KEY_VOLUMEDOWN") != -1 /*&& cTaste != NEXT*/) {
+		cTaste = SUB_10;
+		result = fsystem->playDSP(dsp, 0, true, &channel);
+		if (vol > 0.0f) vol -= 0.1f;
+		result = channel->setVolume(vol);
+		result = dsp->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 0);
+		result = channel->setPaused(false);
+		calcAll();
+	}
 }
 void		DisplayFunc(void)
 {
