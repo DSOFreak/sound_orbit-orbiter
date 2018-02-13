@@ -42,6 +42,13 @@ unsigned short iVoltage;
 int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
 CMaxonMotor * motor;
+float vol = 0.5;
+FMOD::System    *fsystem;
+FMOD::Channel   *channel = 0;
+FMOD::DSP       *dsp;
+FMOD_RESULT      result;
+unsigned int     version;
+void            *extradriverdata = 0;
 
 chrono::system_clock::time_point ttNow, ttOld;
 chrono::system_clock::duration ttD;
