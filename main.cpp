@@ -259,6 +259,8 @@ void		DisplayFunc(void)
 	sprintf(szText, "Target: %d", iTargetPosition);
 	text(szText, 200, 280);
 
+
+
 	sprintf(szText, "Error: %x", motor->ErrorCode);
 	text(szText, 200, 190);
 
