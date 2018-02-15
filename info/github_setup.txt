@@ -1,0 +1,33 @@
+1. Account erstellen auf github.com
+2. Download git-2.16
+	-> Bei installation durchklicken.
+3. Download smartgit 17.1
+	-> Aufpassen das das Häcken am Anfang bei "for non-commercial use" gesetzt ist (nich trial).
+	-> Bei installation durchklicken. 
+4. ssh key erstellen:
+	1. Bei github oben rechts auf das profilbild klicken -> Settings -> SSH and GPG keys -> New SSH key
+	2. Einen Titel eingeben z.B. "Allgemein".
+	3. Schlüssel erzeugen:
+		1. Git Bash öffnen: Windows-Taste -> "git bash" tippen -> Enter
+		2. "ssh-keygen -t rsa -b 4096" ohne "" in Konsole eingeben -> Enter
+		3. Speicherort mit Enter bestätigen. Standard Speicherort: "c:/Users/<username>/.ssh/".
+	6. Wieder bei Github: Den Inhalt der Datei "c:/Users/<username>/.ssh/id_rsa" in das "Key" Textfeld kopieren.
+5. Smartgit starten und die initialen Schritte durchführen. (gitlab hinzufügen).
+6. Repo klonen. Bei Aufforderung zum ssh-key den key unter "c:/Users/<username>/.ssh/id_rsa" angeben.
+
+
+
+Visual Studio Projekt auf github laden:
+
+1. Lokales git-repo erstellen:
+	In Visual Studio wenn das gewünschte projekt offen ist: File -> add to sourcecontrol
+2. Mit Smart Git das erstellte repo öffnen (der Projektordner von Visual Studio)
+	In Smart Git: Repository -> Add or Create .. -> Projektordner angeben
+3. Das Remote Repository angeben: 
+	In Smart Git: Remote -> Add.. -> Auf den Pfeil rechts im Fenster -> Add Hosting Provider -> Github hinzufügen -> Das repo von Github auswählen
+4. Das Projekt auf Github laden
+	In Smart Git: Push klicken
+
+
+Repo für host-pc: 	sound_orbit-host
+Repo für Lautsprecher: 	sound_orbit-orbiter

@@ -1,0 +1,8 @@
+To change GPIO of LIRC change the following line in "/boot/config.txt"
+
+dtoverlay=lirc-rpi
+
+to
+
+dtoverlay=lirc-rpi,gpio_out_pin=17,gpio_in_pin=18
+

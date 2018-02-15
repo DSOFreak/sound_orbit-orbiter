@@ -33,7 +33,7 @@ void CMaxonMotor::closeDevice()
 
     VCS_CloseAllDevices(&ErrorCode);
 	//move(16, 10);
-	//printw("Status: \t%x", ErrorCode);
+	printw("Status: \t%x", ErrorCode);
 }
 void CMaxonMotor::EnableDevice()
 {
@@ -45,7 +45,7 @@ void CMaxonMotor::EnableDevice()
     {
         if( IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode) )
         {
-            //cout << "Clear fault failed! , error code="<<ErrorCode<<endl;
+            cout << "Clear fault failed! , error code="<<ErrorCode<<endl;
             return;
         }
 
@@ -54,12 +54,12 @@ void CMaxonMotor::EnableDevice()
         {
             if( !IsEnabled && !VCS_SetEnableState(keyHandle, nodeID, &ErrorCode) )
             {
-                //cout << "Set enable state failed!, error code="<<ErrorCode<<endl;
+                cout << "Set enable state failed!, error code="<<ErrorCode<<endl;
             }
             else
             {
 				//move(16, 10);
-				//printw("Status: \t%x", ErrorCode);
+				printw("Status: \t%x", ErrorCode);
 
             }
         }
@@ -67,7 +67,7 @@ void CMaxonMotor::EnableDevice()
     else
     {
 		//move(16, 10);
-		//printw("Status: %x", ErrorCode);
+		printw("Status: %x", ErrorCode);
 
     }
 
@@ -83,7 +83,7 @@ void CMaxonMotor::DisableDevice()
         if( IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode) )
         {
  			//move(16, 10);
-			//printw("Status: \tError 0x%x", ErrorCode);
+			printw("Status: \tError 0x%x", ErrorCode);
 			return;
         }
 
@@ -93,19 +93,19 @@ void CMaxonMotor::DisableDevice()
             if( IsEnabled && !VCS_SetDisableState(keyHandle, nodeID, &ErrorCode) )
             {
 				//move(16, 10);
-				//printw("Status: \tError 0x%x", ErrorCode);
+				printw("Status: \tError 0x%x", ErrorCode);
 			}
             else
             {
 				//move(16, 10);
-				//printw("Status: \t%x", ErrorCode);
+				printw("Status: \t%x", ErrorCode);
 			}
         }
     }
     else
     {
 		//move(16, 10);
-		//printw("Status: Error 0x%x", ErrorCode);
+		printw("Status: Error 0x%x", ErrorCode);
 	}
 }
 void CMaxonMotor::activate_device()
@@ -123,17 +123,17 @@ void CMaxonMotor::activate_device()
 
     if( keyHandle == 0 )
     {
-        //cout<<"Open device failure, error code="<<ErrorCode<<endl;
+        cout<<"Open device failure, error code="<<ErrorCode<<endl;
     }
     else
     {
-        //cout<<"Open device success!"<<endl;
+        cout<<"Open device success!"<<endl;
     }
 
 
     if( !VCS_SetProtocolStackSettings(keyHandle, baudrate_, timeout_, &ErrorCode) )
     {
-        //cout<<"Set protocol stack settings failed!, error code="<<ErrorCode<<endl;
+        cout<<"Set protocol stack settings failed!, error code="<<ErrorCode<<endl;
         closeDevice();
     }
 
@@ -166,13 +166,13 @@ void CMaxonMotor::Move(long TargetPosition)
 
         if( !VCS_MoveToPosition(keyHandle, nodeID, TargetPosition, Absolute, Immediately, &errorCode) )
         {
-            //cout << "Move to position failed!, error code="<<errorCode<<endl;
+            cout << "Move to position failed!, error code="<<errorCode<<endl;
 
         }
     }
     else
     {
-        //cout << "Activate profile position mode failed!" << endl;
+        cout << "Activate profile position mode failed!" << endl;
     }
 }
 void CMaxonMotor::GetCurrentPosition(int& CurrentPosition)
@@ -181,7 +181,7 @@ void CMaxonMotor::GetCurrentPosition(int& CurrentPosition)
     unsigned int errorCode = 0;
 
     if( !VCS_GetPositionIs(keyHandle, nodeID, &CurrentPosition, &errorCode) ){
-        //cout << " error while getting current position , error code="<<errorCode<<endl;
+        cout << " error while getting current position , error code="<<errorCode<<endl;
     }
 
 }
@@ -191,7 +191,7 @@ void CMaxonMotor::Halt()
 
         if( !VCS_HaltPositionMovement(keyHandle, nodeID, &ErrorCode) )
         {
-                //cout<<"Halt position movement failed!, error code="<<ErrorCode<<endl;
+                cout<<"Halt position movement failed!, error code="<<ErrorCode<<endl;
         }
 }
 void CMaxonMotor::Error(unsigned int ErrorInfo)
@@ -209,7 +209,6 @@ void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
 
 void CMaxonMotor::SetPosModeParameter() 
 {
-
 	unsigned int uiMaxFollowingError = 20000;
 	unsigned int iProfileVelocity = 0, iProfileAcceleration=0, iProfileDeceleration=0;
 	unsigned short iNominalCurrent = 0, iMaxOutputCurrent=0, iThermalTimeConstant=0;
