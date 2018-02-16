@@ -37,3 +37,20 @@ dtoverlay=lirc-rpi
 to
 
 dtoverlay=lirc-rpi,gpio_out_pin=17,gpio_in_pin=18
+
+### SimpleNetwork
+_https://github.com/kashimAstro/SimpleNetwork_
+
+#### Description
+Is a simple c++ wrapper for the linux network library.
+
+To test the tcp interface you can open a console and type:
+
+echo 001100.00100.00 | nc 127.0.0.1 1234
+
+This will send a command to the application via the tcp interface.
+
+The Application is now setup as tcp-server. In the future it would make more sense to change the application to a tcp-client.
+
+#### Installation
+none.

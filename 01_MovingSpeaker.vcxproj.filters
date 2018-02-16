@@ -5,8 +5,14 @@
     <ClCompile Include="lirc-0.9.4d\lib\lirc_client.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MvngSpkrUI.cpp" />
+    <ClCompile Include="TCPClient.cpp" />
+    <ClCompile Include="Toolbox.cpp" />
+    <ClCompile Include="TCPServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="Toolbox.h" />
+    <ClInclude Include="TCPServer.h" />
   </ItemGroup>
 </Project>

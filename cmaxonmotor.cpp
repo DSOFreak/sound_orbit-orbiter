@@ -33,7 +33,7 @@ void CMaxonMotor::closeDevice()
 
     VCS_CloseAllDevices(&ErrorCode);
 	//move(16, 10);
-	printw("Status: \t%x", ErrorCode);
+	//printw("Status: \t%x", ErrorCode);
 }
 void CMaxonMotor::EnableDevice()
 {
@@ -59,7 +59,7 @@ void CMaxonMotor::EnableDevice()
             else
             {
 				//move(16, 10);
-				printw("Status: \t%x", ErrorCode);
+				//printw("Status: \t%x", ErrorCode);
 
             }
         }
@@ -67,7 +67,7 @@ void CMaxonMotor::EnableDevice()
     else
     {
 		//move(16, 10);
-		printw("Status: %x", ErrorCode);
+		//printw("Status: %x", ErrorCode);
 
     }
 
@@ -83,7 +83,7 @@ void CMaxonMotor::DisableDevice()
         if( IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode) )
         {
  			//move(16, 10);
-			printw("Status: \tError 0x%x", ErrorCode);
+			//printw("Status: \tError 0x%x", ErrorCode);
 			return;
         }
 
@@ -93,19 +93,19 @@ void CMaxonMotor::DisableDevice()
             if( IsEnabled && !VCS_SetDisableState(keyHandle, nodeID, &ErrorCode) )
             {
 				//move(16, 10);
-				printw("Status: \tError 0x%x", ErrorCode);
+				//printw("Status: \tError 0x%x", ErrorCode);
 			}
             else
             {
 				//move(16, 10);
-				printw("Status: \t%x", ErrorCode);
+				//printw("Status: \t%x", ErrorCode);
 			}
         }
     }
     else
     {
 		//move(16, 10);
-		printw("Status: Error 0x%x", ErrorCode);
+		//printw("Status: Error 0x%x", ErrorCode);
 	}
 }
 void CMaxonMotor::activate_device()

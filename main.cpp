@@ -4,7 +4,7 @@
 #include <chrono>
 #include <queue>
 #include <mutex>
-
+#include <csignal>
 #include <lirc/config.h>
 #include <lirc/lirc_client.h>
 #include <stdio.h>
@@ -14,7 +14,8 @@
 #include "wiringPi.h"
 #include "cmaxonmotor.h"
 #include "fmod.hpp"
-
+#include "TCPServer.h"
+#include "Toolbox.h"
 enum eTasten {
 	KEY_1 = 1,
 	KEY_2,
@@ -63,6 +64,7 @@ FMOD_RESULT      result;
 unsigned int     version;
 void            *extradriverdata = 0;
 
+bool exit_app;
 chrono::system_clock::time_point ttNow, ttOld;
 chrono::system_clock::duration ttD;
 
@@ -74,6 +76,10 @@ FMOD::Sound      *sound1;
 
 std::queue<std::string> ir_queue;
 std::mutex ir_mutex;
+
+std::queue<std::string> tcp_queue;
+std::mutex tcp_mutex;
+TCPServer tcp;
 
 
 void ir_func() {
@@ -90,13 +96,20 @@ void ir_func() {
 
 	lirc_readconfig("/etc/lirc/RM-D420.conf", &config, NULL);
 	usleep(1'000'000);
-	while (1) {
+	while (!exit_app) {
 		lirc_nextcode(&code);
 		ir_mutex.lock();
 		ir_queue.push(std::string(code));
 		ir_mutex.unlock();
 	}
 }
+
+void tcp_func() {
+	tcp.setup(1234); // Init TCP-Client all IPs
+	tcp.receive();
+	tcp.detach();
+}
+
 
 // LED Pin - wiringPi pin 0 is BCM_GPIO 17.
 // we have to use BCM numbering when initializing with wiringPiSetupSys
@@ -152,7 +165,6 @@ void calcAll(void) {
 
 
 void IdleFunc(void) {
-	
 	motor->GetCurrentPosition(iCurrentPosition);
 	motor->ErrorNbr(&cErrorNbr);
 	if (motor->ErrorCode == 0x34000007) motor->initializeDevice();
@@ -169,65 +181,94 @@ void TimerFunc(int value) {
 		ir_recived = true;
 	}
 	ir_mutex.unlock();
+	
+	std::string host_data_raw = tcp.getMessage(); // Get tcp messages
+	Toolbox::HostData hostData;
+	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
+		tcp.clean(); // clear the message
+		hostData = Toolbox::decodeHostData(host_data_raw, 0); // decode host data
+		std::cout << "raw hostData: " << host_data_raw << std::endl;
+		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData.direction) << ", angle = " << hostData.angularDistance << ", speed = " << hostData.speed << std::endl;
+		if (hostData.direction == 1) {
+			iAngle -= hostData.angularDistance;
+		}
+		if (hostData.direction == 2) {
+			iAngle += hostData.angularDistance;
+		}
+		if (hostData.direction != 0) {
+			calcAll();
+			motor->Move(iTargetPosition);
+		}
+		
+	}
 
-	ttOld = ttNow;
-	ttNow = chrono::system_clock::now();
-	ttD = (ttNow - ttOld);
-	
-	//if (ttD < (std::chrono::nanoseconds)200000000) return;
-	
+		
 	szTxt2 = s;
 
 
-	if (szTxt2.find("KEY_PLAY") != -1 /*&& cTaste != PLAY*/) {
+	if (szTxt2.find("KEY_PLAY") != -1  ) {
 		cTaste = PLAY;
 	}
-	if (szTxt2.find("check") != -1 /*&& cTaste != PLAY*/) {
+	if (szTxt2.find("check") != -1  ) {
 		cTaste = CHECK;
 	}
 	if (szTxt2.find("KEY_STOP") != -1) {
 		cTaste = STOP;
 	}
-	if (szTxt2.find("KEY_PREVIOUS") != -1 /*&& cTaste != PREV*/) {
+	if (szTxt2.find("KEY_PREVIOUS") != -1) {
 		cTaste = PREV;
 	}
-	if (szTxt2.find("KEY_NEXT") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_NEXT") != -1  ) {
 		cTaste = NEXT;
 	}
-	if (szTxt2.find("KEY_1") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_1") != -1  ) {
 		cTaste = KEY_1;
 	}
-	if (szTxt2.find("KEY_2") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_2") != -1  ) {
 		cTaste = KEY_2;
 	}
-	if (szTxt2.find("KEY_3") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_3") != -1  ) {
 		cTaste = KEY_3;
 	}
-	if (szTxt2.find("KEY_4") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_4") != -1  ) {
 		cTaste = KEY_4;
 	}
-	if (szTxt2.find("KEY_5") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_5") != -1  ) {
 		cTaste = KEY_5;
 	}
-	if (szTxt2.find("KEY_6") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_6") != -1  ) {
 		cTaste = KEY_6;
 	}
-	if (szTxt2.find("KEY_7") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_7") != -1  ) {
 		cTaste = KEY_7;
 	}
-	if (szTxt2.find("KEY_8") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_8") != -1  ) {
 		cTaste = KEY_8;
 	}
-	if (szTxt2.find("KEY_9") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_9") != -1  ) {
 		cTaste = KEY_9;
 	}
-	if (szTxt2.find("KEY_0") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find("KEY_0") != -1  ) {
 		cTaste = KEY_0;
 	}
-	if (szTxt2.find(">10") != -1 /*&& cTaste != NEXT*/) {
+	if (szTxt2.find(">10") != -1  ) {
 		cTaste = SUB_10;
 	}
-
+	if (szTxt2.find("KEY_VOLUMEUP") != -1) {
+		cTaste = KEY_VOLUMEUP;
+	}
+	if (szTxt2.find("KEY_VOLUMEDOWN") != -1) {
+		cTaste = KEY_VOLUMEDOWN;
+	}
+	if (szTxt2.find("KEY_BACK") != -1) {
+		cTaste = KEY_BACKWARD;
+	}
+	if (szTxt2.find("KEY_FORWARD") != -1) {
+		cTaste = KEY_FORWARD;
+	}
+	if (szTxt2.find("xx") != -1) {
+		cTaste = 0;
+	}
 
 	if (old_cTaste != cTaste) { // Entprellen der Infrarot Fernsteuerung
 
@@ -237,101 +278,97 @@ void TimerFunc(int value) {
 			fsystem->createSound(dir.c_str(), FMOD_DEFAULT, 0, &sound1);
 			fsystem->playSound(sound1, 0, false, &channel2);
 		}
-		if (szTxt2.find("KEY_PLAY") != -1 /*&& cTaste != PLAY*/) {
+		if (cTaste == PLAY) {
 			
 			motor->Move(iTargetPosition);
 			//iAngle = cNumb[2] + 10 * cNumb[1] + 100 * cNumb[0];
 			for (int iii = 0; iii <= 3; iii++) cNumb[iii] = 0;
 			iNumbOffs = 0;
 		}
-		if (szTxt2.find("KEY_STOP") != -1) {
+		if (cTaste == STOP) {
 			motor->Halt();
 			for (int iii = 0; iii <= 3; iii++) cNumb[iii] = 0;
 			//iAngle = 0;
 			//iNumbOffs = 0;
 
 		}
-		if (szTxt2.find("KEY_PREVIOUS") != -1 /*&& cTaste != PREV*/) {
+		if (cTaste == PREV) {
 			iAngle = iAngle - 15;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_NEXT") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == NEXT) {
 			iAngle = iAngle + 15;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_1") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_1) {
 			cNumb[iNumbOffs] = 1;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_2") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_2) {
 			cNumb[iNumbOffs] = 2;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_3") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_3) {
 			cNumb[iNumbOffs] = 3;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_4") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_4) {
 			cNumb[iNumbOffs] = 4;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_5") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_5) {
 			cNumb[iNumbOffs] = 5;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_6") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_6) {
 			cNumb[iNumbOffs] = 6;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_7") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_7) {
 			cNumb[iNumbOffs] = 7;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_8") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_8) {
 			cNumb[iNumbOffs] = 8;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_9") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_9) {
 			cNumb[iNumbOffs] = 9;
 			calcAll();
 		}
-		if (szTxt2.find("KEY_0") != -1 /*&& cTaste != NEXT*/) {
+		if (cTaste == KEY_0) {
 			cNumb[iNumbOffs] = 0;
 			calcAll();
 		}
-		if (szTxt2.find(">10") != -1 /*&& cTaste != NEXT*/) {
-			iTargetPosition = iTargetPosition - 1000;
+		if (cTaste == SUB_10) {
+			iTargetPosition = iTargetPosition + 100000;
 		}
 		old_cTaste = cTaste;
 
 	}
 
-	if (szTxt2.find("KEY_VOLUMEUP") != -1) {
+	if (cTaste == KEY_VOLUMEUP) {
 		// increase volume
-		cTaste = KEY_VOLUMEUP;
 		if (vol < 0.99f) vol += 0.1f;
 		channel1->setVolume(vol);
 	}
-	if (szTxt2.find("KEY_VOLUMEDOWN") != -1) {
+	if (cTaste == KEY_VOLUMEDOWN) {
 		// decrease volume
-		cTaste = KEY_VOLUMEDOWN;
 		if (vol > 0.01f) vol -= 0.1f;
 		channel1->setVolume(vol);
 	}
-	if (szTxt2.find("KEY_BACK") != -1) {
+	if (cTaste == KEY_BACKWARD) {
 		// decrease pitch
-		cTaste = KEY_BACKWARD;
 		if (pitch > 44.0f) pitch = getPitch(0, --note);
 		dsp->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
 	}
-	if (szTxt2.find("KEY_FORWARD") != -1) { 
+	if (cTaste == KEY_FORWARD) {
 		// Increase pitch
-		cTaste = KEY_FORWARD;
 		if (pitch < 10000.0f) pitch = getPitch(0, ++note);
 		dsp->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
 	}
-	if (szTxt2.find("xx") != -1) {
-		cTaste = 0;
+	if (cTaste == 0) {
+
 	}
 	
 }
@@ -347,6 +384,13 @@ void		DisplayFunc(void)
 	char szText[32];
 	double dVoltage = double(4.25 * double(iVoltage) / 1000);
 	
+	bool isPlaying;
+	channel2->isPlaying(&isPlaying);
+	if (dVoltage <= 12.8 && !isPlaying) {
+		std::string dir = std::string(SOUNDS_DIR) + "/alerts/bell.wav";
+		fsystem->createSound(dir.c_str(), FMOD_DEFAULT, 0, &sound1);
+		fsystem->playSound(sound1, 0, false, &channel2);
+	}
 
 	printf( "Voltage: %2.2fV\n", dVoltage);
 
@@ -429,16 +473,18 @@ void		KeyboardFunc(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 */
-int send_packet(lirc_cmd_ctx* ctx, int fd)
+
+
+namespace
 {
-	int r;
-	do {
-		r = lirc_command_run(ctx, fd);
-		if (r != 0 && r != EAGAIN)
-			fprintf(stderr,
-				"Error running command: %s\n", strerror(r));
-	} while (r == EAGAIN);
-	return r == 0 ? 0 : -1;
+	volatile std::sig_atomic_t gSignalStatus;
+}
+
+void signal_handler(int signal)
+{
+	gSignalStatus = signal;
+	std::cout << "SIGTERM RECEIVED... Shutting down."<< std::endl;
+	exit_app = true;
 }
 
 int main(int argc, char **argv)
@@ -485,16 +531,20 @@ int main(int argc, char **argv)
 
 
 	
-	std::thread ir_thread(ir_func);
+	std::thread ir_thread(ir_func);	
+
+	std::thread tcp_thread(tcp_func);
+	
 
 
-	while (cTaste != SUB_10) {
+	exit_app = false;
+	std::signal(SIGTERM, signal_handler); // Register  signal interrupt handler
+	while (!exit_app) {
 		TimerFunc(0);
 		DisplayFunc();
 		IdleFunc();
-		usleep(100000);
+		if(!exit_app)usleep(100000);
 	}
-
 	motor->closeDevice(); // close EPOS2
 
 	delete motor;
