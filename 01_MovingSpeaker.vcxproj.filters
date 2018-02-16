@@ -14,5 +14,6 @@
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="Toolbox.h" />
     <ClInclude Include="TCPServer.h" />
+    <ClInclude Include="cmaxonmotor.h" />
   </ItemGroup>
 </Project>

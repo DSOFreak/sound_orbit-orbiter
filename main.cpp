@@ -197,6 +197,7 @@ void TimerFunc(int value) {
 		}
 		if (hostData.direction != 0) {
 			calcAll();
+			motor->setSpeed(hostData.speed);
 			motor->Move(iTargetPosition);
 		}
 		

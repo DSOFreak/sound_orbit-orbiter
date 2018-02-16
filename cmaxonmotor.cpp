@@ -207,17 +207,17 @@ void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
 	VCS_GetNbOfDeviceError(keyHandle, nodeID, cErrorInfo, &errorCode);
 }
 
-void CMaxonMotor::SetPosModeParameter() 
+void CMaxonMotor::SetPosModeParameter()
 {
 	unsigned int uiMaxFollowingError = 20000;
-	unsigned int iProfileVelocity = 0, iProfileAcceleration=0, iProfileDeceleration=0;
-	unsigned short iNominalCurrent = 0, iMaxOutputCurrent=0, iThermalTimeConstant=0;
+	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
+	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
 	//int iError=0;
 
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
 	iProfileVelocity = 10000;
-	iProfileAcceleration = 1000; 
+	iProfileAcceleration = 1000;
 	iProfileDeceleration = 2000;
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 
@@ -225,7 +225,26 @@ void CMaxonMotor::SetPosModeParameter()
 	VCS_GetDcMotorParameter(keyHandle, nodeID, &iNominalCurrent, &iMaxOutputCurrent, &iThermalTimeConstant, &ErrorCode);
 	VCS_SetDcMotorParameter(keyHandle, nodeID, 1000, 2000, 40, &ErrorCode);
 }
-void CMaxonMotor::SetCurModeParameter(int) {
+void CMaxonMotor::SetCurModeParameter(int)
+{
+}
+
+void CMaxonMotor::setSpeed(float speed)
+{
+	unsigned int uiMaxFollowingError = 20000;
+	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
+	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
+	//int iError=0;
+
+	unsigned int errorCode = 0;
+
+	
+	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
+	iProfileVelocity = 200 * speed;
+	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
+	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
+
+	
 }
 
 void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {

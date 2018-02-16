@@ -89,6 +89,7 @@
     <ClCompile Include="Toolbox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cmaxonmotor.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="TCPServer.h" />
