@@ -80,17 +80,21 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MusicScale.cpp" />
     <ClCompile Include="MvngSpkrUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="StimuliLibrary.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="Toolbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cmaxonmotor.h" />
+    <ClInclude Include="MusicScale.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="StimuliLibrary.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="TCPServer.h" />
     <ClInclude Include="Toolbox.h" />

@@ -14,8 +14,10 @@
 #include "wiringPi.h"
 #include "cmaxonmotor.h"
 #include "fmod.hpp"
-#include "TCPServer.h"
+#include "TCPClient.h"
 #include "Toolbox.h"
+#include "StimuliLibrary.h"
+
 enum eTasten {
 	KEY_1 = 1,
 	KEY_2,
@@ -53,16 +55,7 @@ unsigned short iVoltage;
 int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
 CMaxonMotor * motor;
-float vol = 0.5f;
-float pitch;
-int note;
-FMOD::System    *fsystem;
-FMOD::Channel   *channel1 = 0;
-FMOD::Channel   *channel2 = 0;
-FMOD::DSP       *dsp;
-FMOD_RESULT      result;
-unsigned int     version;
-void            *extradriverdata = 0;
+
 
 bool exit_app;
 chrono::system_clock::time_point ttNow, ttOld;
@@ -72,14 +65,17 @@ char *szIRtxt;
 char cTaste, old_cTaste;
 string szTxt2, szTxt2_old;
 int iLircSocket;
-FMOD::Sound      *sound1;
 
 std::queue<std::string> ir_queue;
 std::mutex ir_mutex;
 
 std::queue<std::string> tcp_queue;
 std::mutex tcp_mutex;
-TCPServer tcp;
+TCPClient tcp;
+char *ip_addr;
+int port;
+
+StimuliLibrary stimuliLib;
 
 
 void ir_func() {
@@ -105,11 +101,23 @@ void ir_func() {
 }
 
 void tcp_func() {
-	tcp.setup(1234); // Init TCP-Client all IPs
-	tcp.receive();
-	tcp.detach();
-}
+	std::string msg;
 
+	while (!exit_app) {
+		msg = tcp.receive(100);
+		if (msg.length() == 0) {
+			tcp.exit();
+			std::cout << "Reconnecting..." << std::endl;
+
+			tcp.setup(ip_addr, port);
+			sleep(1);
+
+		}
+		tcp_mutex.lock();
+		tcp_queue.push(msg);
+		tcp_mutex.unlock();
+	}
+}
 
 // LED Pin - wiringPi pin 0 is BCM_GPIO 17.
 // we have to use BCM numbering when initializing with wiringPiSetupSys
@@ -141,18 +149,7 @@ float pitches[] = { 1.0f,
 
 float A_freqs[] = { 22.5f, 55.0f,110.0f,220.0f,440.0f,880.0f,1760.0f,3520.0f,7040.0f };
 
-// Returns a pitch to a specific note
-float getPitch(const int &octave, const std::string &note) {
-	for (int i = 0; i < n_notes; i++) {
-		if (notes[i].compare(note) == 0) return pitches[i] * A_freqs[octave];
-	}
-	return 0.0f;
-}
-// Returns a pitch to a specific note
-float getPitch(const int &octave, const int &note) {
-	if(note < n_notes) return pitches[note] * A_freqs[octave];
-	return pitches[note % n_notes] * A_freqs[octave + (note / n_notes)];
-}
+
 
 void calcAll(void) {
 	//iAngle = cNumb[2] + 10 * cNumb[1] + 100 * cNumb[0];
@@ -181,24 +178,42 @@ void TimerFunc(int value) {
 		ir_recived = true;
 	}
 	ir_mutex.unlock();
-	
-	std::string host_data_raw = tcp.getMessage(); // Get tcp messages
+
+
+	std::string host_data_raw;
+	while (!tcp_queue.empty()) {
+		tcp_mutex.lock();
+		host_data_raw = tcp_queue.front(); // Get tcp messages
+		tcp_queue.pop();
+		tcp_mutex.unlock();
+
+	}
+
+
 	Toolbox::HostData hostData;
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
-		tcp.clean(); // clear the message
-		hostData = Toolbox::decodeHostData(host_data_raw, 0); // decode host data
 		std::cout << "raw hostData: " << host_data_raw << std::endl;
+
+		hostData = Toolbox::decodeHostData(host_data_raw, 0); // decode host data
 		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData.direction) << ", angle = " << hostData.angularDistance << ", speed = " << hostData.speed << std::endl;
+		std::cout << "stim_nr = " << static_cast<int>(hostData.stimulus_nr) << ", dur = " << hostData.stimulusDuration << ", vol = " << hostData.loudness << ", toBeTriggerd = " << hostData.toBeTriggerd << std::endl;
+
 		if (hostData.direction == 1) {
-			iAngle -= hostData.angularDistance;
+			iAngle += hostData.angularDistance;
 		}
 		if (hostData.direction == 2) {
-			iAngle += hostData.angularDistance;
+			iAngle -= hostData.angularDistance;
 		}
 		if (hostData.direction != 0) {
 			calcAll();
 			motor->setSpeed(hostData.speed);
 			motor->Move(iTargetPosition);
+		}
+
+		if(hostData.toBeTriggerd == 1)
+		{
+			stimuliLib.loadStimuli(hostData.stimulus_nr, hostData.loudness, hostData.stimulusDuration);
+			stimuliLib.playStimuli();
 		}
 		
 	}
@@ -274,10 +289,10 @@ void TimerFunc(int value) {
 	if (old_cTaste != cTaste) { // Entprellen der Infrarot Fernsteuerung
 
 		if (cTaste == CHECK) {
-
+			/*
 			std::string dir = std::string(SOUNDS_DIR) + "/wow/Wow " + std::to_string(static_cast<int>(rand()%30+1)) + ".wav";
 			fsystem->createSound(dir.c_str(), FMOD_DEFAULT, 0, &sound1);
-			fsystem->playSound(sound1, 0, false, &channel2);
+			fsystem->playSound(sound1, 0, false, &channel2);*/
 		}
 		if (cTaste == PLAY) {
 			
@@ -350,23 +365,14 @@ void TimerFunc(int value) {
 
 	if (cTaste == KEY_VOLUMEUP) {
 		// increase volume
-		if (vol < 0.99f) vol += 0.1f;
-		channel1->setVolume(vol);
 	}
 	if (cTaste == KEY_VOLUMEDOWN) {
 		// decrease volume
-		if (vol > 0.01f) vol -= 0.1f;
-		channel1->setVolume(vol);
 	}
 	if (cTaste == KEY_BACKWARD) {
 		// decrease pitch
-		if (pitch > 44.0f) pitch = getPitch(0, --note);
-		dsp->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
 	}
 	if (cTaste == KEY_FORWARD) {
-		// Increase pitch
-		if (pitch < 10000.0f) pitch = getPitch(0, ++note);
-		dsp->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
 	}
 	if (cTaste == 0) {
 
@@ -385,14 +391,7 @@ void		DisplayFunc(void)
 	char szText[32];
 	double dVoltage = double(4.25 * double(iVoltage) / 1000);
 	
-	bool isPlaying;
-	channel2->isPlaying(&isPlaying);
-	if (dVoltage <= 12.8 && !isPlaying) {
-		std::string dir = std::string(SOUNDS_DIR) + "/alerts/bell.wav";
-		fsystem->createSound(dir.c_str(), FMOD_DEFAULT, 0, &sound1);
-		fsystem->playSound(sound1, 0, false, &channel2);
-	}
-
+	/*
 	printf( "Voltage: %2.2fV\n", dVoltage);
 
 	printf( "Current: %d mA\n", iCurrent);
@@ -413,7 +412,8 @@ void		DisplayFunc(void)
 
 	printf("Volume: %f\n", vol);
 	printf( "%f %f\n", RAILPERI, WHEELPERI);
-
+	*/
+	/*
 	switch (cTaste) {
 	case 0:break;
 	case PLAY:printf("Run"); break;
@@ -438,6 +438,7 @@ void		DisplayFunc(void)
 	default: {}
 	}
 	printf("\n\n");
+	*/
 }
 /* old glut function */
 /*
@@ -490,43 +491,11 @@ void signal_handler(int signal)
 
 int main(int argc, char **argv)
 {
-
+	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
 	motor = new CMaxonMotor(InterfaceName, 1);
 	motor->initializeDevice(); // initialize EPOS2
 
-
-	vol = 0.0f; // volume init
-	note = 60;
-	pitch = getPitch(0, note); //pitch init Musical note 'A5'
-	
-	// fmod init
-	FMOD::System_Create(&fsystem);
-	fsystem->getVersion(&version);
-
-	if (version < FMOD_VERSION)
-	{
-		printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
-		return -1;
-	}
-	
-	fsystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-
-	//Create an oscillator DSP units for the tone.
-	fsystem->createDSPByType(FMOD_DSP_TYPE_OSCILLATOR, &dsp);
-	dsp->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch); 
-
-	fsystem->playDSP(dsp, 0, true, &channel1);
-	channel1->setVolume(0.0f);
-	channel2->setVolume(1.0f);
-	dsp->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 0); // Set sinus oscillator
-	channel1->setPaused(false);
-	channel2->setPaused(false);
-
-	//Load sound
-	std::string dir = std::string(SOUNDS_DIR) + "/wow/Wow 1.wav";
-	fsystem->createSound(dir.c_str(), FMOD_DEFAULT, 0, &sound1);
-	sound1->setMode(FMOD_LOOP_OFF);
 
 	cTaste = 0;
 
@@ -535,8 +504,12 @@ int main(int argc, char **argv)
 	std::thread ir_thread(ir_func);	
 
 	std::thread tcp_thread(tcp_func);
-	
-
+	ip_addr = argv[1];
+	port = 1234;
+	do {
+		printf("Connecting to server at %s:%d ... \n", ip_addr, port);
+	} while (!tcp.setup(ip_addr, port));
+	printf("Connected!");
 
 	exit_app = false;
 	std::signal(SIGTERM, signal_handler); // Register  signal interrupt handler

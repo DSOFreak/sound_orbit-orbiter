@@ -15,8 +15,8 @@ bool TCPClient::setup(string address , int port)
 		if (sock == -1)
 		{
       			cout << "Could not create socket" << endl;
-    		}
-        }
+    	}
+    }
   	if(inet_addr(address.c_str()) == -1)
   	{
     		struct hostent *he;
@@ -97,4 +97,5 @@ string TCPClient::read()
 void TCPClient::exit()
 {
     close( sock );
+	sock = -1;
 }

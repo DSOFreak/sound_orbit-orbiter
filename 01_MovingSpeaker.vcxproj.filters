@@ -8,6 +8,8 @@
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="Toolbox.cpp" />
     <ClCompile Include="TCPServer.cpp" />
+    <ClCompile Include="StimuliLibrary.cpp" />
+    <ClCompile Include="MusicScale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -15,5 +17,7 @@
     <ClInclude Include="Toolbox.h" />
     <ClInclude Include="TCPServer.h" />
     <ClInclude Include="cmaxonmotor.h" />
+    <ClInclude Include="StimuliLibrary.h" />
+    <ClInclude Include="MusicScale.h" />
   </ItemGroup>
 </Project>
