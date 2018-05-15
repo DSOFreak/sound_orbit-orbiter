@@ -1,0 +1,5 @@
+start the service: sudo systemctl start orbiter.service
+stop  the service: sudo systemctl stop orbiter.service
+
+get the service status (running, stopped, etc.): sudo systemctl status orbiter.service
+watch the service (console output): watch -n 0.1 'sudo systemctl status orbiter.service -n 30'

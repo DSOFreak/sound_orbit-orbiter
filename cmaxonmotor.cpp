@@ -45,7 +45,7 @@ void CMaxonMotor::EnableDevice()
     {
         if( IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode) )
         {
-            //cout << "Clear fault failed! , error code="<<ErrorCode<<endl;
+            cout << "Clear fault failed! , error code="<<ErrorCode<<endl;
             return;
         }
 
@@ -54,7 +54,7 @@ void CMaxonMotor::EnableDevice()
         {
             if( !IsEnabled && !VCS_SetEnableState(keyHandle, nodeID, &ErrorCode) )
             {
-                //cout << "Set enable state failed!, error code="<<ErrorCode<<endl;
+                cout << "Set enable state failed!, error code="<<ErrorCode<<endl;
             }
             else
             {
@@ -123,17 +123,17 @@ void CMaxonMotor::activate_device()
 
     if( keyHandle == 0 )
     {
-        //cout<<"Open device failure, error code="<<ErrorCode<<endl;
+        cout<<"Open device failure, error code="<<ErrorCode<<endl;
     }
     else
     {
-        //cout<<"Open device success!"<<endl;
+        cout<<"Open device success!"<<endl;
     }
 
 
     if( !VCS_SetProtocolStackSettings(keyHandle, baudrate_, timeout_, &ErrorCode) )
     {
-        //cout<<"Set protocol stack settings failed!, error code="<<ErrorCode<<endl;
+        cout<<"Set protocol stack settings failed!, error code="<<ErrorCode<<endl;
         closeDevice();
     }
 
@@ -166,13 +166,13 @@ void CMaxonMotor::Move(long TargetPosition)
 
         if( !VCS_MoveToPosition(keyHandle, nodeID, TargetPosition, Absolute, Immediately, &errorCode) )
         {
-            //cout << "Move to position failed!, error code="<<errorCode<<endl;
+            cout << "Move to position failed!, error code="<<errorCode<<endl;
 
         }
     }
     else
     {
-        //cout << "Activate profile position mode failed!" << endl;
+        cout << "Activate profile position mode failed!" << endl;
     }
 }
 void CMaxonMotor::GetCurrentPosition(int& CurrentPosition)
@@ -181,7 +181,7 @@ void CMaxonMotor::GetCurrentPosition(int& CurrentPosition)
     unsigned int errorCode = 0;
 
     if( !VCS_GetPositionIs(keyHandle, nodeID, &CurrentPosition, &errorCode) ){
-        //cout << " error while getting current position , error code="<<errorCode<<endl;
+        cout << " error while getting current position , error code="<<errorCode<<endl;
     }
 
 }
@@ -191,7 +191,7 @@ void CMaxonMotor::Halt()
 
         if( !VCS_HaltPositionMovement(keyHandle, nodeID, &ErrorCode) )
         {
-                //cout<<"Halt position movement failed!, error code="<<ErrorCode<<endl;
+                cout<<"Halt position movement failed!, error code="<<ErrorCode<<endl;
         }
 }
 void CMaxonMotor::Error(unsigned int ErrorInfo)
@@ -207,18 +207,17 @@ void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
 	VCS_GetNbOfDeviceError(keyHandle, nodeID, cErrorInfo, &errorCode);
 }
 
-void CMaxonMotor::SetPosModeParameter() 
+void CMaxonMotor::SetPosModeParameter()
 {
-
 	unsigned int uiMaxFollowingError = 20000;
-	unsigned int iProfileVelocity = 0, iProfileAcceleration=0, iProfileDeceleration=0;
-	unsigned short iNominalCurrent = 0, iMaxOutputCurrent=0, iThermalTimeConstant=0;
+	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
+	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
 	//int iError=0;
 
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
 	iProfileVelocity = 10000;
-	iProfileAcceleration = 1000; 
+	iProfileAcceleration = 1000;
 	iProfileDeceleration = 2000;
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 
@@ -226,7 +225,26 @@ void CMaxonMotor::SetPosModeParameter()
 	VCS_GetDcMotorParameter(keyHandle, nodeID, &iNominalCurrent, &iMaxOutputCurrent, &iThermalTimeConstant, &ErrorCode);
 	VCS_SetDcMotorParameter(keyHandle, nodeID, 1000, 2000, 40, &ErrorCode);
 }
-void CMaxonMotor::SetCurModeParameter(int) {
+void CMaxonMotor::SetCurModeParameter(int)
+{
+}
+
+void CMaxonMotor::setSpeed(float speed)
+{
+	unsigned int uiMaxFollowingError = 20000;
+	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
+	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
+	//int iError=0;
+
+	unsigned int errorCode = 0;
+
+	
+	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
+	iProfileVelocity = 200 * speed;
+	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
+	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
+
+	
 }
 
 void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {

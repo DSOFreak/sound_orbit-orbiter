@@ -1,0 +1,10 @@
+1. Follow the instructions on: http://www.instructables.com/id/FMOD-Running-on-Raspberry-Pi/ (Raspberry Pi Model 3 has an armv7)
+2. In Visual Studio:
+	1. Add Header Files:
+	Right Click on Project -> Properties -> VC++ Directories -> Add the path to the headers in Include Directories.
+	2. Add Library as Linker-Flags.
+	Right Click on Project -> Properties -> Linker -> Input -> Add "fmod" to the Library Dependencies
+
+
+
+Audio DACs: mcp4725 12 bit Mono DAC-Chip. Fertiges Board 0.71Fr Aliexpress 8.75Fr Digitec. PCB ist Open-Source. Läuft mit Raspi

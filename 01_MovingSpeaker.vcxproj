@@ -65,7 +65,7 @@
     <LibraryPath>$(LibraryPath);$(ProjectDir)\include;$(IncludePath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <IncludePath>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)include\gtk;$(ProjectDir)include\gdk;$(ProjectDir)include\gtk\deprecated;$(ProjectDir)include\ncursesw;$(ProjectDir)include\wiringPi\2.32;$(IncludePath);$(ISensIncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)include\gtk;$(ProjectDir)include\fmod;$(ProjectDir)include\gdk;$(ProjectDir)include\gtk\deprecated;$(ProjectDir)include\ncursesw;$(ProjectDir)include\wiringPi\2.32;$(IncludePath);$(ISensIncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)include\ncursesw</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClCompile Include="cmaxonmotor.cpp" />
     <ClCompile Include="lirc-0.9.4d\lib\lirc_client.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
@@ -83,6 +84,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="TCPClient.cpp" />
+    <ClCompile Include="TCPServer.cpp" />
+    <ClCompile Include="Toolbox.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cmaxonmotor.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="TCPServer.h" />
+    <ClInclude Include="Toolbox.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
@@ -97,7 +108,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
-      <LibraryDependencies>wiringPi;EposCmd;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>wiringPi;pthread;fmod;EposCmd;lirc;lirc_client;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
       <Command>DISPLAY=130.92.124.189:0.0</Command>
@@ -105,10 +116,14 @@
     <ClCompile>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
+    <PreBuildEvent>
+      <AdditionalSourcesToCopyMapping>
+      </AdditionalSourcesToCopyMapping>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <Link>
-      <LibraryDependencies>wiringPi;EposCmd;GL;GLU;glut;lirc;lirc_client;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>wiringPi;EposCmd;GL;GLU;glut;lirc;lirc_client;fmod;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
