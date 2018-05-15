@@ -56,7 +56,8 @@ int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
 CMaxonMotor * motor;
 
-
+std::queue<shared_ptr<Toolbox::HostData> > movement_queue;
+std::queue<shared_ptr<Toolbox::HostData> > stimuli_queue;
 bool exit_app;
 chrono::system_clock::time_point ttNow, ttOld;
 chrono::system_clock::duration ttD;
@@ -162,11 +163,14 @@ void calcAll(void) {
 
 
 void IdleFunc(void) {
-	motor->GetCurrentPosition(iCurrentPosition);
+	motor->getCurrentPosition(iCurrentPosition);
 	motor->ErrorNbr(&cErrorNbr);
 	if (motor->ErrorCode == 0x34000007) motor->initializeDevice();
 	if (cErrorNbr != 0) motor->initializeDevice();
 }
+
+bool movement_skip;
+bool stimuli_skip;
 
 void TimerFunc(int value) {
 	std::string s = "xx";
@@ -190,34 +194,73 @@ void TimerFunc(int value) {
 	}
 
 
-	Toolbox::HostData hostData;
+	;
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
 		std::cout << "raw hostData: " << host_data_raw << std::endl;
 
-		hostData = Toolbox::decodeHostData(host_data_raw, 0); // decode host data
-		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData.direction) << ", angle = " << hostData.angularDistance << ", speed = " << hostData.speed << std::endl;
-		std::cout << "stim_nr = " << static_cast<int>(hostData.stimulus_nr) << ", dur = " << hostData.stimulusDuration << ", vol = " << hostData.loudness << ", toBeTriggerd = " << hostData.toBeTriggerd << std::endl;
+		shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw, 0))); // decode host data
+		if (hostData->mov_queued) { // Add new data to queue
+			movement_queue.push(hostData);
+			movement_skip = false;
+		}
+		else{ // Clear Queue and Add new Data to Queue
+			movement_skip = true;
+			while(!movement_queue.empty())
+			{
+				movement_queue.pop();
+			}
+			movement_queue.push(hostData);
+		}
+		if (hostData->stim_queued) { // Add new data to queue
+			stimuli_queue.push(hostData);
+			stimuli_skip = false;
+		}
+		else { // Clear Queue and Add new Data to Queue
+			stimuli_skip = true;
+			while (!stimuli_queue.empty())
+			{
+				stimuli_queue.pop();
+			}
+			stimuli_queue.push(hostData);
+		}
+	}
 
-		if (hostData.direction == 1) {
-			iAngle += hostData.angularDistance;
+	if (!movement_queue.empty() && (motor->reachedTarget() || movement_skip))
+	{
+		
+		shared_ptr<Toolbox::HostData> hostData = movement_queue.front();
+		movement_queue.pop();
+
+		std::cout << "Excecuting command:" << std::endl;
+		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angle = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
+		std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
+
+		if (hostData->direction == 1) {
+			iAngle = hostData->angularDistance;
 		}
-		if (hostData.direction == 2) {
-			iAngle -= hostData.angularDistance;
+		if (hostData->direction == 2) {
+			iAngle = hostData->angularDistance;
 		}
-		if (hostData.direction != 0) {
+		if (hostData->direction != 0) {
 			calcAll();
-			motor->setSpeed(hostData.speed);
+			motor->setSpeed(hostData->speed);
 			motor->Move(iTargetPosition);
 		}
 
-		if(hostData.toBeTriggerd == 1)
-		{
-			stimuliLib.loadStimuli(hostData.stimulus_nr, hostData.loudness, hostData.stimulusDuration);
-			stimuliLib.playStimuli();
-		}
-		
+
 	}
 
+	if (!stimuli_queue.empty() && (stimuliLib.isFinished() || stimuli_skip))
+	{
+		shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
+		stimuli_queue.pop();
+
+		if (hostData->toBeTriggerd == 1)
+		{
+			stimuliLib.loadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+			stimuliLib.playStimuli();
+		}
+	}
 		
 	szTxt2 = s;
 

@@ -16,16 +16,19 @@ namespace Toolbox {
 		B = moving direction
 		C = Speed with two decimals
 		D = angle with two decimals
+		I = 
+	
 		E = speaker id = 01
 		F = moving direction
 		G = Speed with two decimals
 		H = angle with two decimals
+
 	*/
 	HostData decodeHostData(std::string hostData, size_t speakerID)
 	{
 		HostData d;
 
-		if (hostData.length() < (speakerID + 1) * 26) {
+		if (hostData.length() < (speakerID + 1) * 26) { //TODO: NEW PROTOCOL
 			std::cout << "Error: Not enough data for the selected speaker id." << std::endl;
 			d.direction = 0;
 			d.speed = 0.0f;
@@ -43,21 +46,26 @@ namespace Toolbox {
 			int angularDistance = std::stoi(hostData.substr(startIdx + 9, 3), nullptr, 10);
 			int angularDistanceDiv100 = std::stoi(hostData.substr(startIdx + 13, 2), nullptr, 10);
 
-			int stim_nr = std::stoi(hostData.substr(startIdx + 15, 2), nullptr, 10);
+			int queued_mov_nr = std::stoi(hostData.substr(startIdx + 15, 1), nullptr, 10);
 
-			int stim_dur = std::stoi(hostData.substr(startIdx + 17, 6), nullptr, 10);
-			float stim_vol_L_real = std::stoi(hostData.substr(startIdx + 23, 2), nullptr, 10);
-			int stim_tbt = std::stoi(hostData.substr(startIdx + 25, 1), nullptr, 10);
+			int stim_nr = std::stoi(hostData.substr(startIdx + 16, 2), nullptr, 10);
+
+			int stim_dur = std::stoi(hostData.substr(startIdx + 18, 6), nullptr, 10);
+			float stim_vol_L_real = std::stoi(hostData.substr(startIdx + 24, 2), nullptr, 10);
+			int stim_tbt = std::stoi(hostData.substr(startIdx + 26, 1), nullptr, 10);
+			int queued_stim_nr = std::stoi(hostData.substr(startIdx + 27, 1), nullptr, 10);
 
 			d.direction = motorDirection;
 			d.speed = (1.0f * speed) + (0.01f * speedDiv100);
 			d.angularDistance = (1.0f * angularDistance) + (0.01f * angularDistanceDiv100);
+			d.mov_queued = queued_mov_nr == 0;
 			d.stimulusDuration = stim_dur;
 			d.stimulus_nr = stim_nr;
 			float C = 0.0f;
 			float Lmax = 90.0f;
 			d.loudness = pow(10.0f, (stim_vol_L_real - Lmax + C) / 20.0f);
 			d.toBeTriggerd = stim_tbt;
+			d.stim_queued = queued_stim_nr == 0;
 		}
 		catch (std::exception e) {
 			std::cout << e.what() << std::endl;
