@@ -11,12 +11,21 @@ CMaxonMotor::CMaxonMotor()
     strcpy(PortName, "USB0");
     ErrorCode = 0x00;
     nodeID = 1;
+
 }
 CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
 {
     PortName = portNamestr;
     ErrorCode = 0x00;
     nodeID = input_node_Id;
+}
+
+#define POSITION_TOLERANCE 100
+bool CMaxonMotor::reachedTarget()
+{
+	int targetReached;
+	VCS_GetMovementState(keyHandle, nodeID, &targetReached, nullptr);
+	return targetReached >0;
 }
 
 
@@ -60,7 +69,7 @@ void CMaxonMotor::EnableDevice()
             {
 				//move(16, 10);
 				//printw("Status: \t%x", ErrorCode);
-
+				
             }
         }
     }
@@ -138,6 +147,7 @@ void CMaxonMotor::activate_device()
     }
 
     EnableDevice();
+	VCS_ResetPositionMarkerCounter(keyHandle, nodeID, &ErrorCode);
 
 }
 void CMaxonMotor::initializeDevice() {
@@ -153,7 +163,7 @@ void CMaxonMotor::Move(long TargetPosition)
 
     if( VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode) )
     {
-        int Absolute = TRUE; // FALSE;
+        int Absolute = FALSE;
         int Immediately = TRUE;
 
         if( !Absolute )
@@ -167,24 +177,42 @@ void CMaxonMotor::Move(long TargetPosition)
         if( !VCS_MoveToPosition(keyHandle, nodeID, TargetPosition, Absolute, Immediately, &errorCode) )
         {
             cout << "Move to position failed!, error code="<<errorCode<<endl;
-
         }
     }
     else
     {
         cout << "Activate profile position mode failed!" << endl;
     }
+	int curr;
+	getCurrentPosition(curr);
+	std::cout << "curr: " << curr << std::endl;
+	std::cout << "trgt: " << TargetPosition << std::endl;
+	
+
 }
-void CMaxonMotor::GetCurrentPosition(int& CurrentPosition)
+
+void CMaxonMotor::getTargetPosition(long int &targetPosition)
 {
 
     unsigned int errorCode = 0;
 
-    if( !VCS_GetPositionIs(keyHandle, nodeID, &CurrentPosition, &errorCode) ){
-        cout << " error while getting current position , error code="<<errorCode<<endl;
+    if( !VCS_GetTargetPosition(keyHandle, nodeID, &targetPosition, &errorCode) ){
+        cout << " error while getting target position , error code="<<errorCode<<endl;
     }
 
 }
+
+void CMaxonMotor::getCurrentPosition(int &currentPosition)
+{
+
+	unsigned int errorCode = 0;
+
+	if (!VCS_GetPositionIs(keyHandle, nodeID, &currentPosition, &errorCode)) {
+		cout << " error while getting current position , error code=" << errorCode << endl;
+	}
+
+}
+
 void CMaxonMotor::Halt()
 {
         unsigned int ErrorCode = 0;
