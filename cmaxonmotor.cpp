@@ -208,7 +208,7 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 	unsigned int errorCode = 0;
 
 	if (!VCS_GetPositionIs(keyHandle, nodeID, &currentPosition, &errorCode)) {
-		cout << " error while getting current position , error code=" << errorCode << endl;
+		//cout << " error while getting current position , error code=" << errorCode << endl;
 	}
 
 }

@@ -68,15 +68,27 @@ void StimuliLibrary::loadStimuli(int nr, float volume, unsigned int duration)
 	duration_stimuli = duration;
 	dsp_lowpass->setBypass(true);
 	
+	// Drin lassen für Referenz um sounds zu erzeugen
 	if(nr >= 2 && nr <= 60)
 	{
 		float pitch = scale.getPitch(4, nr);
 		dsp_sin->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
 		fsystem->playDSP(dsp_sin, 0, true, &channel);
 	}
+	bool isPlaybackPaused = true;
 	switch(nr)
 	{
-		case 0:
+		// TO do: Put stimuli in an array to improve speed. Indexed access (fischti)
+		//To load a sound into memory
+		case 1:
+			printf("\n\n Playing 01_chirp - no loop - \n\n");
+			fsystem->createSound("../../../../TestFiles/01_chirp.flac", FMOD_DEFAULT, 0, &audio);
+			channel->setChannelGroup(channelgroup);
+			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+			break;
+		case 2:
+			break;
+		/*case 0:
 			// White noise
 			fsystem->playDSP(dsp_noise, 0, true, &channel);
 			break;		
@@ -85,6 +97,7 @@ void StimuliLibrary::loadStimuli(int nr, float volume, unsigned int duration)
 			fsystem->playDSP(dsp_noise, 0, true, &channel);
 			dsp_lowpass->setBypass(false);
 			break;
+			*/
 	}
 	channel->setVolume(volume);
 }
