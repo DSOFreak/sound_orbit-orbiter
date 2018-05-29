@@ -16,7 +16,7 @@
 #include "fmod.hpp"
 #include "TCPClient.h"
 #include "Toolbox.h"
-#include "StimuliLibrary.h"
+#include "StimuliLibrary.h" 
 
 enum eTasten {
 	KEY_1 = 1,
@@ -92,7 +92,7 @@ void ir_func() {
 
 
 	lirc_readconfig("/etc/lirc/RM-D420.conf", &config, NULL);
-	usleep(1'000'000);
+	usleep(1000000);
 	while (!exit_app) {
 		lirc_nextcode(&code);
 		ir_mutex.lock();
@@ -547,6 +547,11 @@ int main(int argc, char **argv)
 	std::thread ir_thread(ir_func);	
 
 	std::thread tcp_thread(tcp_func);
+	if (argc == 1)
+	{
+		printf("No Ip provided: use: 192.168.178.20\n");
+		argv[1] = "192.168.178.20";
+	}
 	ip_addr = argv[1];
 	port = 1234;
 	do {
