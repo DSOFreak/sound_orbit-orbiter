@@ -2,10 +2,14 @@
 #include <fmod.hpp>
 #include <string>
 #include "MusicScale.h"
-
+using namespace std;
 class StimuliLibrary
 {
 private:
+	string pathToAudio_01Chirp = "../../../../TestFiles/01_chirp.flac";
+	string pathToAudio_02PinkNoise = "../../../../TestFiles/02_pink192k.flac";
+	string pathToAudio_03Sin500 = "../../../../TestFiles/03_sin500.flac";
+
 	FMOD::System    *fsystem;
 	FMOD::Channel   *channel;
 	FMOD::ChannelGroup *channelgroup;
