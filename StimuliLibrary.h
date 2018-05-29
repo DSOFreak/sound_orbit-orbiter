@@ -8,6 +8,8 @@ class StimuliLibrary
 private:
 	FMOD::System    *fsystem;
 	FMOD::Channel   *channel;
+	FMOD::ChannelGroup *channelgroup;
+	FMOD::Sound		*audio;
 	FMOD::DSP       *dsp_sin;
 	FMOD::DSP       *dsp_noise;
 	FMOD::DSP		*dsp_lowpass;

@@ -534,6 +534,10 @@ void signal_handler(int signal)
 
 int main(int argc, char **argv)
 {
+
+	// argv[1] = Ip
+	
+
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
 	motor = new CMaxonMotor(InterfaceName, 1);
