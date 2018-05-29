@@ -82,22 +82,27 @@ void StimuliLibrary::loadStimuli(int nr, float volume, unsigned int duration)
 		//To load a sound into memory
 		case 1:
 			printf("\n\n Playing 01_chirp - no loop - \n\n");
-			fsystem->createSound("../../../../TestFiles/01_chirp.flac", FMOD_DEFAULT, 0, &audio);
+			fsystem->createSound(pathToAudio_01Chirp.c_str(), FMOD_DEFAULT, 0, &audio);
+			//fsystem->createSound("../../../../TestFiles/01_chirp.flac", FMOD_DEFAULT, 0, &audio);
+			
 			channel->setChannelGroup(channelgroup);
 			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 			break;
 		case 2:
+			printf("\n\n Playing 02_pink - no loop - \n\n");
+			fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio);
+			channel->setChannelGroup(channelgroup);
+			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 			break;
-		/*case 0:
-			// White noise
-			fsystem->playDSP(dsp_noise, 0, true, &channel);
-			break;		
-		case 1:
-			// Pink noise
-			fsystem->playDSP(dsp_noise, 0, true, &channel);
-			dsp_lowpass->setBypass(false);
+		case 3:
+			printf("\n\n Playing 03_sinus - no loop - \n\n");
+			fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio);
+			channel->setChannelGroup(channelgroup);
+			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 			break;
-			*/
+		default:
+			printf("\n\n Playing NOTHING - undefined stimulus number \n\n");
+			break;
 	}
 	channel->setVolume(volume);
 }
