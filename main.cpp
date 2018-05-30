@@ -250,15 +250,24 @@ void TimerFunc(int value) {
 
 	}
 
-	if (!stimuli_queue.empty() && (stimuliLib.isFinished() || stimuli_skip))
+	stimuliLib.updateFSystem();
+	if (stimuliLib.bGetIsThereAFractionLeftToPlay())
+	{
+		printf("\n We have a fraction left to play of %d milliseconds\n",stimuliLib.uiGetDesiredStimuliDuration_ms());
+		stimuliLib.playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
+	}
+	if (!stimuli_queue.empty() && ( stimuliLib.isFinished() || stimuli_skip ) )
 	{
 		shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
 		stimuli_queue.pop();
 
 		if (hostData->toBeTriggerd == 1)
 		{
-			stimuliLib.loadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
-			stimuliLib.playStimuli();
+			bool bIsValidStimulus = stimuliLib.bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+			if (bIsValidStimulus)
+			{
+				stimuliLib.playStimuli();
+			}
 		}
 	}
 		
@@ -566,6 +575,7 @@ int main(int argc, char **argv)
 	exit_app = false;
 	std::signal(SIGTERM, signal_handler); // Register  signal interrupt handler
 	while (!exit_app) {
+		//channel->update();
 		TimerFunc(0);
 		DisplayFunc();
 		IdleFunc();
