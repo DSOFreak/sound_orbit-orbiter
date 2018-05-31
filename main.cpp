@@ -111,8 +111,7 @@ void tcp_func() {
 			std::cout << "Reconnecting..." << std::endl;
 
 			tcp.setup(ip_addr, port);
-			sleep(1);
-
+			sleep(2);
 		}
 		tcp_mutex.lock();
 		tcp_queue.push(msg);
