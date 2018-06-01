@@ -55,6 +55,7 @@ namespace Toolbox {
 
 				if (bCheckForValidity(d, hostData, speakerID, realSpeakerID,stim_nr))
 				{
+					printf("This protocol is valid \n");
 					d.direction = motorDirection;
 					d.speed = (1.0f * speed) + (0.01f * speedDiv100);
 					d.angularDistance = (1.0f * angularDistance) + (0.01f * angularDistanceDiv100);
@@ -78,7 +79,7 @@ namespace Toolbox {
 	{
 		printf("Check for validity \n");
 		// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
-		if ( ((strHostData.length() < (speakerID + 1) * 27) ) || (MAX_SPEAKER_NUMBER< iRealSpeakerID ) || ( iRealSpeakerID < 0 ) || (MAX_STIMULUS_NUMBER < iStimulusNumber ) || (iStimulusNumber < 0))
+		if ( ((strHostData.length() < (speakerID + 1) * 27) ) || (MAX_SPEAKER_NUMBER< iRealSpeakerID ) || ( iRealSpeakerID < 0 ) || (MAX_STIMULUS_NUMBER < iStimulusNumber ) || (iStimulusNumber <= 0))
 		{ 
 			printf("This protocol is nothing to process for the motor / audio control. \n");
 			vSetHostDataToZero(refHostData);
