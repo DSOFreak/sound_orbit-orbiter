@@ -151,7 +151,7 @@ float A_freqs[] = { 22.5f, 55.0f,110.0f,220.0f,440.0f,880.0f,1760.0f,3520.0f,704
 
 
 
-void calcAll(void) {
+void calcTargetPosition(void) {
 	//iAngle = cNumb[2] + 10 * cNumb[1] + 100 * cNumb[0];
 	//if (iAngle > 360) iAngle = 360;
 	iTargetPosition = 65536 * float(iAngle) / 360.0 * RAILPERI / WHEELPERI;
@@ -231,17 +231,17 @@ void TimerFunc(int value) {
 		movement_queue.pop();
 
 		std::cout << "Excecuting command:" << std::endl;
-		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angle = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
-		std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
+		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
+		std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
 
-		if (hostData->direction == 1) {
-			iAngle = hostData->angularDistance;
+		if (hostData->direction == 1) { // Dir 1 = clockwise
+			iAngle = hostData->angularDistance; // Correct
 		}
-		if (hostData->direction == 2) {
-			iAngle = hostData->angularDistance;
+		if (hostData->direction == 2) { // Dir 2 = counterclockwise
+			iAngle = hostData->angularDistance * -1;
 		}
-		if (hostData->direction != 0) {
-			calcAll();
+		if (hostData->direction != 0) { // Dir 0 = no movement
+			calcTargetPosition(); 
 			motor->setSpeed(hostData->speed);
 			motor->Move(iTargetPosition);
 		}
@@ -361,51 +361,51 @@ void TimerFunc(int value) {
 		}
 		if (cTaste == PREV) {
 			iAngle = iAngle - 15;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == NEXT) {
 			iAngle = iAngle + 15;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_1) {
 			cNumb[iNumbOffs] = 1;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_2) {
 			cNumb[iNumbOffs] = 2;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_3) {
 			cNumb[iNumbOffs] = 3;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_4) {
 			cNumb[iNumbOffs] = 4;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_5) {
 			cNumb[iNumbOffs] = 5;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_6) {
 			cNumb[iNumbOffs] = 6;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_7) {
 			cNumb[iNumbOffs] = 7;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_8) {
 			cNumb[iNumbOffs] = 8;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_9) {
 			cNumb[iNumbOffs] = 9;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == KEY_0) {
 			cNumb[iNumbOffs] = 0;
-			calcAll();
+			calcTargetPosition();
 		}
 		if (cTaste == SUB_10) {
 			iTargetPosition = iTargetPosition + 100000;

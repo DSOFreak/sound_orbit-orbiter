@@ -136,14 +136,14 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 			break;
 		case 3:
 			pathToCurrentAudioFile = pathToAudio_03Sin500;
-			printf("\n\n Playing 03_sinus - no loop - \n\n");
+			//printf("\n\n Playing 03_sinus - no loop - \n\n");
 			fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio);
 			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 			channel->setChannelGroup(channelgroup);
 			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 			break;
 		default:
-			printf("\n\n Playing NOTHING - undefined stimulus number \n\n");
+			printf("\n\n Playing NOTHING - undefined stimulus number %i \n\n", nr);
 			bRetIsValidStimuli = false;
 			break;
 	}
@@ -153,8 +153,8 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 
 void StimuliLibrary::playStimuli()
 {
-	printf("\n audioFileLength_ms %i \n", audioFileLength_ms);
-	printf("\n desiredDuration_ms %f \n", desiredDuration_ms);
+	//printf("\n audioFileLength_ms %i \n", audioFileLength_ms);
+	//printf("\n desiredDuration_ms %f \n", desiredDuration_ms);
 	// Case 1: Stimulus is shorter than desired length
 	if (audioFileLength_ms < desiredDuration_ms)
 	{
@@ -164,9 +164,9 @@ void StimuliLibrary::playStimuli()
 		unsigned int intMultiple = (int)isLongerFactor; // -> e.g. 3
 		double isLongerFraction = isLongerFactor - (double)intMultiple; // -> e.g. 0.25
 
-		printf("\n\n (audioFileLength_ms < desiredDuration_ms) \n\n");
+		//printf("\n\n (audioFileLength_ms < desiredDuration_ms) \n\n");
 		//channel->setCallback(StimuliLibrary::EndOfSong);
-		printf("\intMultiple is %i \n", intMultiple);
+		//printf("\intMultiple is %i \n", intMultiple);
 		channel->setLoopCount(intMultiple - 1); // -1: as 1 Loop means playing the sound twice
 		channel->setMode(FMOD_LOOP_NORMAL);
 		channel->setPaused(false);
@@ -175,9 +175,9 @@ void StimuliLibrary::playStimuli()
 		dFractionOfAudioFileLeftToPlay = isLongerFraction;
 	
 		
-		printf("\ndFractionOfAudioFileLeftToPlay is %f \n", dFractionOfAudioFileLeftToPlay);
+		//printf("\ndFractionOfAudioFileLeftToPlay is %f \n", dFractionOfAudioFileLeftToPlay);
 		desiredDuration_ms = isLongerFraction* (double)audioFileLength_ms; // For the call after the loop we only want to play the fraction that is left
-		printf("\n NEW desiredDuration_ms is %f \n", desiredDuration_ms);
+		//printf("\n NEW desiredDuration_ms is %f \n", desiredDuration_ms);
 	}
 	// Case 2: Stimulus is longer than desired length
 	else if (audioFileLength_ms > desiredDuration_ms)
