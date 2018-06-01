@@ -184,7 +184,7 @@ void StimuliLibrary::playStimuli()
 	// Case 2: Stimulus is longer than desired length
 	else if (audioFileLength_ms > desiredDuration_ms)
 	{
-		printf("\n TO DO: HIER IST NOCH NICHTS IMPLEMENTIERT \n");
+		
 
 
 		printf("\n\n (audioFileLength_ms > desiredDuration_ms) \n\n");
