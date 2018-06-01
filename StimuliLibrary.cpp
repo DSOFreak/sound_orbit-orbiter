@@ -3,6 +3,8 @@
 #include <thread>			
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+using namespace std;
 //#include <unistd.h>		wyt todo
 //#define LENGTH_OF_SELECTED_STIMULUS 0 // in the gui by selecting 0 we just play as long as the stimulus is
 void StimuliLibrary::initAllStimuli()
@@ -120,7 +122,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		//To load a sound into memory
 		case 1:
 			pathToCurrentAudioFile = pathToAudio_01Chirp;
-			printf("\n\n Playing 01_chirp - no loop - \n\n");
+			//printf("\n\n Playing 01_chirp - no loop - \n\n");
 			fsystem->createSound(pathToAudio_01Chirp.c_str(), FMOD_DEFAULT, 0, &audio);
 			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 			channel->setChannelGroup(channelgroup);
@@ -128,7 +130,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 			break;
 		case 2:
 			pathToCurrentAudioFile = pathToAudio_02PinkNoise;
-			printf("\n\n Playing 02_pink - no loop - \n\n");
+			//printf("\n\n Playing 02_pink - no loop - \n\n");
 			fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio);
 			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 			channel->setChannelGroup(channelgroup);
@@ -171,7 +173,7 @@ void StimuliLibrary::playStimuli()
 		channel->setMode(FMOD_LOOP_NORMAL);
 		channel->setPaused(false);
 		// We do have some rest to play
-		printf("\isLongerFactor is %f \n", isLongerFraction);
+		//printf("\isLongerFactor is %f \n", isLongerFraction);
 		dFractionOfAudioFileLeftToPlay = isLongerFraction;
 	
 		
@@ -182,20 +184,18 @@ void StimuliLibrary::playStimuli()
 	// Case 2: Stimulus is longer than desired length
 	else if (audioFileLength_ms > desiredDuration_ms)
 	{
+		printf("\n TO DO: HIER IST NOCH NICHTS IMPLEMENTIERT \n");
+
+
 		printf("\n\n (audioFileLength_ms > desiredDuration_ms) \n\n");
-		//unsigned int durationDifference_ms = (unsigned int) audioFileLength_ms - (unsigned int) desiredDuration_ms;
+		unsigned int durationDifference_ms = (unsigned int) audioFileLength_ms - (unsigned int) desiredDuration_ms;
 		//printf("\n durationDifference_ms %i \n", durationDifference_ms);
-
-
-		// delay for ending 
-		//FMOD_DELAYTYPE_END_MS myType;
-		//channel->setDelay(FMOD_DELAYTYPE_END_MS,0,)
-
-
-
+		//double isShorterFactor = (double)desiredDuration_ms / (double)audioFileLength_ms; // e.g. 3.25
+		//printf("isShorterFactor %f \n", isShorterFactor);
 
 
 		/*
+		
 		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 		unsigned int audioLength_bytes;
 		audio->getLength(&audioLength_bytes, FMOD_TIMEUNIT_RAWBYTES);
@@ -218,24 +218,59 @@ void StimuliLibrary::playStimuli()
 		channel->getFrequency(&fFrequency);
 		myAdditionalAudioSettings.defaultfrequency = fFrequency;
 		myAdditionalAudioSettings.numchannels = 1;
-		myAdditionalAudioSettings.format = FMOD_SOUND_FORMAT_BITSTREAM;
+		myAdditionalAudioSettings.format = FMOD_SOUND_FORMAT_NONE;
 		bool isPlaybackPaused = true;
-
+		channel->setMode(FMOD_LOOP_NORMAL);
 		printf("1 \n");
-		fsystem->createSound(pathToCurrentAudioFile.c_str(), FMOD_OPENUSER, &myAdditionalAudioSettings, &audio);
-		printf("2 \n");
+		FMOD_RESULT result = fsystem->createSound(pathToCurrentAudioFile.c_str(), FMOD_OPENRAW, &myAdditionalAudioSettings, &audio);
+		cout << result << endl;
 		channel->setChannelGroup(channelgroup);
 		printf("3 \n");
 		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 		printf("4 \n");
+		
 		*/
+
+		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+		unsigned int audioFileLength_Samples;
+		audio->getLength(&audioFileLength_Samples, FMOD_TIMEUNIT_PCM);
+		// Get length of one sample
+		double dMsLengthOfOneSample = (double)audioFileLength_Samples / (double)audioFileLength_ms;
+		// Multipli with desired ms
+		double dSampleLengthOfDesiredMsLength = dMsLengthOfOneSample*desiredDuration_ms;
+		// Cut the values
+		int iSampleLengthOfAudio = (int)dSampleLengthOfDesiredMsLength;
+		printf("audioFileLength_Samples: %i \n", audioFileLength_Samples);
+		printf("we play samples: %i \n", iSampleLengthOfAudio);
+		
+
+		fsystem->getMasterChannelGroup(&channelgroup);
+
+		unsigned long long clockDSP, parentDSP;
+		channelgroup->getDSPClock(&clockDSP, &parentDSP);
+		unsigned int bufferLength = 2048; // som arbitrary vlue
+		int numbuffers = 1;
+		fsystem->getDSPBufferSize(&bufferLength, &numbuffers);
+		fsystem->playSound(audio, channelgroup, true, &channel);
+		FMOD_RESULT myResult = channelgroup->setDelay(clockDSP, clockDSP+ iSampleLengthOfAudio,true);
+
+
+
+
+
+
+
+
+
+
+
 		channel->setPaused(false);
 		vSetdFractionOfAudioFileLeftToPlay(0.00);
 	}
 	// Case 3: User piceked (perhaps accidently) a perfect match in durations
 	else
 	{
-		printf("\n\n (Play full length stimulus) \n\n");
+		//printf("\n\n (Play full length stimulus) \n\n");
 		channel->setPaused(false);
 	}
 
