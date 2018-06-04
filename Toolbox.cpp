@@ -77,7 +77,7 @@ namespace Toolbox {
 	}
 	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, size_t speakerID, int iRealSpeakerID, int iStimulusNumber)
 	{
-		printf("Check for validity \n");
+		//printf("Check for validity \n");
 		// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
 		if ( ((strHostData.length() < (speakerID + 1) * 27) ) || (MAX_SPEAKER_NUMBER< iRealSpeakerID ) || ( iRealSpeakerID < 0 ) || (MAX_STIMULUS_NUMBER < iStimulusNumber ) || (iStimulusNumber <= 0))
 		{ 
