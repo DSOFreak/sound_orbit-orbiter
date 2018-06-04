@@ -53,7 +53,7 @@ namespace Toolbox {
 				int queued_stim_nr = std::stoi(hostData.substr(startIdx + 27, 1), nullptr, 10);
 
 
-				if (bCheckForValidity(d, hostData, speakerID, realSpeakerID,stim_nr))
+				if (bCheckForValidity(d, hostData, speakerID, realSpeakerID,stim_nr, stim_dur, angularDistance))
 				{
 					printf("This protocol is valid \n");
 					d.direction = motorDirection;
@@ -75,16 +75,17 @@ namespace Toolbox {
 			}
 		return d;
 	}
-	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, size_t speakerID, int iRealSpeakerID, int iStimulusNumber)
+	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, size_t speakerID, int iRealSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance)
 	{
 		//printf("Check for validity \n");
 		// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
-		if ( ((strHostData.length() < (speakerID + 1) * 27) ) || (MAX_SPEAKER_NUMBER< iRealSpeakerID ) || ( iRealSpeakerID < 0 ) || (MAX_STIMULUS_NUMBER < iStimulusNumber ) || (iStimulusNumber <= 0))
+		if ( ((strHostData.length() < (speakerID + 1) * 27) ) || (MAX_SPEAKER_NUMBER< iRealSpeakerID ) || ( iRealSpeakerID < 0 ) || (MAX_STIMULUS_NUMBER < iStimulusNumber ) || (iStimulusNumber <= 0) || ((iStimulusDuration==0)&&(iAngularDistance==0)))
 		{ 
 			printf("This protocol is nothing to process for the motor / audio control. \n");
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
+		else if ()
 		else
 		{
 			return true;
