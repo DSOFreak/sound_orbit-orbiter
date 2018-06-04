@@ -5,8 +5,8 @@
 #include <string.h>
 #include <iostream>
 using namespace std;
-//#include <unistd.h>		wyt todo
-//#define LENGTH_OF_SELECTED_STIMULUS 0 // in the gui by selecting 0 we just play as long as the stimulus is
+#define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
+const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
 void StimuliLibrary::initAllStimuli()
 {
 	//Stimuli 1:
