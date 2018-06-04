@@ -85,7 +85,6 @@ namespace Toolbox {
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
-		else if ()
 		else
 		{
 			return true;
