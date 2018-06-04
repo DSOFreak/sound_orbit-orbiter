@@ -81,7 +81,7 @@ namespace Toolbox {
 		// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
 		if ( ((strHostData.length() < (speakerID + 1) * 27) ) || (MAX_SPEAKER_NUMBER< iRealSpeakerID ) || ( iRealSpeakerID < 0 ) || (MAX_STIMULUS_NUMBER < iStimulusNumber ) || (iStimulusNumber <= 0) || ((iStimulusDuration==0)&&(iAngularDistance==0)))
 		{ 
-			printf("This protocol is nothing to process for the motor / audio control. \n");
+			printf("This protocol is nothing to process for the motor / audio control... \n");
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
