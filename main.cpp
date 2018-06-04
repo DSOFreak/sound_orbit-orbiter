@@ -170,12 +170,32 @@ void IdleFunc(void) {
 
 bool movement_skip;
 bool stimuli_skip;
+void vProcessMovement()
+{
+	shared_ptr<Toolbox::HostData> hostData = movement_queue.front();
+	movement_queue.pop();
 
-void TimerFunc(int value) {
+	std::cout << "Excecuting command:" << std::endl;
+	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
+	std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
+
+	if (hostData->direction == 1) { // Dir 1 = clockwise
+		iAngle = hostData->angularDistance; // Correct
+	}
+	if (hostData->direction == 2) { // Dir 2 = counterclockwise
+		iAngle = hostData->angularDistance * -1;
+	}
+	if (hostData->direction != 0) { // Dir 0 = no movement
+		calcTargetPosition();
+		motor->setSpeed(hostData->speed);
+		motor->Move(iTargetPosition);
+	}
+}
+void TimerFunc(bool& bIsFirstCall) {
 	std::string s = "xx";
 	bool ir_recived = false;
 	ir_mutex.lock();
-	while(!ir_queue.empty()){
+	while (!ir_queue.empty()) {
 		s = ir_queue.front();
 		ir_queue.pop();
 		ir_recived = true;
@@ -191,9 +211,6 @@ void TimerFunc(int value) {
 		tcp_mutex.unlock();
 
 	}
-
-
-	;
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
 		std::cout << "raw hostData: " << host_data_raw << std::endl;
 
@@ -203,10 +220,10 @@ void TimerFunc(int value) {
 			movement_queue.push(hostData);
 			movement_skip = false;
 		}
-		else{ // Clear Queue and Add new Data to Queue
+		else { // Clear Queue and Add new Data to Queue
 			std::cout << " Clear Queue and Add new Data to Queue" << endl;
 			movement_skip = true;
-			while(!movement_queue.empty())
+			while (!movement_queue.empty())
 			{
 				movement_queue.pop();
 			}
@@ -226,30 +243,24 @@ void TimerFunc(int value) {
 		}
 	}
 
-	if (!movement_queue.empty() && (motor->reachedTarget() || movement_skip))
+	if (!movement_queue.empty())// movement pending 
 	{
-		
-		shared_ptr<Toolbox::HostData> hostData = movement_queue.front();
-		movement_queue.pop();
-
-		std::cout << "Excecuting command:" << std::endl;
-		std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
-		std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
-
-		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngle = hostData->angularDistance; // Correct
+		if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+		{
+			vProcessMovement();
 		}
-		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngle = hostData->angularDistance * -1;
+		// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
+		else if (bIsFirstCall == true)
+		{
+			bIsFirstCall = false;
+			cout << "Movement due to first call" << endl;
+			vProcessMovement();
+			// is Motor moving? else: process further movement
+			//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
+			//vProcessMovement();
 		}
-		if (hostData->direction != 0) { // Dir 0 = no movement
-			calcTargetPosition(); 
-			motor->setSpeed(hostData->speed);
-			motor->Move(iTargetPosition);
-		}
-
-
 	}
+
 
 	stimuliLib.updateFSystem();
 	if (stimuliLib.bGetIsThereAFractionLeftToPlay())
@@ -542,6 +553,8 @@ void signal_handler(int signal)
 	exit_app = true;
 }
 
+
+
 int main(int argc, char **argv)
 {
 
@@ -575,15 +588,17 @@ int main(int argc, char **argv)
 
 	exit_app = false;
 	std::signal(SIGTERM, signal_handler); // Register  signal interrupt handler
+	bool bIsFirstCall = true;
+	bool bRef = &bIsFirstCall;
 	while (!exit_app) {
 		//channel->update();
-		TimerFunc(0);
+		TimerFunc(bRef);
 		DisplayFunc();
 		IdleFunc();
 		if(!exit_app)usleep(100000);
 	}
 	motor->closeDevice(); // close EPOS2
-
+	printf("\n -------- Delete motor object quit main!");
 	delete motor;
 	return 0;
 

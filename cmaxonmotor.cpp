@@ -32,11 +32,11 @@ bool CMaxonMotor::reachedTarget()
 	bool bRetVal = false;
 	int targetReached;
 	VCS_GetMovementState(keyHandle, nodeID, &targetReached, nullptr);
-	if (targetReached > 0) // We reached the target position
+	if (targetReached != 0) // We reached the target position
 	{
-		cout << "We reached the target position, Wait for 1000ms" << endl;
+		//cout << "We reached the target position, Wait for 1000ms" << endl;
 		usleep(1000000); // 1000000us = 1s
-		cout << "ok, go on." << endl;
+		//cout << "ok, go on." << endl;
 		bRetVal = true;
 	}
 	else
@@ -176,7 +176,7 @@ void CMaxonMotor::initializeDevice() {
 
 void CMaxonMotor::Move(long TargetPosition)
 {
-	cout << "MOTOR IS MOVING \n" << endl;
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING \n" << endl;
     unsigned int errorCode = 0;
 
     if( VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode) )
