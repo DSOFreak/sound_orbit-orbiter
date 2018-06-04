@@ -2,6 +2,12 @@
 
 #include <string.h>
 #include <iostream>
+
+#include <lirc/lirc_client.h> //usleep
+
+
+
+
 //#include <curses.h>
 
 using namespace std;
@@ -23,9 +29,21 @@ CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
 #define POSITION_TOLERANCE 100
 bool CMaxonMotor::reachedTarget()
 {
+	bool bRetVal = false;
 	int targetReached;
 	VCS_GetMovementState(keyHandle, nodeID, &targetReached, nullptr);
-	return targetReached >0;
+	if (targetReached > 0) // We reached the target position
+	{
+		cout << "We reached the target position, Wait for 1000ms" << endl;
+		usleep(1000000); // 1000000us = 1s
+		cout << "ok, go on." << endl;
+		bRetVal = true;
+	}
+	else
+	{
+		bRetVal = false;
+	}
+	return bRetVal;
 }
 
 

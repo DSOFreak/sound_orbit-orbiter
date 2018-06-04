@@ -17,7 +17,7 @@
 #include "TCPClient.h"
 #include "Toolbox.h"
 #include "StimuliLibrary.h" 
-
+using namespace std;
 enum eTasten {
 	KEY_1 = 1,
 	KEY_2,
@@ -199,10 +199,12 @@ void TimerFunc(int value) {
 
 		shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw, 0))); // decode host data
 		if (hostData->mov_queued) { // Add new data to queue
+			std::cout << "Add new data to queue" << endl;
 			movement_queue.push(hostData);
 			movement_skip = false;
 		}
 		else{ // Clear Queue and Add new Data to Queue
+			std::cout << " Clear Queue and Add new Data to Queue" << endl;
 			movement_skip = true;
 			while(!movement_queue.empty())
 			{
