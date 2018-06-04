@@ -49,5 +49,10 @@ public:
 	void stop();
 	bool bLoadStimuli(int nr, float volume, unsigned int duration);
 	void playStimuli();
+
+	// Protocol hijacking to add specific non-time information for stimulus
+	//StimulusDuration(000000 - 999999) -> 6Digits in ms ~=15min max length for time framed stimulus
+	static const int iPlayStimulusAsLongAsMovementsPending; // For example for the DSD360 test. Plays as long as there is something in the queue
+
 };
 
