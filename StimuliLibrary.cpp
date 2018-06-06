@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <limits>
 using namespace std;
 #define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
@@ -34,7 +35,7 @@ void StimuliLibrary::timedStop(FMOD::Channel *channel ,unsigned int time_ms)
 
 unsigned int StimuliLibrary::uiGetDesiredStimuliDuration_ms()
 {
-	return desiredDuration_ms;
+	return uiDesiredDuration_ms;
 }
 
 bool StimuliLibrary::bGetIsThereAFractionLeftToPlay()
@@ -61,7 +62,7 @@ void StimuliLibrary::updateFSystem()
 	fsystem->update();
 }
 
-StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00)
+StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
 	printf("StimuliLibrary constructor called \n");
 	FMOD::System_Create(&fsystem);
@@ -91,19 +92,33 @@ bool StimuliLibrary::isFinished()
 	return !val;
 }
 
-void StimuliLibrary::stop()
+void StimuliLibrary::stopStimuli()
 {
+
 	printf("\n\n  Stimuli Stop - \n\n");
+	audio->setMode(FMOD_LOOP_OFF);
+	channel->setMode(FMOD_LOOP_OFF);
+
+
 	early_stop = true;
 	channel->setPaused(true);
 	channel->stop();
+	audio->release();
+	fsystem->release();
+	FMOD::System_Create(&fsystem);
+	fsystem->getVersion(&version);
+	if (version < FMOD_VERSION)
+	{
+		printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
+	}
+	fsystem->init(32, FMOD_INIT_NORMAL, nullptr);
 }
 
 bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 {
+	//printf("\n\n  bLoadStimuli - \n\n");
 	bool bRetIsValidStimuli = true;
-	channel->setMode(FMOD_DEFAULT); // reset to default
-	desiredDuration_ms = duration;
+	uiDesiredDuration_ms = duration;
 	dsp_lowpass->setBypass(true);
 	dFractionOfAudioFileLeftToPlay = 0.00;
 	// Drin lassen für Referenz um sounds zu erzeugen
@@ -149,20 +164,25 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 			bRetIsValidStimuli = false;
 			break;
 	}
+
 	channel->setVolume(volume);
 	return bRetIsValidStimuli;
 }
 
 void StimuliLibrary::playStimuli()
 {
+	printf("\n playStimuli() \n");
+	if (audioFileLength_ms == 0)
+	{
+		stopStimuli();
+	}
 	//printf("\n audioFileLength_ms %i \n", audioFileLength_ms);
 	//printf("\n desiredDuration_ms %f \n", desiredDuration_ms);
 	// Case 1: Stimulus is shorter than desired length
-	if (audioFileLength_ms < desiredDuration_ms)
+	else if (audioFileLength_ms < uiDesiredDuration_ms)
 	{
-		
-		unsigned int durationDifference_ms = desiredDuration_ms - audioFileLength_ms;
-		double isLongerFactor = (double)desiredDuration_ms / (double)audioFileLength_ms; // e.g. 3.25
+		unsigned int durationDifference_ms = uiDesiredDuration_ms - audioFileLength_ms;
+		double isLongerFactor = (double)uiDesiredDuration_ms / (double)audioFileLength_ms; // e.g. 3.25
 		unsigned int intMultiple = (int)isLongerFactor; // -> e.g. 3
 		double isLongerFraction = isLongerFactor - (double)intMultiple; // -> e.g. 0.25
 
@@ -175,74 +195,26 @@ void StimuliLibrary::playStimuli()
 		// We do have some rest to play
 		//printf("\isLongerFactor is %f \n", isLongerFraction);
 		dFractionOfAudioFileLeftToPlay = isLongerFraction;
-	
 		
 		//printf("\ndFractionOfAudioFileLeftToPlay is %f \n", dFractionOfAudioFileLeftToPlay);
-		desiredDuration_ms = isLongerFraction* (double)audioFileLength_ms; // For the call after the loop we only want to play the fraction that is left
+		uiDesiredDuration_ms = isLongerFraction* (double)audioFileLength_ms; // For the call after the loop we only want to play the fraction that is left
 		//printf("\n NEW desiredDuration_ms is %f \n", desiredDuration_ms);
 	}
 	// Case 2: Stimulus is longer than desired length
-	else if (audioFileLength_ms > desiredDuration_ms)
+	else if (audioFileLength_ms > uiDesiredDuration_ms)
 	{
-		
-
-
 		printf("\n\n (audioFileLength_ms > desiredDuration_ms) \n\n");
-		unsigned int durationDifference_ms = (unsigned int) audioFileLength_ms - (unsigned int) desiredDuration_ms;
-		//printf("\n durationDifference_ms %i \n", durationDifference_ms);
-		//double isShorterFactor = (double)desiredDuration_ms / (double)audioFileLength_ms; // e.g. 3.25
-		//printf("isShorterFactor %f \n", isShorterFactor);
 
-
-		/*
-		
-		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-		unsigned int audioLength_bytes;
-		audio->getLength(&audioLength_bytes, FMOD_TIMEUNIT_RAWBYTES);
-		// Get length of one byte
-		double dMsLengthOfOneByte = (double)audioLength_bytes / (double)audioFileLength_ms;
-		// Multipli with desired ms
-		double dByteLengthOfDesiredMsLength = dMsLengthOfOneByte*desiredDuration_ms;
-		// Cut the values
-		int iByteLengthOfAudio = (int)dByteLengthOfDesiredMsLength;
-		printf("\n raw byte length %i \n", audioLength_bytes);
-		printf("\n to play byte length %i \n", iByteLengthOfAudio);
-
-		// Create new audio file
-		FMOD_CREATESOUNDEXINFO myAdditionalAudioSettings;
-		memset(&myAdditionalAudioSettings, 0, sizeof(FMOD_CREATESOUNDEXINFO));
-		myAdditionalAudioSettings.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);             
-		myAdditionalAudioSettings.length = iByteLengthOfAudio;
-		myAdditionalAudioSettings.fileoffset = 0;
-		float fFrequency;
-		channel->getFrequency(&fFrequency);
-		myAdditionalAudioSettings.defaultfrequency = fFrequency;
-		myAdditionalAudioSettings.numchannels = 1;
-		myAdditionalAudioSettings.format = FMOD_SOUND_FORMAT_NONE;
-		bool isPlaybackPaused = true;
-		channel->setMode(FMOD_LOOP_NORMAL);
-		printf("1 \n");
-		FMOD_RESULT result = fsystem->createSound(pathToCurrentAudioFile.c_str(), FMOD_OPENRAW, &myAdditionalAudioSettings, &audio);
-		cout << result << endl;
-		channel->setChannelGroup(channelgroup);
-		printf("3 \n");
-		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-		printf("4 \n");
-		
-		*/
-
-		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 		unsigned int audioFileLength_Samples;
 		audio->getLength(&audioFileLength_Samples, FMOD_TIMEUNIT_PCM);
 		// Get length of one sample
 		double dMsLengthOfOneSample = (double)audioFileLength_Samples / (double)audioFileLength_ms;
 		// Multipli with desired ms
-		double dSampleLengthOfDesiredMsLength = dMsLengthOfOneSample*desiredDuration_ms;
+		double dSampleLengthOfDesiredMsLength = dMsLengthOfOneSample*uiDesiredDuration_ms;
 		// Cut the values
 		int iSampleLengthOfAudio = (int)dSampleLengthOfDesiredMsLength;
 		printf("audioFileLength_Samples: %i \n", audioFileLength_Samples);
-		printf("we play samples: %i \n", iSampleLengthOfAudio);
-		
+		printf("we play samples: %i \n", iSampleLengthOfAudio);		
 
 		fsystem->getMasterChannelGroup(&channelgroup);
 
@@ -253,16 +225,6 @@ void StimuliLibrary::playStimuli()
 		fsystem->getDSPBufferSize(&bufferLength, &numbuffers);
 		fsystem->playSound(audio, channelgroup, true, &channel);
 		FMOD_RESULT myResult = channelgroup->setDelay(clockDSP, clockDSP+ iSampleLengthOfAudio,true);
-
-
-
-
-
-
-
-
-
-
 
 		channel->setPaused(false);
 		vSetdFractionOfAudioFileLeftToPlay(0.00);
@@ -282,6 +244,137 @@ void StimuliLibrary::playStimuli()
 	//early_stop = false;
 	//std::thread t(timedStop,  channel, duration_stimuli);
 	//t.detach();
+}
+
+void StimuliLibrary::vPlayStimulusIfToBeTriggered()
+{
+	shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
+	stimuli_queue.pop(); // Delete the stimulus either way.
+
+	if (hostData->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
+	{
+		bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+		if (bIsValidStimulus)
+		{
+			playStimuli();
+		}
+	}
+}
+
+bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_ptr<Toolbox::HostData>> movementQueue, CMaxonMotor* pMotor)
+{
+	//printf("\n Going IN: bAdaptStimulusParametersDueToHijacking\n");
+	bool bRetVal = false;
+	bool isPaused = false;
+	if (bCurrentlyAHijackedProtcolIsProcessed())
+	{
+		bRetVal = true;
+	}
+	// Check for all protocl hicjacking options (currently only one)
+	if (bIsStimulusToPlayAsLongAsMovementsPending())
+	{
+		//printf("\n IsStimulusToPlayAsLongAsMovementsPending == True\n");
+		if (!bCurrentlyAHijackedProtcolIsProcessed())
+		{
+			printf("\n bCurrentlyAHijackedProtcolIsProcessed\n");
+			hostDataOfHijackedProtocol = stimuli_queue.front();
+			stimuli_queue.pop(); // Delete the stimulus either way.
+			bool bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+		}
+
+		if (!movementQueue.empty() || !pMotor->reachedTarget())
+		{
+			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
+			{	
+				printf("\n Tryining infintie play\n");
+				channel->setMode(FMOD_LOOP_NORMAL);
+				channel->setLoopCount(-1); // -1: is infinite
+
+				channel->setPaused(false);
+				hostDataOfHijackedProtocol->toBeTriggerd = 0;
+			}
+		}
+		else if (pMotor->reachedTarget())
+		{
+			printf("\nAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+			
+			vSetHijackedProtocolIsCompletelyProcessed();
+			stopStimuli();
+		}
+		bRetVal =  true;
+	}
+	else
+	{
+		bRetVal = false;
+	}
+	//printf("\n Going OUT: bAdaptStimulusParametersDueToHijacking\n");
+	return bRetVal;
+}
+
+
+
+bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
+{
+	
+	bool bIsValidStimulus;
+	if (bCurrentlyAHijackedProtcolIsProcessed())
+	{
+		bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+		if (bIsValidStimulus)
+		{
+			//printf("\nbIsStimulusToPlayAsLongAsMovementsPending bIsValidStimulus\n");
+			if (uiDesiredDuration_ms == iPlayStimulusAsLongAsMovementsPending)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+	else
+	{
+		if (!stimuli_queue.empty())
+		{
+			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
+			printf("hostData->stimulusDuration %i \n", hostData->stimulusDuration);
+			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+			printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
+			printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);
+			if (uiDesiredDuration_ms == iPlayStimulusAsLongAsMovementsPending)
+			{
+				printf("\n desiredDuration_ms == iPlayStimulusAsLongAsMovementsPending\n");
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			//printf("\n stimuli_queue.empty() \n");
+			return false;
+		}
+	}
+}
+
+bool StimuliLibrary::bCurrentlyAHijackedProtcolIsProcessed()
+{
+	if (hostDataOfHijackedProtocol != nullptr)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void StimuliLibrary::vSetHijackedProtocolIsCompletelyProcessed()
+{
+	hostDataOfHijackedProtocol = nullptr;
 }
 
 

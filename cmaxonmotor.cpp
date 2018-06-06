@@ -35,7 +35,7 @@ bool CMaxonMotor::reachedTarget()
 	if (targetReached != 0) // We reached the target position
 	{
 		//cout << "We reached the target position, Wait for 1000ms" << endl;
-		usleep(1000000); // 1000000us = 1s
+		usleep(250000); // 1000000us = 1s
 		//cout << "ok, go on." << endl;
 		bRetVal = true;
 	}
