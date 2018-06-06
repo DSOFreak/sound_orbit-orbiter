@@ -57,7 +57,7 @@ unsigned char cErrorNbr, cNumb[3];
 CMaxonMotor * motor;
 
 std::queue<shared_ptr<Toolbox::HostData> > movement_queue;
-std::queue<shared_ptr<Toolbox::HostData> > stimuli_queue;
+
 bool exit_app;
 chrono::system_clock::time_point ttNow, ttOld;
 chrono::system_clock::duration ttD;
@@ -211,6 +211,8 @@ void TimerFunc(bool& bIsFirstCall) {
 		tcp_mutex.unlock();
 
 	}
+
+	/* PROTOCOL INTERPRETATION */
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
 		std::cout << "raw hostData: " << host_data_raw << std::endl;
 
@@ -230,19 +232,21 @@ void TimerFunc(bool& bIsFirstCall) {
 			movement_queue.push(hostData);
 		}
 		if (hostData->stim_queued) { // Add new data to queue
-			stimuli_queue.push(hostData);
+			stimuliLib.stimuli_queue.push(hostData);
 			stimuli_skip = false;
 		}
 		else { // Clear Queue and Add new Data to Queue
 			stimuli_skip = true;
-			while (!stimuli_queue.empty())
+			while (!stimuliLib.stimuli_queue.empty())
 			{
-				stimuli_queue.pop();
+				stimuliLib.stimuli_queue.pop();
 			}
-			stimuli_queue.push(hostData);
+			stimuliLib.stimuli_queue.push(hostData);
 		}
 	}
 
+
+	/* MOVEMENT PROCESSING */
 	if (!movement_queue.empty())// movement pending 
 	{
 		if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
@@ -261,28 +265,27 @@ void TimerFunc(bool& bIsFirstCall) {
 		}
 	}
 
+	/* STIMULI PROCESSING */
 
 	stimuliLib.updateFSystem();
-	if (stimuliLib.bGetIsThereAFractionLeftToPlay())
+	// Check if there is a protocol hicjacking
+	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(movement_queue,motor)) // not protocl adaption, process as usual
 	{
-		printf("\n We have a fraction left to play of %d milliseconds\n",stimuliLib.uiGetDesiredStimuliDuration_ms());
-		stimuliLib.playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
-	}
-	if (!stimuli_queue.empty() && ( stimuliLib.isFinished() || stimuli_skip ) )
-	{
-		shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
-		stimuli_queue.pop();
-
-		if (hostData->toBeTriggerd == 1)
+		//cout << "No Hijacking" << endl;
+		if (stimuliLib.bGetIsThereAFractionLeftToPlay())
 		{
-			bool bIsValidStimulus = stimuliLib.bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
-			if (bIsValidStimulus)
-			{
-				stimuliLib.playStimuli();
-			}
+			//printf("\n We have a fraction left to play of %d milliseconds\n", stimuliLib.uiGetDesiredStimuliDuration_ms());
+			stimuliLib.playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
 		}
-	}
+		else if (!stimuliLib.stimuli_queue.empty())
+		{
+			//cout << "We try to play a stimulus if it has to be triggered" << endl;
+			stimuliLib.vPlayStimulusIfToBeTriggered();
+		}
+	}	
+
 		
+	/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++INFRARED PROCESSING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 	szTxt2 = s;
 
 

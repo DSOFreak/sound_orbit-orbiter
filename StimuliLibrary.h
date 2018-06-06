@@ -1,7 +1,11 @@
 #pragma once
 #include <fmod.hpp>
+#include <queue>
 #include <string>
+#include <memory>
 #include "MusicScale.h"
+#include "cmaxonmotor.h"
+#include "Toolbox.h"
 using namespace std;
 class StimuliLibrary
 {
@@ -11,7 +15,7 @@ private:
 	string pathToAudio_03Sin500 = "../../../../TestFiles/03_sin500.flac";
 	string pathToCurrentAudioFile;
 	unsigned int audioFileLength_ms;
-	double desiredDuration_ms;
+	unsigned int uiDesiredDuration_ms;
 
 	// If audioFileLength_ms<desiredDuration_ms and we have a fraction of the audiofile left to play
 	double dFractionOfAudioFileLeftToPlay;
@@ -39,6 +43,8 @@ private:
 		FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void*commanData1, void*commanData2);
 
 public:
+	std::queue<shared_ptr<Toolbox::HostData> > stimuli_queue;
+	std::shared_ptr<Toolbox::HostData> hostDataOfHijackedProtocol;
 	unsigned int uiGetDesiredStimuliDuration_ms();
 	bool bGetIsThereAFractionLeftToPlay();
 	void vSetdFractionOfAudioFileLeftToPlay(double dValue);
@@ -46,13 +52,16 @@ public:
 	StimuliLibrary();
 	~StimuliLibrary();
 	bool isFinished();
-	void stop();
+	void stopStimuli();
 	bool bLoadStimuli(int nr, float volume, unsigned int duration);
 	void playStimuli();
-
+	void vPlayStimulusIfToBeTriggered();
 	// Protocol hijacking to add specific non-time information for stimulus
+	bool bAdaptStimulusParametersDueToHijacking(std::queue<shared_ptr<Toolbox::HostData>> movementQueue, CMaxonMotor* pMotor);
 	//StimulusDuration(000000 - 999999) -> 6Digits in ms ~=15min max length for time framed stimulus
 	static const int iPlayStimulusAsLongAsMovementsPending; // For example for the DSD360 test. Plays as long as there is something in the queue
-
+	bool bIsStimulusToPlayAsLongAsMovementsPending();
+	bool bCurrentlyAHijackedProtcolIsProcessed();
+	void vSetHijackedProtocolIsCompletelyProcessed();
 };
 
