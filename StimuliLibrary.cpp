@@ -338,13 +338,13 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 		if (!stimuli_queue.empty())
 		{
 			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
-			printf("hostData->stimulusDuration %i \n", hostData->stimulusDuration);
+			//printf("hostData->stimulusDuration %i \n", hostData->stimulusDuration);
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
-			printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
-			printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);
+			//printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
+			//printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);
 			if (uiDesiredDuration_ms == iPlayStimulusAsLongAsMovementsPending)
 			{
-				printf("\n desiredDuration_ms == iPlayStimulusAsLongAsMovementsPending\n");
+				//printf("\n desiredDuration_ms == iPlayStimulusAsLongAsMovementsPending\n");
 				return true;
 			}
 			else
