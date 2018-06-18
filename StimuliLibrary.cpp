@@ -1,7 +1,7 @@
 #include "StimuliLibrary.h"
 #include <cstdio>
-#include <thread>
-#include <unistd.h>
+#include <thread>			
+//#include <unistd.h>		wyt todo
 
 void StimuliLibrary::initAllStimuli()
 {
@@ -17,14 +17,14 @@ void StimuliLibrary::initAllStimuli()
 
 void StimuliLibrary::timedStop(FMOD::Channel *channel ,unsigned int time_ms)
 {
-	while(!early_stop && (time_ms >= 0))
-	{
-		time_ms--;
-		usleep(1000);
-	}
-	
-	channel->setPaused(true);
-	channel->stop();
+	//while(!early_stop && (time_ms >= 0))	wyt todo
+	//{
+	//	time_ms--;
+	//	usleep(1000);
+	//}
+	//
+	//channel->setPaused(true);
+	//channel->stop();
 }
 
 StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr)
@@ -92,9 +92,9 @@ void StimuliLibrary::loadStimuli(int nr, float volume, unsigned int duration)
 void StimuliLibrary::playStimuli()
 {
 	channel->setPaused(false);
-	early_stop = false;
-	std::thread t(timedStop,  channel, duration_stimuli);
-	t.detach();
+	//early_stop = false;
+	//std::thread t(timedStop,  channel, duration_stimuli);
+	//t.detach();
 }
 
 

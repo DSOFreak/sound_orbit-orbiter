@@ -16,7 +16,7 @@
 #include "fmod.hpp"
 #include "TCPClient.h"
 #include "Toolbox.h"
-#include "StimuliLibrary.h"
+#include "StimuliLibrary.h" 
 
 enum eTasten {
 	KEY_1 = 1,
@@ -92,7 +92,7 @@ void ir_func() {
 
 
 	lirc_readconfig("/etc/lirc/RM-D420.conf", &config, NULL);
-	usleep(1'000'000);
+	usleep(1000000);
 	while (!exit_app) {
 		lirc_nextcode(&code);
 		ir_mutex.lock();

@@ -251,7 +251,8 @@ void CMaxonMotor::SetPosModeParameter()
 
 
 	VCS_GetDcMotorParameter(keyHandle, nodeID, &iNominalCurrent, &iMaxOutputCurrent, &iThermalTimeConstant, &ErrorCode);
-	VCS_SetDcMotorParameter(keyHandle, nodeID, 1000, 2000, 40, &ErrorCode);
+	VCS_SetDcMotorParameter(keyHandle, nodeID, 1800, 2000, 40, &ErrorCode);
+	cout << "1.8A" << endl;
 }
 void CMaxonMotor::SetCurModeParameter(int)
 {

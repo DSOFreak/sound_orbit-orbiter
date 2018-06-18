@@ -112,7 +112,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>
-      <LibraryDependencies>wiringPi;pthread;fmod;EposCmd;lirc;lirc_client;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>wiringPi;pthread;fmod;EposCmd;lirc;lirc_client;GL;GLU;glut;%(LibraryDependencies)</LibraryDependencies>
     </Link>
     <RemotePostBuildEvent>
       <Command>DISPLAY=130.92.124.189:0.0</Command>
@@ -124,10 +124,13 @@
       <AdditionalSourcesToCopyMapping>
       </AdditionalSourcesToCopyMapping>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>echo $(ProjectDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <Link>
-      <LibraryDependencies>wiringPi;EposCmd;GL;GLU;glut;lirc;lirc_client;fmod;%(LibraryDependencies)</LibraryDependencies>
+      <LibraryDependencies>wiringPi;EposCmd;pthread;GL;GLU;glut;lirc;lirc_client;fmod;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
