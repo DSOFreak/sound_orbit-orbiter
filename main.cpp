@@ -17,11 +17,9 @@
 #include "TCPClient.h"
 #include "Toolbox.h"
 #include "StimuliLibrary.h" 
-<<<<<<< HEAD
-using namespace std;
-=======
 
->>>>>>> nominal current to 1.8A
+using namespace std;
+
 enum eTasten {
 	KEY_1 = 1,
 	KEY_2,

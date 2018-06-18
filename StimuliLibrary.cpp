@@ -1,7 +1,6 @@
 #include "StimuliLibrary.h"
 #include <cstdio>
 #include <thread>			
-<<<<<<< HEAD
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
@@ -9,10 +8,9 @@
 using namespace std;
 #define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
-=======
+
 //#include <unistd.h>		wyt todo
 
->>>>>>> nominal current to 1.8A
 void StimuliLibrary::initAllStimuli()
 {
 	//Stimuli 1:
@@ -35,7 +33,6 @@ void StimuliLibrary::timedStop(FMOD::Channel *channel ,unsigned int time_ms)
 	//
 	//channel->setPaused(true);
 	//channel->stop();
-<<<<<<< HEAD
 }
 
 
@@ -66,8 +63,7 @@ void StimuliLibrary::vSetdFractionOfAudioFileLeftToPlay(double dValue)
 void StimuliLibrary::updateFSystem()
 {
 	fsystem->update();
-=======
->>>>>>> nominal current to 1.8A
+
 }
 
 StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
@@ -179,7 +175,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 
 void StimuliLibrary::playStimuli()
 {
-<<<<<<< HEAD
+
 	printf("\n playStimuli() \n");
 	if (audioFileLength_ms == 0)
 	{
@@ -250,9 +246,8 @@ void StimuliLibrary::playStimuli()
 		//Default priority for the sound when played on a channel. 0 to 256. 0 = most important, 256 = least important.Default = 128.
 	// -> Wenn sound kommt welcher den alten überschreibt -> setzte höhere Priorität (oder stoppe den alten)
 
-=======
 	channel->setPaused(false);
->>>>>>> nominal current to 1.8A
+
 	//early_stop = false;
 	//std::thread t(timedStop,  channel, duration_stimuli);
 	//t.detach();
