@@ -140,9 +140,9 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 
 		//To load a sound into memory
 		case 1:
-			pathToCurrentAudioFile = pathToAudio_01Chirp;
+			pathToCurrentAudioFile = pathToAudio_01WhiteNoise;
 			//printf("\n\n Playing 01_chirp - no loop - \n\n");
-			fsystem->createSound(pathToAudio_01Chirp.c_str(), FMOD_DEFAULT, 0, &audio);
+			fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
 			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 			channel->setChannelGroup(channelgroup);
 			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
