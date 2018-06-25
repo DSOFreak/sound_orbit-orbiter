@@ -581,8 +581,8 @@ int main(int argc, char **argv)
 	std::thread tcp_thread(tcp_func);
 	if (argc == 1)
 	{
-		printf("No Ip provided: use: 192.168.178.20\n");
-		argv[1] = "192.168.178.20";
+		printf("No Ip provided: use: 192.168.178.23\n");
+		argv[1] = "192.168.178.23";
 	}
 	ip_addr = argv[1];
 	port = 1234;
