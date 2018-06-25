@@ -8,6 +8,9 @@
 using namespace std;
 #define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
+
+//#include <unistd.h>		wyt todo
+
 void StimuliLibrary::initAllStimuli()
 {
 	//Stimuli 1:
@@ -60,6 +63,7 @@ void StimuliLibrary::vSetdFractionOfAudioFileLeftToPlay(double dValue)
 void StimuliLibrary::updateFSystem()
 {
 	fsystem->update();
+
 }
 
 StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
@@ -171,6 +175,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 
 void StimuliLibrary::playStimuli()
 {
+
 	printf("\n playStimuli() \n");
 	if (audioFileLength_ms == 0)
 	{
@@ -240,6 +245,8 @@ void StimuliLibrary::playStimuli()
 	//priority
 		//Default priority for the sound when played on a channel. 0 to 256. 0 = most important, 256 = least important.Default = 128.
 	// -> Wenn sound kommt welcher den alten überschreibt -> setzte höhere Priorität (oder stoppe den alten)
+
+	channel->setPaused(false);
 
 	//early_stop = false;
 	//std::thread t(timedStop,  channel, duration_stimuli);
