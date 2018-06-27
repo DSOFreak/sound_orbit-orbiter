@@ -1,4 +1,6 @@
-#pragma once
+#ifndef STIMULILIB_H
+#define STIMULILIB_H
+#include "Equalizer.h"
 #include <fmod.hpp>
 #include <queue>
 #include <string>
@@ -6,10 +8,20 @@
 #include "MusicScale.h"
 #include "cmaxonmotor.h"
 #include "Toolbox.h"
+
 using namespace std;
 class StimuliLibrary
 {
 private:
+	// Equalizer objects
+	std::shared_ptr<Equalizer> pEqSpeaker0WN;
+	std::shared_ptr<Equalizer> pEqSpeaker0PN;
+	std::shared_ptr<Equalizer> pEqSpeaker1WN;
+	std::shared_ptr<Equalizer> pEqSpeaker1PN;
+	std::shared_ptr<Equalizer> pEqSpeaker2WN;
+	std::shared_ptr<Equalizer> pEqSpeaker2PN;
+
+	// Audio files
 	string pathToAudio_01WhiteNoise = "../../../../TestFiles/WN_N24_FS48k_Flanke10ms_30Sec.flac";
 	string pathToAudio_02PinkNoise = "../../../../TestFiles/PN_N24_FS48k_Flanke10ms_30Sec.flac";
 	string pathToAudio_03Sin500 = "../../../../TestFiles/03_sin500.flac";
@@ -28,13 +40,6 @@ private:
 	FMOD::DSP       *dsp_noise;
 	FMOD::DSP		*dsp_lowpass;
 
-	//debug
-	FMOD::DSP *pDSPChanHead;
-	FMOD::DSP *pDSPChanGrpHead;
-
-	/* EQUALIZER FOR PINK NOISE*/
-	// Speaker 0
-	FMOD::DSP	*dsp_Speaker0_PN_EQ125;
 
 	FMOD_RESULT      result;
 	unsigned int version;
@@ -44,7 +49,6 @@ private:
 	void *extradriverdata;
 	bool early_stop;
 	void initAllStimuli();
-	void initEQForPN(unsigned int uiSpeakerNumber);
 	static void timedStop(FMOD::Channel* channel, unsigned time_ms);
 
 
@@ -53,12 +57,17 @@ private:
 		FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void*commanData1, void*commanData2);
 
 public:
+	FMOD::Channel* getChannel();
+	FMOD::ChannelGroup* getChannelGroup();
+	FMOD::System * getSystem();
+
 	std::queue<shared_ptr<Toolbox::HostData> > stimuli_queue;
 	std::shared_ptr<Toolbox::HostData> hostDataOfHijackedProtocol;
 	unsigned int uiGetDesiredStimuliDuration_ms();
 	bool bGetIsThereAFractionLeftToPlay();
 	void vSetdFractionOfAudioFileLeftToPlay(double dValue);
 	void updateFSystem();
+	void initEqualizers();
 	StimuliLibrary();
 	~StimuliLibrary();
 	bool isFinished();
@@ -75,3 +84,4 @@ public:
 	void vSetHijackedProtocolIsCompletelyProcessed();
 };
 
+#endif

@@ -75,6 +75,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="cmaxonmotor.cpp" />
+    <ClCompile Include="Equalizer.cpp" />
     <ClCompile Include="lirc-0.9.4d\lib\lirc_client.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
@@ -92,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cmaxonmotor.h" />
+    <ClInclude Include="Equalizer.h" />
     <ClInclude Include="MusicScale.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StimuliLibrary.h" />

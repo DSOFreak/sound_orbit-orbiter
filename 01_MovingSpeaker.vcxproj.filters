@@ -10,6 +10,7 @@
     <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="StimuliLibrary.cpp" />
     <ClCompile Include="MusicScale.cpp" />
+    <ClCompile Include="Equalizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -19,5 +20,6 @@
     <ClInclude Include="cmaxonmotor.h" />
     <ClInclude Include="StimuliLibrary.h" />
     <ClInclude Include="MusicScale.h" />
+    <ClInclude Include="Equalizer.h" />
   </ItemGroup>
 </Project>

@@ -23,93 +23,7 @@ void StimuliLibrary::initAllStimuli()
 	dsp_lowpass->setBypass(true);
 }
 
-void StimuliLibrary::initEQForPN(unsigned int uiSpeakerNumber)
-{
-//Debug
-	FMOD_RESULT res0;
-	FMOD_RESULT res1;
-	FMOD_RESULT res2;
-	FMOD_RESULT res3;
-	FMOD_RESULT res4;
-	FMOD_RESULT res5;
-	FMOD_RESULT res6;
-	FMOD_RESULT res7;
-	FMOD_RESULT res8;
-	FMOD_RESULT res9;
-	switch (uiSpeakerNumber)
-	{
-		case 0:
-			// creates the channel group and gets the head DSP pointer
-			res4 = fsystem->createChannelGroup("my_chan_grp", &channelgroup);
-			res5 = channelgroup->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanGrpHead);
-			res0 = fsystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &dsp_Speaker0_PN_EQ125);
-			res1 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, 1000.0f);
-			res2 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, 1.0f);
-			res3 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, -20.0f);
-			res6 = pDSPChanGrpHead->addInput(dsp_Speaker0_PN_EQ125, 0);
 
-			// now we have to get the DSP Head pointer of the main channel and disconnect all existing DSP in order to avoid having our sound still playing without any modification
-			res7 = channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
-			res8 = pDSPChanHead->disconnectAll(false, true);
-			res9 = dsp_Speaker0_PN_EQ125->addInput(pDSPChanHead, 0);
-			dsp_Speaker0_PN_EQ125->setActive(true);
-			break;
-		default:
-			break;
-	}
-	
-	if (res0 != FMOD_OK)
-	{
-		printf("FMOD error res0! (%d)\n", res0);
-		exit(-1);
-	}
-	if (res1 != FMOD_OK)
-	{
-		printf("FMOD error res1! (%d)\n", res1);
-		exit(-1);
-	}
-	if (res2 != FMOD_OK)
-	{
-		printf("FMOD error res2! (%d)\n", res2);
-		exit(-1);
-	}
-	if (res3 != FMOD_OK)
-	{
-		printf("FMOD error res3! (%d)\n", res3);
-		exit(-1);
-	}
-	if (res4 != FMOD_OK)
-	{
-		printf("FMOD error res4! (%d)\n", res4);
-		exit(-1);
-	}
-	if (res5 != FMOD_OK)
-	{
-		printf("FMOD error res5! (%d)\n", res5);
-		exit(-1);
-	}
-	if (res6 != FMOD_OK)
-	{
-		printf("FMOD error res6! (%d)\n", res6);
-		exit(-1);
-	}
-	if (res7 != FMOD_OK)
-	{
-		printf("FMOD error res7! (%d)\n", res6);
-		exit(-1);
-	}
-	if (res8 != FMOD_OK)
-	{
-		printf("FMOD error res8! (%d)\n", res6);
-		exit(-1);
-	}
-	if (res9 != FMOD_OK)
-	{
-		printf("FMOD error res9! (%d)\n", res6);
-		exit(-1);
-	}
-
-}
 
 
 
@@ -156,6 +70,19 @@ void StimuliLibrary::updateFSystem()
 
 }
 
+void StimuliLibrary::initEqualizers()
+{
+	//(StimuliLibrary *pStimuliLibObj, unsigned int uiSpeakerID, unsigned int uiStimulusNumber)
+	pEqSpeaker0WN = std::make_shared<Equalizer>(this->getChannel(),this->getChannelGroup(),this->getSystem(), 0, 1);
+	pEqSpeaker0PN = std::make_shared<Equalizer>(this->getChannel(), this->getChannelGroup(), this->getSystem(), 0, 2);
+
+	pEqSpeaker1WN = std::make_shared<Equalizer>(this->getChannel(), this->getChannelGroup(), this->getSystem(), 1, 1);
+	pEqSpeaker1PN = std::make_shared<Equalizer>(this->getChannel(), this->getChannelGroup(), this->getSystem(), 1, 2);
+
+	pEqSpeaker2WN = std::make_shared<Equalizer>(this->getChannel(), this->getChannelGroup(), this->getSystem(), 2, 1);
+	pEqSpeaker2PN = std::make_shared<Equalizer>(this->getChannel(), this->getChannelGroup(), this->getSystem(), 2, 2);
+}
+
 StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
 	printf("StimuliLibrary constructor called \n");
@@ -169,6 +96,8 @@ StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFile
 
 	fsystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	
+	// Init the equalizer objects
+	initEqualizers();
 
 	initAllStimuli();
 }
@@ -248,7 +177,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		//channel->setChannelGroup(channelgroup);
 		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 		unsigned int DUMMYSPEAKERNUMBERFORTESTONLY = 0;
-		initEQForPN(DUMMYSPEAKERNUMBERFORTESTONLY);
+		//initEQForPN(DUMMYSPEAKERNUMBERFORTESTONLY);
 
 		break;
 	}
@@ -497,6 +426,21 @@ FMOD_RESULT F_CALLBACK StimuliLibrary::EndOfSong(FMOD_CHANNELCONTROL*channelCont
 
 
 	return FMOD_OK;
+}
+
+FMOD::Channel * StimuliLibrary::getChannel()
+{
+	return channel;
+}
+
+FMOD::ChannelGroup * StimuliLibrary::getChannelGroup()
+{
+	return channelgroup;
+}
+
+FMOD::System * StimuliLibrary::getSystem()
+{
+	return fsystem;
 }
 
 
