@@ -27,6 +27,15 @@ private:
 	FMOD::DSP       *dsp_sin;
 	FMOD::DSP       *dsp_noise;
 	FMOD::DSP		*dsp_lowpass;
+
+	//debug
+	FMOD::DSP *pDSPChanHead;
+	FMOD::DSP *pDSPChanGrpHead;
+
+	/* EQUALIZER FOR PINK NOISE*/
+	// Speaker 0
+	FMOD::DSP	*dsp_Speaker0_PN_EQ125;
+
 	FMOD_RESULT      result;
 	unsigned int version;
 
@@ -35,6 +44,7 @@ private:
 	void *extradriverdata;
 	bool early_stop;
 	void initAllStimuli();
+	void initAllEqualizers();
 	static void timedStop(FMOD::Channel* channel, unsigned time_ms);
 
 

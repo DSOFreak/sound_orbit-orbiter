@@ -23,6 +23,60 @@ void StimuliLibrary::initAllStimuli()
 	dsp_lowpass->setBypass(true);
 }
 
+void StimuliLibrary::initAllEqualizers()
+{
+	FMOD_RESULT res0 = fsystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &dsp_Speaker0_PN_EQ125);
+	FMOD_RESULT res1 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, 1000.0f);
+	FMOD_RESULT res2 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, 1.0f); 
+	FMOD_RESULT res3 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, -20.0f);
+
+
+	bool bDSPIsPaused = false;
+	FMOD_RESULT res4 = fsystem->playDSP(dsp_Speaker0_PN_EQ125, channelgroup, bDSPIsPaused, &channel);
+	FMOD_RESULT res5 = channel->addDSP(0,dsp_Speaker0_PN_EQ125);
+	FMOD_RESULT res6 = dsp_Speaker0_PN_EQ125->setActive(true);
+
+
+	if (res0 != FMOD_OK)
+	{
+		printf("FMOD error res0! (%d)\n", res0);
+		exit(-1);
+	}
+	if (res1 != FMOD_OK)
+	{
+		printf("FMOD error res1! (%d)\n", res1);
+		exit(-1);
+	}
+	if (res2 != FMOD_OK)
+	{
+		printf("FMOD error res2! (%d)\n", res2);
+		exit(-1);
+	}
+	if (res3 != FMOD_OK)
+	{
+		printf("FMOD error res3! (%d)\n", res3);
+		exit(-1);
+	}
+	if (res4 != FMOD_OK)
+	{
+		printf("FMOD error res4! (%d)\n", res4);
+		exit(-1);
+	}
+	if (res5 != FMOD_OK)
+	{
+		printf("FMOD error res5! (%d)\n", res5);
+		exit(-1);
+	}
+	if (res6 != FMOD_OK)
+	{
+		printf("FMOD error res6! (%d)\n", res6);
+		exit(-1);
+	}
+
+
+
+}
+
 void StimuliLibrary::timedStop(FMOD::Channel *channel ,unsigned int time_ms)
 {
 	//while(!early_stop && (time_ms >= 0))	wyt todo
@@ -81,6 +135,7 @@ StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFile
 	
 
 	initAllStimuli();
+	//initAllEqualizers();
 }
 
 
@@ -128,32 +183,109 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	// Drin lassen für Referenz um sounds zu erzeugen
 	if(nr >= 2 && nr <= 60)
 	{
-		float pitch = scale.getPitch(4, nr);
-		dsp_sin->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
-		fsystem->playDSP(dsp_sin, 0, true, &channel);
+		//float pitch = scale.getPitch(4, nr);
+		//dsp_sin->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
+		//printf("\n\n  fsystem->playDSP(dsp_sin, 0, true, &channel);  \n\n");
+		//exit(-1);
+		//fsystem->playDSP(dsp_sin, 0, true, &channel);
 	}
 	bool isPlaybackPaused = true;
-	switch(nr)
+	switch (nr)
 	{
 		// TO do: Put stimuli in an array to improve speed. Indexed access (fischti)
 		// - Create Object of each audio file at startup -> No need to do things like "getLength" more often
 
 		//To load a sound into memory
-		case 1:
-			pathToCurrentAudioFile = pathToAudio_01WhiteNoise;
-			//printf("\n\n Playing 01_chirp - no loop - \n\n");
-			fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
-			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-			channel->setChannelGroup(channelgroup);
-			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-			break;
-		case 2:
-			pathToCurrentAudioFile = pathToAudio_02PinkNoise;
-			//printf("\n\n Playing 02_pink - no loop - \n\n");
-			fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio);
-			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-			channel->setChannelGroup(channelgroup);
-			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+	case 1:
+		pathToCurrentAudioFile = pathToAudio_01WhiteNoise;
+		//printf("\n\n Playing 01_chirp - no loop - \n\n");
+		fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
+		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+		channel->setChannelGroup(channelgroup);
+		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+		break;
+	case 2:
+		{
+		pathToCurrentAudioFile = pathToAudio_02PinkNoise;
+		//printf("\n\n Playing 02_pink - no loop - \n\n");
+		fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio);
+		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+		//channel->setChannelGroup(channelgroup);
+		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+
+		//Debug
+
+		// creates the channel group and gets the head DSP pointer
+		FMOD_RESULT res4 = fsystem->createChannelGroup("my_chan_grp", &channelgroup);
+		FMOD_RESULT res5 = channelgroup->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanGrpHead);
+
+		FMOD_RESULT res0 = fsystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &dsp_Speaker0_PN_EQ125);
+		FMOD_RESULT res1 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, 1000.0f);
+		FMOD_RESULT res2 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, 1.0f);
+		FMOD_RESULT res3 = dsp_Speaker0_PN_EQ125->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, -20.0f);
+		FMOD_RESULT res6 = pDSPChanGrpHead->addInput(dsp_Speaker0_PN_EQ125, 0);
+
+		//FMOD_RESULT res6 = channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
+
+
+		// now we have to get the DSP Head pointer of the main channel and disconnect all existing DSP in order to avoid having our sound still playing without any modification
+		FMOD_RESULT res7 = channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
+		FMOD_RESULT res8 = pDSPChanHead->disconnectAll(false, true);
+		FMOD_RESULT res9 = dsp_Speaker0_PN_EQ125->addInput(pDSPChanHead, 0);
+		dsp_Speaker0_PN_EQ125->setActive(true);
+
+
+		if (res0 != FMOD_OK)
+		{
+			printf("FMOD error res0! (%d)\n", res0);
+			exit(-1);
+		}
+		if (res1 != FMOD_OK)
+		{
+			printf("FMOD error res1! (%d)\n", res1);
+			exit(-1);
+		}
+		if (res2 != FMOD_OK)
+		{
+			printf("FMOD error res2! (%d)\n", res2);
+			exit(-1);
+		}
+		if (res3 != FMOD_OK)
+		{
+			printf("FMOD error res3! (%d)\n", res3);
+			exit(-1);
+		}
+		if (res4 != FMOD_OK)
+		{
+			printf("FMOD error res4! (%d)\n", res4);
+			exit(-1);
+		}
+		if (res5 != FMOD_OK)
+		{
+			printf("FMOD error res5! (%d)\n", res5);
+			exit(-1);
+		}
+		if (res6 != FMOD_OK)
+		{
+			printf("FMOD error res6! (%d)\n", res6);
+			exit(-1);
+		}
+		if (res7 != FMOD_OK)
+		{
+			printf("FMOD error res7! (%d)\n", res6);
+			exit(-1);
+		}
+		if (res8 != FMOD_OK)
+		{
+			printf("FMOD error res8! (%d)\n", res6);
+			exit(-1);
+		}
+		if (res9 != FMOD_OK)
+		{
+			printf("FMOD error res9! (%d)\n", res6);
+			exit(-1);
+		}
+		}
 			break;
 		case 3:
 			pathToCurrentAudioFile = pathToAudio_03Sin500;
