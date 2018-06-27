@@ -52,7 +52,7 @@ private:
 	FMOD::DSP	*dsp_Eq_12500Hz;
 	FMOD::DSP	*dsp_Eq_16000Hz;
 
-	/*FMOD::DSP* arrEqDSPObjects[NUMBER_OF_TERCEBANDS] = {
+	FMOD::DSP* arrEqDSPObjects[NUMBER_OF_TERCEBANDS] = {
 		dsp_Eq_125Hz,
 		dsp_Eq_160Hz,
 		dsp_Eq_250Hz,
@@ -74,7 +74,7 @@ private:
 		dsp_Eq_12500Hz,
 		dsp_Eq_16000Hz
 	};
-	*/
+	
 	// Map mit dem paar (speaker number, 
 	float myEqSettings[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI];
 

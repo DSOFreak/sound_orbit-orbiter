@@ -176,9 +176,9 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 		//channel->setChannelGroup(channelgroup);
 		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-		unsigned int DUMMYSPEAKERNUMBERFORTESTONLY = 0;
-		//initEQForPN(DUMMYSPEAKERNUMBERFORTESTONLY);
-
+		// DEBUG: Wir nehmen hier einfach Speaker 0 an.. das ist so nicht richtig!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		printf("\n\n Playing 02_pink - no loop - \n\n");
+		pEqSpeaker0PN->initDSPWithEQSettings();
 		break;
 	}
 		case 3:
