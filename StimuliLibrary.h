@@ -44,7 +44,7 @@ private:
 	void *extradriverdata;
 	bool early_stop;
 	void initAllStimuli();
-	void initAllEqualizers();
+	void initEQForPN(unsigned int uiSpeakerNumber);
 	static void timedStop(FMOD::Channel* channel, unsigned time_ms);
 
 
