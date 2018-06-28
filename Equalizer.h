@@ -77,7 +77,7 @@ private:
 	float myEqSettings[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI];
 
 	/* WHIE NOISE (WN)*/
-	float arrfSpeaker0WN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
+	const float arrfSpeaker0WN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
 		{ 125.0f,	0.2f,	1.0f },
 		{ 160.0f,	0.2f,	1.0f },
 		{ 250.0f,	0.2f,	1.0f },
@@ -100,7 +100,7 @@ private:
 		{ 16000.0f,	0.2f,	1.0f },
 	};
 
-	float arrfSpeaker1WN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
+	const float arrfSpeaker1WN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
 		{ 125.0f,	0.2f,	1.0f },
 		{ 160.0f,	0.2f,	1.0f },
 		{ 250.0f,	0.2f,	1.0f },
@@ -123,7 +123,7 @@ private:
 		{ 16000.0f,	0.2f,	1.0f },
 	};
 
-	float arrfSpeaker2WN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
+	const float arrfSpeaker2WN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
 		{ 125.0f,	0.2f,	1.0f },
 		{ 160.0f,	0.2f,	1.0f },
 		{ 250.0f,	0.2f,	1.0f },
@@ -146,8 +146,8 @@ private:
 		{ 16000.0f,	0.2f,	1.0f },
 	};
 	/* PINK NOISE (WN)*/
-	float arrfSpeaker0PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
-		{125.0f,	0.2f,	1.0f},
+	const float arrfSpeaker0PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
+		{125.0f,	1.0f,	-10.0f},
 		{ 160.0f,	0.2f,	1.0f},
 		{ 250.0f,	0.2f,	1.0f},
 		{ 315.0f,	0.2f,	1.0f},
@@ -169,7 +169,7 @@ private:
 		{ 16000.0f,	0.2f,	1.0f},
 	};
 
-	float arrfSpeaker1PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
+	const float arrfSpeaker1PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
 		{ 125.0f,	0.2f,	1.0f },
 		{ 160.0f,	0.2f,	1.0f },
 		{ 250.0f,	0.2f,	1.0f },
@@ -192,7 +192,7 @@ private:
 		{ 16000.0f,	0.2f,	1.0f },
 	};
 
-	float arrfSpeaker2PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
+	const float arrfSpeaker2PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
 		{ 125.0f,	0.2f,	1.0f },
 		{ 160.0f,	0.2f,	1.0f },
 		{ 250.0f,	0.2f,	1.0f },
