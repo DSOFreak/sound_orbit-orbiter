@@ -215,10 +215,13 @@ void TimerFunc(bool& bIsFirstCall) {
 	}
 
 	/* PROTOCOL INTERPRETATION */
+	int speakerIDX;
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
 		std::cout << "raw hostData: " << host_data_raw << std::endl;
+		speakerIDX = std::stoi(host_data_raw.substr(0, 2));
 
-		shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw, 0))); // decode host data
+		
+		shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw, speakerIDX))); // decode host data
 		if (hostData->mov_queued) { // Add new data to queue
 			std::cout << "Add new data to queue" << endl;
 			movement_queue.push(hostData);

@@ -2,6 +2,7 @@
 #include <cstdio>		
 #include <stdio.h>
 #include <string.h>
+#include "RaspiConfig.h"
 #define MAX_STIMULUS_NUMBER 3
 #define MAX_SPEAKER_NUMBER 2
 
@@ -32,7 +33,8 @@ namespace Toolbox {
 	HostData decodeHostData(std::string hostData, size_t speakerID)
 	{
 		HostData d;
-
+		if (speakerID == RaspiConfig::ownIndex)
+		{
 			int startIdx = speakerID * 27;
 			try {
 				int realSpeakerID = std::stoi(hostData.substr(startIdx + 0, 2), nullptr, 10);
@@ -53,7 +55,7 @@ namespace Toolbox {
 				int queued_stim_nr = std::stoi(hostData.substr(startIdx + 27, 1), nullptr, 10);
 
 
-				if (bCheckForValidity(d, hostData, speakerID, realSpeakerID,stim_nr, stim_dur, angularDistance))
+				if (bCheckForValidity(d, hostData, speakerID, realSpeakerID, stim_nr, stim_dur, angularDistance))
 				{
 					printf("This protocol is valid \n");
 					d.direction = motorDirection;
@@ -73,6 +75,11 @@ namespace Toolbox {
 				vSetHostDataToZero(d);
 				printf("This protocol is nothing to process for the motor / audio control. \n");
 			}
+		}
+		else
+		{
+			printf("This protocol is for speaker %d and not for me, I am number %d. \n", speakerID, RaspiConfig::ownIndex);
+		}
 		return d;
 	}
 	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, size_t speakerID, int iRealSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance)

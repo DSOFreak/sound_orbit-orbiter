@@ -179,35 +179,6 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		// DEBUG: Wir nehmen hier einfach Speaker 0 an.. das ist so nicht richtig!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		printf("\n\n Playing 02_pink - no loop - \n\n");
 		pEqSpeaker0PN->initDSPWithEQSettings(channel,channelgroup,fsystem);
-		/*
-		FMOD_RESULT res0;
-		FMOD_RESULT res1;
-		FMOD_RESULT res2;
-		FMOD_RESULT res3;
-		FMOD_RESULT res4;
-		FMOD_RESULT res5;
-		FMOD_RESULT res6;
-		FMOD_RESULT res7;
-		FMOD_RESULT res8;
-		FMOD_RESULT res9;
-
-
-
-
-		// creates the channel group and gets the head DSP pointer
-		res4 = fsystem->createChannelGroup("my_chan_grp", &channelgroup);
-		res5 = channelgroup->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanGrpHead);
-		res0 = fsystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &dsp_Eq_125Hz);
-		res1 = dsp_Eq_125Hz->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, 4000.0f);
-		res2 = dsp_Eq_125Hz->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, 0.2f);
-		res3 = dsp_Eq_125Hz->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, -30.0f);
-		res6 = pDSPChanGrpHead->addInput(dsp_Eq_125Hz, 0);
-
-		// now we have to get the DSP Head pointer of the main channel and disconnect all existing DSP in order to avoid having our sound still playing without any modification
-		res7 = channel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
-		res8 = pDSPChanHead->disconnectAll(false, true);
-		res9 = dsp_Eq_125Hz->addInput(pDSPChanHead, 0);
-		dsp_Eq_125Hz->setActive(true);*/
 
 
 		break;

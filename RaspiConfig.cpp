@@ -1,0 +1,12 @@
+#include "RaspiConfig.h"
+
+
+const int RaspiConfig::ownIndex = 0;
+RaspiConfig::RaspiConfig()
+{
+}
+
+
+RaspiConfig::~RaspiConfig()
+{
+}

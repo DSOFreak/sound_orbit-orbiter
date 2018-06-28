@@ -11,6 +11,7 @@
 namespace Toolbox
 {
 	struct HostData {
+		u_int8_t speakerIDX;
 		u_int8_t direction;
 		float speed;
 		float angularDistance;
