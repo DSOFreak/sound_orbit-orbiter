@@ -79,8 +79,8 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 	float fGain;
 	res4 = pSystem->createChannelGroup("my_chan_grp", &pChannelGroup);
 	res5 = pChannelGroup->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanGrpHead);
-	//for (int i = 0; i < NUMBER_OF_TERCEBANDS; i++)
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < NUMBER_OF_TERCEBANDS; i++)
+	//for (int i = 0; i < 2; i++)
 	{ 
 		res0 = pSystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &arrEqDSPObjects[i]);
 		fCenterFreq = myEqSettings[i][0];
@@ -100,7 +100,8 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 	}	
 		else
 		{
-			res1337 = arrEqDSPObjects[i-1]->addInput(arrEqDSPObjects[i], 0); // connect all equalizers as a serial circuit. effects a applied one after another
+			printf("INPUT ADDED\n");
+			res1337 = arrEqDSPObjects[i-1]->addInput(arrEqDSPObjects[i], 0); // 
 		}
 		if (res1337 != FMOD_OK)
 		{
@@ -148,11 +149,11 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 	res7 = pChannel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
 	res8 = pDSPChanHead->disconnectAll(false, true);
 
-	res9 = arrEqDSPObjects[0]->addInput(pDSPChanHead, 0);//DAS IST DEBUG
+	res9 = arrEqDSPObjects[NUMBER_OF_TERCEBANDS-1]->addInput(pDSPChanHead, 0);//DAS IST DEBUG
 	
 	//res9 = arrEqDSPObjects[NUMBER_OF_TERCEBANDS-1]->addInput(pDSPChanHead, 0); DAS HIER MUSS REIN
-	//for (int k = 0; k < NUMBER_OF_TERCEBANDS; k++)
-	for (int k = 0; k < 2; k++)
+	for (int k = 0; k < NUMBER_OF_TERCEBANDS; k++)
+	//for (int k = 0; k < 2; k++)
 	{
 		arrEqDSPObjects[k]->setActive(true);
 		if (res7 != FMOD_OK)
