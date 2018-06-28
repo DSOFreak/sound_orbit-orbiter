@@ -72,51 +72,41 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 	FMOD_RESULT res7;
 	FMOD_RESULT res8;
 	FMOD_RESULT res9;
-
+	FMOD_RESULT res1337;
 	//Initialize all frequency bands
 	float fCenterFreq;
 	float fBandwidth;
 	float fGain;
-	//for (int i = 0; i < NUMBER_OF_TERCEBANDS; i++)
-	//{
-		//ersetze dsp_Eq_125Hz mit arrEqDSPObjects[i]
 	res4 = pSystem->createChannelGroup("my_chan_grp", &pChannelGroup);
 	res5 = pChannelGroup->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanGrpHead);
-	res0 = pSystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &arrEqDSPObjects[0]);
-	fCenterFreq = myEqSettings[0][0];
-	fBandwidth = myEqSettings[0][1];
-	fGain = myEqSettings[0][2];
-	printf("fCenterFreq (%f)\n", fCenterFreq);
-	printf("fBandwidth (%f)\n", fBandwidth);
-	printf("fGain! (%f)\n", fGain);
-	res1 = arrEqDSPObjects[0]->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, fCenterFreq);
-	res2 = arrEqDSPObjects[0]->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, fBandwidth);
-	res3 = arrEqDSPObjects[0]->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, fGain);
-	res6 = pDSPChanGrpHead->addInput(arrEqDSPObjects[0], 0);
+	//for (int i = 0; i < NUMBER_OF_TERCEBANDS; i++)
+	for (int i = 0; i < 2; i++)
+	{ 
+		res0 = pSystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &arrEqDSPObjects[i]);
+		fCenterFreq = myEqSettings[i][0];
+		fBandwidth = myEqSettings[i][1];
+		fGain = myEqSettings[i][2];
+		printf("fCenterFreq (%f)\n", fCenterFreq);
+		printf("fBandwidth (%f)\n", fBandwidth);
+		printf("fGain! (%f)\n", fGain);
+		res1 = arrEqDSPObjects[i]->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, fCenterFreq);
+		res2 = arrEqDSPObjects[i]->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, fBandwidth);
+		res3 = arrEqDSPObjects[i]->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, fGain);
+		
 
-	// now we have to get the DSP Head pointer of the main channel and disconnect all existing DSP in order to avoid having our sound still playing without any modification
-	res7 = pChannel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
-	res8 = pDSPChanHead->disconnectAll(false, true);
-	res9 = arrEqDSPObjects[0]->addInput(pDSPChanHead, 0);
-	arrEqDSPObjects[0]->setActive(true);
-
-	/*
-		// creates the channel group and gets the head DSP pointer
-		res4 = pSystem->createChannelGroup("my_chan_grp", &pChannelGroup);
-		res5 = pChannelGroup->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanGrpHead);
-		res0 = pSystem->createDSPByType(FMOD_DSP_TYPE_PARAMEQ, &dsp_Eq_125Hz);
-		res1 = dsp_Eq_125Hz->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, 4000.0f);
-		res2 = dsp_Eq_125Hz->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, 0.2f);
-		res3 = dsp_Eq_125Hz->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, 1.0f);
-		res6 = pDSPChanGrpHead->addInput(dsp_Eq_125Hz, 0);
-
-		// now we have to get the DSP Head pointer of the main channel and disconnect all existing DSP in order to avoid having our sound still playing without any modification
-		res7 = pChannel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
-		res8 = pDSPChanHead->disconnectAll(false, true);
-		res9 = dsp_Eq_125Hz->addInput(pDSPChanHead, 0);
-		dsp_Eq_125Hz->setActive(true);
-		*/
-
+		if (i == 0)
+		{
+			res6 = pDSPChanGrpHead->addInput(arrEqDSPObjects[i], 0);
+	}	
+		else
+		{
+			res1337 = arrEqDSPObjects[i-1]->addInput(arrEqDSPObjects[i], 0); // connect all equalizers as a serial circuit. effects a applied one after another
+		}
+		if (res1337 != FMOD_OK)
+		{
+			printf("FMOD error res1337! (%d)\n", res1337);
+			exit(-1);
+		}
 		if (res0 != FMOD_OK)
 		{
 			printf("FMOD error res0! (%d)\n", res0);
@@ -152,6 +142,19 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 			printf("FMOD error res6! (%d)\n", res6);
 			exit(-1);
 		}
+
+	}
+	// now we have to get the DSP Head pointer of the main channel and disconnect all existing DSP in order to avoid having our sound still playing without any modification
+	res7 = pChannel->getDSP(FMOD_CHANNELCONTROL_DSP_HEAD, &pDSPChanHead);
+	res8 = pDSPChanHead->disconnectAll(false, true);
+
+	res9 = arrEqDSPObjects[0]->addInput(pDSPChanHead, 0);//DAS IST DEBUG
+	
+	//res9 = arrEqDSPObjects[NUMBER_OF_TERCEBANDS-1]->addInput(pDSPChanHead, 0); DAS HIER MUSS REIN
+	//for (int k = 0; k < NUMBER_OF_TERCEBANDS; k++)
+	for (int k = 0; k < 2; k++)
+	{
+		arrEqDSPObjects[k]->setActive(true);
 		if (res7 != FMOD_OK)
 		{
 			printf("FMOD error res7! (%d)\n", res6);
@@ -167,5 +170,6 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 			printf("FMOD error res9! (%d)\n", res6);
 			exit(-1);
 		}
-	//}
+	}
+
 }

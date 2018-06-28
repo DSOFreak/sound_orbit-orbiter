@@ -147,8 +147,9 @@ private:
 	};
 	/* PINK NOISE (WN)*/
 	const float arrfSpeaker0PN[NUMBER_OF_TERCEBANDS][NUMBER_OF_STIMULI] = { // CENTERFREQ, BANDWIDTH, GAIN  When a frequency has its gain set to 1.0, the sound will be unaffected and represents the original signal exactly.
-		{125.0f,	1.0f,	-10.0f},
-		{ 160.0f,	0.2f,	1.0f},
+
+		{ 500.0f,	0.2f,	-10.0f},//ACHTUN HIER SOLLTE 160.0f stehen!
+		{ 3000.0f,	1.0f,	-10.0f },//ACHTUN HIER SOLLTE 125.0f stehen!
 		{ 250.0f,	0.2f,	1.0f},
 		{ 315.0f,	0.2f,	1.0f},
 		{ 400.0f,	0.2f,	1.0f},
@@ -159,13 +160,13 @@ private:
 		{ 1250.0f,	0.2f,	1.0f},
 		{ 1600.0f,	0.2f,	1.0f},
 		{ 2500.0f,	0.2f,	1.0f},
-		{ 3150.0f,	0.2f,	1.0f},
+		{ 3150.0f,	0.2f,	-20.0f},//
 		{ 4000.0f,	0.2f,	1.0f},
 		{ 5000.0f,	0.2f,	1.0f},
 		{ 6300.0f,	0.2f,	1.0f},
 		{ 8000.0f,	0.2f,	1.0f},
 		{ 10000.0f,	0.2f,	1.0f},
-		{ 12500.0f,	0.2f,	1.0f},
+		{ 12500.0f,	0.2f,	1.0f},//
 		{ 16000.0f,	0.2f,	1.0f},
 	};
 
