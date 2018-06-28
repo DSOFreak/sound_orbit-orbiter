@@ -14,17 +14,15 @@ using namespace std;
 class Equalizer
 {
 public:
-	Equalizer(FMOD::Channel* pChannel, FMOD::ChannelGroup* pChannelGroup, FMOD::System* pSystem, unsigned int uiSpeakerID, unsigned int uiStimulusNumber);
+	Equalizer(unsigned int uiSpeakerID, unsigned int uiStimulusNumber);
 	~Equalizer();
-	void initDSPWithEQSettings();
+	void initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGroup* pChannelGroup, FMOD::System* pSystem);
 private:
 	//debug
 	FMOD::DSP *pDSPChanHead;
 	FMOD::DSP *pDSPChanGrpHead;
 
-	FMOD::System		*m_fsystem;
-	FMOD::Channel		*m_channel;
-	FMOD::ChannelGroup	*m_channelgroup;
+
 
 	unsigned int m_uiSpeakerID;
 	unsigned int m_uiStimulusNumber;

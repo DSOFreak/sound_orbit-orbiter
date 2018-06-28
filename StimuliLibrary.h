@@ -56,6 +56,12 @@ private:
 	static FMOD_RESULT F_CALLBACK EndOfSong(FMOD_CHANNELCONTROL*channelControl, FMOD_CHANNELCONTROL_TYPE controlType,
 		FMOD_CHANNELCONTROL_CALLBACK_TYPE callbackType, void*commanData1, void*commanData2);
 
+
+	//debug
+	/*FMOD::DSP *pDSPChanHead;
+	FMOD::DSP *pDSPChanGrpHead;
+	FMOD::DSP	*dsp_Eq_125Hz;*/
+
 public:
 	FMOD::Channel* getChannel();
 	FMOD::ChannelGroup* getChannelGroup();
