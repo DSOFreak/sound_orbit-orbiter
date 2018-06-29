@@ -77,16 +77,20 @@ void StimuliLibrary::initEqualizers()
 	switch (RaspiConfig::ownIndex)
 	{
 		case 0:
-			pEqSpeakerWN = std::make_shared<Equalizer>(0, 1);
+			pEqSpeakerWN = std::make_shared<Equalizer>(0, 1); // (SpeakerID,StimulusNumber)
 			pEqSpeakerPN = std::make_shared<Equalizer>(0, 2);
+			break;
 		case 1:
 			pEqSpeakerWN = std::make_shared<Equalizer>(1, 1);
 			pEqSpeakerPN = std::make_shared<Equalizer>(1, 2);
+			break;
 		case 2:
 			pEqSpeakerWN = std::make_shared<Equalizer>(2, 1);
 			pEqSpeakerPN = std::make_shared<Equalizer>(2, 2);
+			break;
 		default:
-			printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
+			printf("ERROR: Raspi COnfig not found for Equalizer initialization \n");
+			exit(-1);
 	}
 
 }
