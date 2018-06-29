@@ -25,9 +25,9 @@ namespace Toolbox
 
 
 
-	HostData decodeHostData(std::string hostData, size_t speakerID);
+	HostData decodeHostData(std::string hostData);
 
-	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, size_t speakerID, int iRealSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance);
+	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, unsigned int speakerID,int iStimulusNumber, int iStimulusDuration, int iAngularDistance);
 
 	void vSetHostDataToZero(HostData &structHostData);
 };

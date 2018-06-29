@@ -5,6 +5,7 @@
 #include <string.h>
 #include <iostream>
 #include <limits>
+#include "RaspiConfig.h"
 using namespace std;
 #define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
@@ -73,14 +74,21 @@ void StimuliLibrary::updateFSystem()
 void StimuliLibrary::initEqualizers()
 {
 	//(StimuliLibrary *pStimuliLibObj, unsigned int uiSpeakerID, unsigned int uiStimulusNumber)
-	pEqSpeaker0WN = std::make_shared<Equalizer>(0, 1);
-	pEqSpeaker0PN = std::make_shared<Equalizer>(0, 2);
+	switch (RaspiConfig::ownIndex)
+	{
+		case 0:
+			pEqSpeakerWN = std::make_shared<Equalizer>(0, 1);
+			pEqSpeakerPN = std::make_shared<Equalizer>(0, 2);
+		case 1:
+			pEqSpeakerWN = std::make_shared<Equalizer>(1, 1);
+			pEqSpeakerPN = std::make_shared<Equalizer>(1, 2);
+		case 2:
+			pEqSpeakerWN = std::make_shared<Equalizer>(2, 1);
+			pEqSpeakerPN = std::make_shared<Equalizer>(2, 2);
+		default:
+			printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
+	}
 
-	pEqSpeaker1WN = std::make_shared<Equalizer>(1, 1);
-	pEqSpeaker1PN = std::make_shared<Equalizer>(1, 2);
-
-	pEqSpeaker2WN = std::make_shared<Equalizer>(2, 1);
-	pEqSpeaker2PN = std::make_shared<Equalizer>(2, 2);
 }
 
 StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
@@ -176,9 +184,8 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 		//channel->setChannelGroup(channelgroup);
 		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-		// DEBUG: Wir nehmen hier einfach Speaker 0 an.. das ist so nicht richtig!+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		printf("\n\n Playing 02_pink - no loop - \n\n");
-		pEqSpeaker0PN->initDSPWithEQSettings(channel,channelgroup,fsystem);
+		pEqSpeakerPN->initDSPWithEQSettings(channel,channelgroup,fsystem);
 
 
 		break;

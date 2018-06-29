@@ -153,7 +153,6 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 	
 	//res9 = arrEqDSPObjects[NUMBER_OF_TERCEBANDS-1]->addInput(pDSPChanHead, 0); DAS HIER MUSS REIN
 	for (int k = 0; k < NUMBER_OF_TERCEBANDS; k++)
-	//for (int k = 0; k < 2; k++)
 	{
 		arrEqDSPObjects[k]->setActive(true);
 		if (res7 != FMOD_OK)

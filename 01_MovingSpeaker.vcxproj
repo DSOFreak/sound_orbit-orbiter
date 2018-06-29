@@ -86,6 +86,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="RaspiConfig.cpp" />
     <ClCompile Include="StimuliLibrary.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="TCPServer.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="cmaxonmotor.h" />
     <ClInclude Include="Equalizer.h" />
     <ClInclude Include="MusicScale.h" />
+    <ClInclude Include="RaspiConfig.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="StimuliLibrary.h" />
     <ClInclude Include="TCPClient.h" />

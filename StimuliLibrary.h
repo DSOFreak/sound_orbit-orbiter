@@ -14,12 +14,8 @@ class StimuliLibrary
 {
 private:
 	// Equalizer objects
-	std::shared_ptr<Equalizer> pEqSpeaker0WN;
-	std::shared_ptr<Equalizer> pEqSpeaker0PN;
-	std::shared_ptr<Equalizer> pEqSpeaker1WN;
-	std::shared_ptr<Equalizer> pEqSpeaker1PN;
-	std::shared_ptr<Equalizer> pEqSpeaker2WN;
-	std::shared_ptr<Equalizer> pEqSpeaker2PN;
+	std::shared_ptr<Equalizer> pEqSpeakerWN;
+	std::shared_ptr<Equalizer> pEqSpeakerPN;
 
 	// Audio files
 	string pathToAudio_01WhiteNoise = "../../../../TestFiles/WN_N24_FS48k_Flanke10ms_30Sec.flac";
