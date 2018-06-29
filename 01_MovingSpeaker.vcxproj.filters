@@ -12,6 +12,7 @@
     <ClCompile Include="MusicScale.cpp" />
     <ClCompile Include="Equalizer.cpp" />
     <ClCompile Include="RaspiConfig.cpp" />
+    <ClCompile Include="tcpParameterRequestHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -23,5 +24,6 @@
     <ClInclude Include="MusicScale.h" />
     <ClInclude Include="Equalizer.h" />
     <ClInclude Include="RaspiConfig.h" />
+    <ClInclude Include="tcpParameterRequestHandler.h" />
   </ItemGroup>
 </Project>

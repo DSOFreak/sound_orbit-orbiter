@@ -89,6 +89,7 @@
     <ClCompile Include="RaspiConfig.cpp" />
     <ClCompile Include="StimuliLibrary.cpp" />
     <ClCompile Include="TCPClient.cpp" />
+    <ClCompile Include="tcpParameterRequestHandler.cpp" />
     <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="Toolbox.cpp" />
   </ItemGroup>
@@ -100,6 +101,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="StimuliLibrary.h" />
     <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="tcpParameterRequestHandler.h" />
     <ClInclude Include="TCPServer.h" />
     <ClInclude Include="Toolbox.h" />
   </ItemGroup>

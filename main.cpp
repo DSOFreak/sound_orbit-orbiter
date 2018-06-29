@@ -17,7 +17,7 @@
 #include "TCPClient.h"
 #include "Toolbox.h"
 #include "StimuliLibrary.h" 
-
+#include "tcpParameterRequestHandler.h"
 using namespace std;
 
 enum eTasten {
@@ -57,7 +57,7 @@ unsigned short iVoltage;
 int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
 CMaxonMotor * motor;
-
+std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(motor);
 std::queue<shared_ptr<Toolbox::HostData> > movement_queue;
 
 bool exit_app;
@@ -219,35 +219,46 @@ void TimerFunc(bool& bIsFirstCall) {
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
 		std::cout << "raw hostData: " << host_data_raw << std::endl;
 
+		// FIRST: Check if it is a get or set request for raspi data
+		char charIsGetOrSetRequest = host_data_raw.at(0);
+		//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
+		if (charIsGetOrSetRequest == 'G' || charIsGetOrSetRequest == 'S')
+		{
+			std::vector<double>vecdResults; 
+			vecdResults = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+			printf("REQUEST RESULTS %f \n", vecdResults);
+		}
+		else
+		{
+			shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
+			if (hostData->mov_queued) { // Add new data to queue
+				std::cout << "Add new data to queue" << endl;
+				movement_queue.push(hostData);
+				movement_skip = false;
+			}
+			else { // Clear Queue and Add new Data to Queue
+				std::cout << " Clear Queue and Add new Data to Queue" << endl;
+				movement_skip = true;
+				while (!movement_queue.empty())
+				{
+					movement_queue.pop();
+				}
+				movement_queue.push(hostData);
+			}
+			if (hostData->stim_queued) { // Add new data to queue
+				stimuliLib.stimuli_queue.push(hostData);
+				stimuli_skip = false;
+			}
+			else { // Clear Queue and Add new Data to Queue
+				stimuli_skip = true;
+				while (!stimuliLib.stimuli_queue.empty())
+				{
+					stimuliLib.stimuli_queue.pop();
+				}
+				stimuliLib.stimuli_queue.push(hostData);
+			}
+		}
 
-		
-		shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
-		if (hostData->mov_queued) { // Add new data to queue
-			std::cout << "Add new data to queue" << endl;
-			movement_queue.push(hostData);
-			movement_skip = false;
-		}
-		else { // Clear Queue and Add new Data to Queue
-			std::cout << " Clear Queue and Add new Data to Queue" << endl;
-			movement_skip = true;
-			while (!movement_queue.empty())
-			{
-				movement_queue.pop();
-			}
-			movement_queue.push(hostData);
-		}
-		if (hostData->stim_queued) { // Add new data to queue
-			stimuliLib.stimuli_queue.push(hostData);
-			stimuli_skip = false;
-		}
-		else { // Clear Queue and Add new Data to Queue
-			stimuli_skip = true;
-			while (!stimuliLib.stimuli_queue.empty())
-			{
-				stimuliLib.stimuli_queue.pop();
-			}
-			stimuliLib.stimuli_queue.push(hostData);
-		}
 	}
 
 
