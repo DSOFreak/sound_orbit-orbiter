@@ -299,6 +299,7 @@ void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 
 	if (hostData->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 	{
+		printf("vPlayStimulusIfToBeTriggered() \n");
 		bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 		if (bIsValidStimulus)
 		{
@@ -365,6 +366,7 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 	bool bIsValidStimulus;
 	if (bCurrentlyAHijackedProtcolIsProcessed())
 	{
+		printf("bIsStimulusToPlayAsLongAsMovementsPending() 1\n");
 		bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
 		if (bIsValidStimulus)
 		{
@@ -384,7 +386,7 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 		if (!stimuli_queue.empty())
 		{
 			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
-			//printf("hostData->stimulusDuration %i \n", hostData->stimulusDuration);
+			printf("bIsStimulusToPlayAsLongAsMovementsPending() 2\n");
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 			//printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
 			//printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);

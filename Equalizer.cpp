@@ -86,9 +86,9 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 		fCenterFreq = myEqSettings[i][0];
 		fBandwidth = myEqSettings[i][1];
 		fGain = myEqSettings[i][2];
-		printf("fCenterFreq (%f)\n", fCenterFreq);
-		printf("fBandwidth (%f)\n", fBandwidth);
-		printf("fGain! (%f)\n", fGain);
+		//printf("fCenterFreq (%f)\n", fCenterFreq);
+		//printf("fBandwidth (%f)\n", fBandwidth);
+		//printf("fGain! (%f)\n", fGain);
 		res1 = arrEqDSPObjects[i]->setParameterFloat(FMOD_DSP_PARAMEQ_CENTER, fCenterFreq);
 		res2 = arrEqDSPObjects[i]->setParameterFloat(FMOD_DSP_PARAMEQ_BANDWIDTH, fBandwidth);
 		res3 = arrEqDSPObjects[i]->setParameterFloat(FMOD_DSP_PARAMEQ_GAIN, fGain);
@@ -100,7 +100,6 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 	}	
 		else
 		{
-			printf("INPUT ADDED\n");
 			res1337 = arrEqDSPObjects[i-1]->addInput(arrEqDSPObjects[i], 0); // 
 		}
 		if (res1337 != FMOD_OK)
