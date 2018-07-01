@@ -299,10 +299,7 @@ void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {
 	piVoltage = 0;
 	piCurrent = 0;
 	unsigned short pAnalogValue=0, InputNumber=1;
-	printf("GetSupply \n");
 	VCS_GetCurrentIs(keyHandle, nodeID, &piCurrent, &ErrorCode);
-	printf("GetSupply 1\n");
 	VCS_GetAnalogInput(keyHandle, nodeID, InputNumber, &pAnalogValue, &ErrorCode);
-	printf("GetSupply 2\n");
 	piVoltage = pAnalogValue;
 }

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <thread>
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include "wiringPi.h"
 #include "cmaxonmotor.h"
@@ -224,9 +225,11 @@ void TimerFunc(bool& bIsFirstCall) {
 		//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
 		if (charIsGetOrSetRequest == 'G' || charIsGetOrSetRequest == 'S')
 		{
-			std::vector<double>vecdResults; 
-			vecdResults = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
-			printf("REQUEST RESULTS %f \n", vecdResults);
+			std::string strsAnsnwerToServerRequest;
+			strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+
+			tcp.Send(strsAnsnwerToServerRequest);
+			//printf("Battery Voltage %f \n", vecdResults.at(0));
 		}
 		else
 		{
