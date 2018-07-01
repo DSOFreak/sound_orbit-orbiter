@@ -1,17 +1,18 @@
 #pragma once
 #include "cmaxonmotor.h"
 #include <vector>
+#include <memory>
 #include <string>
 #include <iostream>
 class tcpParameterRequestHandler
 {
 public:
-	tcpParameterRequestHandler(CMaxonMotor *pMaxonMotor);
+	tcpParameterRequestHandler(std::shared_ptr<CMaxonMotor> pMaxonMotor);
 	~tcpParameterRequestHandler();
 	std::vector<double> interpretRequest( std::string & strRequest);
 private:
 
-	CMaxonMotor * m_pMaxonMotor;
+	std::shared_ptr<CMaxonMotor>  m_pMaxonMotor;
 	// Get Functions
 	double dGetBatteryVoltage();
 };

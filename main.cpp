@@ -56,8 +56,8 @@ using namespace std;
 unsigned short iVoltage;
 int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
-CMaxonMotor * motor;
-std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(motor);
+std::shared_ptr<CMaxonMotor>  motor;// = std::make_shared<CMaxonMotor>();
+std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
 std::queue<shared_ptr<Toolbox::HostData> > movement_queue;
 
 bool exit_app;
@@ -474,7 +474,7 @@ void		DisplayFunc(void)
 	char szText[32];
 	double dVoltage = double(4.25 * double(iVoltage) / 1000);
 	
-	/*
+	
 	printf( "Voltage: %2.2fV\n", dVoltage);
 
 	printf( "Current: %d mA\n", iCurrent);
@@ -482,7 +482,7 @@ void		DisplayFunc(void)
 	printf( "Position: %d\n", iCurrentPosition);
 
 	printf( "Target: %d\n", iTargetPosition);
-
+	/*
 	printf( "Error: %x\n", motor->ErrorCode);
 
 	printf( "Error#: %x\n", cErrorNbr);
@@ -582,9 +582,9 @@ int main(int argc, char **argv)
 
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
-	motor = new CMaxonMotor(InterfaceName, 1);
+	motor = std::make_shared<CMaxonMotor>(InterfaceName, 1);
 	motor->initializeDevice(); // initialize EPOS2
-
+	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(motor);
 
 	cTaste = 0;
 
@@ -612,13 +612,13 @@ int main(int argc, char **argv)
 	while (!exit_app) {
 		//channel->update();
 		TimerFunc(bRef);
-		DisplayFunc();
+		//DisplayFunc();
 		IdleFunc();
 		if(!exit_app)usleep(100000);
 	}
 	motor->closeDevice(); // close EPOS2
 	printf("\n -------- Delete motor object quit main!");
-	delete motor;
+
 	return 0;
 
 

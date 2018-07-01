@@ -2,7 +2,7 @@
 
 
 
-tcpParameterRequestHandler::tcpParameterRequestHandler(CMaxonMotor * pMaxonMotor) : m_pMaxonMotor(pMaxonMotor)
+tcpParameterRequestHandler::tcpParameterRequestHandler(std::shared_ptr<CMaxonMotor> pMaxonMotor) : m_pMaxonMotor(pMaxonMotor)
 {
 }
 
