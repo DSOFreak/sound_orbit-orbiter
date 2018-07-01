@@ -13,6 +13,7 @@ tcpParameterRequestHandler::~tcpParameterRequestHandler()
 
 std::string tcpParameterRequestHandler::interpretRequest( std::string & strRequest)
 {
+	// ANSWER PROTOCL IS "REQUEST_ID_idnr_Value" e.g. G_V_A_ID_0_12.392
 	std::ostringstream strResultTemp;
 	std::vector<double> vecdResult;
 	char charIsGetOrSetRequest = strRequest.at(0);
@@ -50,7 +51,7 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 	//Add own speaker ID
 	strResultTemp.str("");
 	strResultTemp << RaspiConfig::ownIndex;
-	std::string strSpeakerIdentification = "ID_" + strResultTemp.str() + "_";
+	std::string strSpeakerIdentification = strRequest +"_ID_" + strResultTemp.str() + "_";
 	answerToServerRequest.insert(0, strSpeakerIdentification);
 	return answerToServerRequest;
 }
