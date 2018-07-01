@@ -57,7 +57,7 @@ using namespace std;
 unsigned short iVoltage;
 int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
-std::shared_ptr<CMaxonMotor>  motor;// = std::make_shared<CMaxonMotor>();
+std::shared_ptr<CMaxonMotor>  motor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
 std::queue<shared_ptr<Toolbox::HostData> > movement_queue;
 

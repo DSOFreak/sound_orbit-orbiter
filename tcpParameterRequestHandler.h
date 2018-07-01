@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "RaspiConfig.h"
 class tcpParameterRequestHandler
 {
 public:
@@ -16,5 +17,6 @@ private:
 	std::shared_ptr<CMaxonMotor>  m_pMaxonMotor;
 	// Get Functions
 	double dGetBatteryVoltage();
+	double dGetMotorPosition();
 };
 

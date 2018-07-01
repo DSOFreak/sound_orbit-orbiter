@@ -13,7 +13,7 @@ tcpParameterRequestHandler::~tcpParameterRequestHandler()
 
 std::string tcpParameterRequestHandler::interpretRequest( std::string & strRequest)
 {
-	std::ostringstream strResult;
+	std::ostringstream strResultTemp;
 	std::vector<double> vecdResult;
 	char charIsGetOrSetRequest = strRequest.at(0);
 	if (charIsGetOrSetRequest == 'G')
@@ -21,6 +21,10 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 		if (strRequest == "G_V_A") // get all battery voltages
 		{
 			vecdResult.push_back(dGetBatteryVoltage());
+		}
+		else if("G_P_A") // get all motor positions (raw DEBUG)
+		{
+			vecdResult.push_back(dGetMotorPosition());
 		}
 	}
 	else if (charIsGetOrSetRequest == 'S')
@@ -35,14 +39,19 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 	}
 
 	// convert to str
-	strResult << vecdResult.at(0);
+	strResultTemp << vecdResult.at(0);
 
 
 
-	std::string answerToServerRequest = strResult.str();
+	std::string answerToServerRequest = strResultTemp.str();
 
 	//Add telegram delimiter
 	answerToServerRequest.append(tcpParameterRequestHandler::strEndIndicatorForProtocol);
+	//Add own speaker ID
+	strResultTemp.str("");
+	strResultTemp << RaspiConfig::ownIndex;
+	std::string strSpeakerIdentification = "ID_" + strResultTemp.str() + "_";
+	answerToServerRequest.insert(0, strSpeakerIdentification);
 	return answerToServerRequest;
 }
 
@@ -55,5 +64,15 @@ double tcpParameterRequestHandler::dGetBatteryVoltage()
 	m_pMaxonMotor->GetSupply(piVoltage, piCurrent);
 	// übernommen aus displayfunc() (unklar was für ein faktor das ist)
 	dRetVal = (double)(4.25 * double(piVoltage) / 1000);
+	return dRetVal;
+}
+
+double tcpParameterRequestHandler::dGetMotorPosition()
+{
+	double dRetVal;
+	int iCurrentPosition;
+	// Requests the current motor position
+	m_pMaxonMotor->getCurrentPosition(iCurrentPosition);
+	dRetVal = (double)iCurrentPosition;
 	return dRetVal;
 }
