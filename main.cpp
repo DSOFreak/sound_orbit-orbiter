@@ -50,12 +50,13 @@ enum eTasten {
 
 
 #define DEBOUNCE 500000000;
-#define WHEELPERI float(0.029 * 3.1415)
-#define RAILPERI  float(2.2 * 3.1415)
+#define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
+#define RAILPERI  float(2.16 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
 using namespace std;
 
 unsigned short iVoltage;
-int iTargetPosition, iCurrentPosition, iNumbOffs, iAngle;
+long lMotorMovementToProcess;
+int iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
 std::shared_ptr<CMaxonMotor>  motor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
@@ -154,12 +155,8 @@ float A_freqs[] = { 22.5f, 55.0f,110.0f,220.0f,440.0f,880.0f,1760.0f,3520.0f,704
 
 
 
-void calcTargetPosition(void) {
-	//iAngle = cNumb[2] + 10 * cNumb[1] + 100 * cNumb[0];
-	//if (iAngle > 360) iAngle = 360;
-	iTargetPosition = 65536 * float(iAngle) / 360.0 * RAILPERI / WHEELPERI;
-	if (iNumbOffs<2) iNumbOffs++;
-	else iNumbOffs = 0;
+void calcMovementToProcess(void) {
+	lMotorMovementToProcess = 65536 * (float(iAngle) / 360.0) * (RAILPERI / WHEELPERI);
 }
 
 
@@ -189,9 +186,9 @@ void vProcessMovement()
 		iAngle = hostData->angularDistance * -1;
 	}
 	if (hostData->direction != 0) { // Dir 0 = no movement
-		calcTargetPosition();
+		calcMovementToProcess();
 		motor->setSpeed(hostData->speed);
-		motor->Move(iTargetPosition);
+		motor->Move(lMotorMovementToProcess);
 	}
 }
 void TimerFunc(bool& bIsFirstCall) {
@@ -382,7 +379,7 @@ void TimerFunc(bool& bIsFirstCall) {
 		}
 		if (cTaste == PLAY) {
 			
-			motor->Move(iTargetPosition);
+			motor->Move(lMotorMovementToProcess);
 			//iAngle = cNumb[2] + 10 * cNumb[1] + 100 * cNumb[0];
 			for (int iii = 0; iii <= 3; iii++) cNumb[iii] = 0;
 			iNumbOffs = 0;
@@ -396,54 +393,54 @@ void TimerFunc(bool& bIsFirstCall) {
 		}
 		if (cTaste == PREV) {
 			iAngle = iAngle - 15;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == NEXT) {
 			iAngle = iAngle + 15;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_1) {
 			cNumb[iNumbOffs] = 1;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_2) {
 			cNumb[iNumbOffs] = 2;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_3) {
 			cNumb[iNumbOffs] = 3;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_4) {
 			cNumb[iNumbOffs] = 4;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_5) {
 			cNumb[iNumbOffs] = 5;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_6) {
 			cNumb[iNumbOffs] = 6;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_7) {
 			cNumb[iNumbOffs] = 7;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_8) {
 			cNumb[iNumbOffs] = 8;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_9) {
 			cNumb[iNumbOffs] = 9;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == KEY_0) {
 			cNumb[iNumbOffs] = 0;
-			calcTargetPosition();
+			calcMovementToProcess();
 		}
 		if (cTaste == SUB_10) {
-			iTargetPosition = iTargetPosition + 100000;
+			lMotorMovementToProcess = lMotorMovementToProcess + 100000;
 		}
 		old_cTaste = cTaste;
 
@@ -484,7 +481,7 @@ void		DisplayFunc(void)
 
 	printf( "Position: %d\n", iCurrentPosition);
 
-	printf( "Target: %d\n", iTargetPosition);
+	printf( "Target: %d\n", lMotorMovementToProcess);
 	/*
 	printf( "Error: %x\n", motor->ErrorCode);
 

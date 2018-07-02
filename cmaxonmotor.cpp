@@ -35,7 +35,7 @@ bool CMaxonMotor::reachedTarget()
 	if (targetReached != 0) // We reached the target position
 	{
 		//cout << "We reached the target position, Wait for 1000ms" << endl;
-		usleep(250000); // 1000000us = 1s
+		usleep(25000); // 1000000us = 1s
 		//cout << "ok, go on." << endl;
 		bRetVal = true;
 	}
@@ -287,7 +287,7 @@ void CMaxonMotor::setSpeed(float speed)
 
 	
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 200 * speed;
+	iProfileVelocity = 200 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
 
