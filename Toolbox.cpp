@@ -5,7 +5,7 @@
 #include "RaspiConfig.h"
 #define MAX_STIMULUS_NUMBER 3
 #define MAX_SPEAKER_NUMBER 2
-
+#define VALUE_NOT_SET -1
 using namespace std;
 /**
 	This namespace has to be used for utiliy functions.
@@ -33,10 +33,19 @@ namespace Toolbox {
 	HostData decodeHostData(std::string hostData)
 	{
 		HostData d;
-		int startIdx = RaspiConfig::ownIndex * 27;
+
+		int transmittedSpeakerID = VALUE_NOT_SET;
+		for (int i = 0; i < MAX_SPEAKER_NUMBER; i++)
+		{
+			if (transmittedSpeakerID == RaspiConfig::ownIndex)
+			{
+				//printf("Found the speaker \n");
+				break;
+			}
+			int startIdx = i * 27;
 
 			try {
-				int transmittedSpeakerID = std::stoi(hostData.substr(startIdx + 0, 2), nullptr, 10);
+				transmittedSpeakerID = std::stoi(hostData.substr(startIdx + 0, 2), nullptr, 10);
 				int motorDirection = std::stoi(hostData.substr(startIdx + 2, 1), nullptr, 10);
 				int speed = std::stoi(hostData.substr(startIdx + 3, 3), nullptr, 10);
 				int speedDiv100 = std::stoi(hostData.substr(startIdx + 7, 2), nullptr, 10);
@@ -73,15 +82,16 @@ namespace Toolbox {
 			}
 			catch (std::exception e) {
 				vSetHostDataToZero(d);
-				printf("This protocol is nothing to process for the motor / audio control. \n");
-			}
+				printf("Catch: This protocol is nothing to process for the motor / audio control. \n");
+		}
+	}
 		return d;
 	}
 	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, unsigned int transmittedSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance)
 	{
 		if (transmittedSpeakerID != RaspiConfig::ownIndex)
 		{
-			printf("This protocol is nothing to process for the motor / audio control... \n");
+			printf("transmittedSpeakerID != RaspiConfig::ownIndex: This protocol is nothing to process for the motor / audio control... \n");
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
@@ -89,9 +99,9 @@ namespace Toolbox {
 		{
 			//printf("Check for validity \n");
 			// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
-			if (((strHostData.length() < (RaspiConfig::ownIndex + 1) * 27)) || (MAX_SPEAKER_NUMBER< transmittedSpeakerID) || (transmittedSpeakerID < 0) || (MAX_STIMULUS_NUMBER < iStimulusNumber) || (iStimulusNumber <= 0) || ((iStimulusDuration == 0) && (iAngularDistance == 0)))
+			if ((MAX_SPEAKER_NUMBER< transmittedSpeakerID) || (transmittedSpeakerID < 0) || (MAX_STIMULUS_NUMBER < iStimulusNumber) || (iStimulusNumber <= 0) || ((iStimulusDuration == 0) && (iAngularDistance == 0)))
 			{
-				printf("This protocol is nothing to process for the motor / audio control... \n");
+				printf("Check for validity: This protocol is nothing to process for the motor / audio control... \n");
 				vSetHostDataToZero(refHostData);
 				return false;
 			}
