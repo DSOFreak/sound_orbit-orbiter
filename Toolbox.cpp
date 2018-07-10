@@ -10,10 +10,10 @@ using namespace std;
 /**
 	This namespace has to be used for utiliy functions.
 */
-namespace Toolbox {
-	
-	/**
 
+namespace Toolbox {
+	/**
+	
 		hostData format =
 		1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10| 11| 12| 13| 14| 15| 16| 17| 18| 19| 20| 21| 22| 23| 24| 25| 26| 27| 28| 29| 30| 31| 32| 33| 34| 35| 36| 37| 38| 39| 40| 41
 		A | A | B | C | C | C | . | C | C | D | D | D | . | D | D | I | I | J | J | J | J | J | J | K | K | L | E | E | F | G | G | G | . | G | G | H | H | H | . | H | H 
@@ -39,10 +39,10 @@ namespace Toolbox {
 		{
 			if (transmittedSpeakerID == RaspiConfig::ownIndex)
 			{
-				//printf("Found the speaker \n");
+				printf("\n \n \n \n \n \n Found the speaker \n \n \n");
 				break;
 			}
-			int startIdx = i * 27;
+			int startIdx = i * uiLengthOfProtocol;
 
 			try {
 				transmittedSpeakerID = std::stoi(hostData.substr(startIdx + 0, 2), nullptr, 10);

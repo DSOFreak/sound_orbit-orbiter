@@ -226,7 +226,7 @@ void TimerFunc(bool& bIsFirstCall) {
 			strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
 
 			tcp.Send(strsAnsnwerToServerRequest);
-			//printf("Battery Voltage %f \n", vecdResults.at(0));
+			//std::cout << "Battery Voltage" << strsAnsnwerToServerRequest <<endl;;
 		}
 		else
 		{

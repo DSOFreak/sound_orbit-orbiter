@@ -10,6 +10,7 @@
 // StimulusNumber (00-99) StimulusDuration (000000-999999) dBSPL (00-99) StimulusToBetriggerd (0 - 1) Queued/Instant Stimulus Trigger (0,1))
 namespace Toolbox
 {
+	const unsigned int uiLengthOfProtocol = 28;
 	struct HostData {
 		u_int8_t speakerIDX;
 		u_int8_t direction;
