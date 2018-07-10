@@ -35,7 +35,7 @@ namespace Toolbox {
 		HostData d;
 
 		int transmittedSpeakerID = VALUE_NOT_SET;
-		for (int i = 0; i < MAX_SPEAKER_NUMBER; i++)
+		for (int i = 0; i <= MAX_SPEAKER_NUMBER; i++)
 		{
 			if (transmittedSpeakerID == RaspiConfig::ownIndex)
 			{
@@ -91,7 +91,7 @@ namespace Toolbox {
 	{
 		if (transmittedSpeakerID != RaspiConfig::ownIndex)
 		{
-			printf("transmittedSpeakerID != RaspiConfig::ownIndex: This protocol is nothing to process for the motor / audio control... \n");
+			printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
