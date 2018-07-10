@@ -25,7 +25,7 @@ namespace Toolbox {
 		I = 
 	
 		E = speaker id = 01
-		F = moving direction
+		F = moving directions
 		G = Speed with two decimals
 		H = angle with two decimals
 
