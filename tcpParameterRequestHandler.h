@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include "RaspiConfig.h"
+#include "Toolbox.h"
 class tcpParameterRequestHandler
 {
 public:

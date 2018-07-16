@@ -45,6 +45,10 @@ bool TCPClient::setup(string address , int port)
     		perror("TCPClient::setup failed. Error");
     		return false;
   	}
+	else
+	{
+		cout << "\n CONNECTION ESTABLISHED \n";
+	}
   	return true;
 }
 

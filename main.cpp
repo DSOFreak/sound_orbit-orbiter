@@ -18,6 +18,7 @@
 #include "TCPClient.h"
 #include "Toolbox.h"
 #include "StimuliLibrary.h" 
+#include "Movement.h"
 #include "tcpParameterRequestHandler.h"
 using namespace std;
 
@@ -60,8 +61,7 @@ int iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3];
 std::shared_ptr<CMaxonMotor>  motor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
-std::queue<shared_ptr<Toolbox::HostData> > movement_queue;
-
+Movement* pMovement;
 bool exit_app;
 chrono::system_clock::time_point ttNow, ttOld;
 chrono::system_clock::duration ttD;
@@ -172,8 +172,8 @@ bool movement_skip;
 bool stimuli_skip;
 void vProcessMovement()
 {
-	shared_ptr<Toolbox::HostData> hostData = movement_queue.front();
-	movement_queue.pop();
+	shared_ptr<Toolbox::HostData> hostData = pMovement->movement_queue.front();
+	pMovement->movement_queue.pop();
 
 	std::cout << "Excecuting command:" << std::endl;
 	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
@@ -220,7 +220,7 @@ void TimerFunc(bool& bIsFirstCall) {
 		// FIRST: Check if it is a get or set request for raspi data
 		char charIsGetOrSetRequest = host_data_raw.at(0);
 		//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
-		if (charIsGetOrSetRequest == 'G' || charIsGetOrSetRequest == 'S')
+		if (charIsGetOrSetRequest == 'G')
 		{
 			std::string strsAnsnwerToServerRequest;
 			strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
@@ -228,22 +228,27 @@ void TimerFunc(bool& bIsFirstCall) {
 			tcp.Send(strsAnsnwerToServerRequest);
 			std::cout << "Battery Voltage" << strsAnsnwerToServerRequest <<endl;;
 		}
+		else if (charIsGetOrSetRequest == 'S') // no answer sned needed
+		{
+			std::string strsAnsnwerToServerRequest;
+			strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+		}
 		else
 		{
 			shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
 			if (hostData->mov_queued) { // Add new data to queue
 				std::cout << "Add new data to queue" << endl;
-				movement_queue.push(hostData);
+				pMovement->movement_queue.push(hostData);
 				movement_skip = false;
 			}
 			else { // Clear Queue and Add new Data to Queue
 				std::cout << " Clear Queue and Add new Data to Queue" << endl;
 				movement_skip = true;
-				while (!movement_queue.empty())
+				while (!pMovement->movement_queue.empty())
 				{
-					movement_queue.pop();
+					pMovement->movement_queue.pop();
 				}
-				movement_queue.push(hostData);
+				pMovement->movement_queue.push(hostData);
 			}
 			if (hostData->stim_queued) { // Add new data to queue
 				stimuliLib.stimuli_queue.push(hostData);
@@ -263,7 +268,7 @@ void TimerFunc(bool& bIsFirstCall) {
 
 
 	/* MOVEMENT PROCESSING */
-	if (!movement_queue.empty())// movement pending 
+	if (!pMovement->movement_queue.empty())// movement pending 
 	{
 		if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
 		{
@@ -285,7 +290,7 @@ void TimerFunc(bool& bIsFirstCall) {
 
 	stimuliLib.updateFSystem();
 	// Check if there is a protocol hicjacking
-	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(movement_queue,motor)) // not protocl adaption, process as usual
+	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue,motor)) // not protocl adaption, process as usual
 	{
 		//cout << "No Hijacking" << endl;
 		if (stimuliLib.bGetIsThereAFractionLeftToPlay())
@@ -579,7 +584,7 @@ int main(int argc, char **argv)
 
 	// argv[1] = Ip
 	
-
+	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
 	motor = std::make_shared<CMaxonMotor>(InterfaceName, 1);

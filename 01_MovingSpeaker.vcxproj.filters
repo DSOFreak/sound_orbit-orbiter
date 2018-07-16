@@ -13,6 +13,7 @@
     <ClCompile Include="Equalizer.cpp" />
     <ClCompile Include="RaspiConfig.cpp" />
     <ClCompile Include="tcpParameterRequestHandler.cpp" />
+    <ClCompile Include="Movement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -25,5 +26,6 @@
     <ClInclude Include="Equalizer.h" />
     <ClInclude Include="RaspiConfig.h" />
     <ClInclude Include="tcpParameterRequestHandler.h" />
+    <ClInclude Include="Movement.h" />
   </ItemGroup>
 </Project>

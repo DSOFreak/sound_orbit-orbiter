@@ -1,6 +1,6 @@
 #include "tcpParameterRequestHandler.h"
-
-
+#include <algorithm>
+#include "Movement.h"
 const std::string tcpParameterRequestHandler::strEndIndicatorForProtocol = "Q"; // End of Telegram
 tcpParameterRequestHandler::tcpParameterRequestHandler(std::shared_ptr<CMaxonMotor> pMaxonMotor) : m_pMaxonMotor(pMaxonMotor)
 {
@@ -30,6 +30,12 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 	}
 	else if (charIsGetOrSetRequest == 'S')
 	{
+		if (strRequest == "S_C_M") // clear all movements
+		{
+			Movement* pMovement = Movement::getInstance();
+			pMovement->vClearMovementQueue();
+			printf("Movement Queue Cleared \n");
+		}
 		// TO DO: Hier habe ich noch nicht das sich lohnen würde.. nichts zu setzen!
 	}
 	else
@@ -40,19 +46,25 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 	}
 
 	// convert to str
-	strResultTemp << vecdResult.at(0);
+	std::string answerToServerRequest;
+	if (!vecdResult.empty())
+	{
+		strResultTemp << vecdResult.at(0);
+		answerToServerRequest = strResultTemp.str();
 
+		//Add telegram delimiter
+		answerToServerRequest.append(tcpParameterRequestHandler::strEndIndicatorForProtocol);
+		//Add own speaker ID
+		strResultTemp.str("");
+		strResultTemp << RaspiConfig::ownIndex;
+		std::string strSpeakerIdentification = strRequest + "_ID_" + strResultTemp.str() + "_";
+		answerToServerRequest.insert(0, strSpeakerIdentification);
+	}
+	else
+	{
+		answerToServerRequest = "NO_ANSWER_OF_SET_REQUEST";
+	}
 
-
-	std::string answerToServerRequest = strResultTemp.str();
-
-	//Add telegram delimiter
-	answerToServerRequest.append(tcpParameterRequestHandler::strEndIndicatorForProtocol);
-	//Add own speaker ID
-	strResultTemp.str("");
-	strResultTemp << RaspiConfig::ownIndex;
-	std::string strSpeakerIdentification = strRequest +"_ID_" + strResultTemp.str() + "_";
-	answerToServerRequest.insert(0, strSpeakerIdentification);
 	return answerToServerRequest;
 }
 

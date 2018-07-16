@@ -81,6 +81,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Movement.cpp" />
     <ClCompile Include="MusicScale.cpp" />
     <ClCompile Include="MvngSpkrUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
@@ -96,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="cmaxonmotor.h" />
     <ClInclude Include="Equalizer.h" />
+    <ClInclude Include="Movement.h" />
     <ClInclude Include="MusicScale.h" />
     <ClInclude Include="RaspiConfig.h" />
     <ClInclude Include="resource.h" />
