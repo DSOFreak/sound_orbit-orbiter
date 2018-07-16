@@ -12,7 +12,7 @@ class CMaxonMotor
 private:
     char* PortName;
     unsigned short nodeID;
-    void *keyHandle;
+    void *keyHandle;//
 
 
 public:

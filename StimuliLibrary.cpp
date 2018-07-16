@@ -343,8 +343,6 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_pt
 		}
 		else if (pMotor->reachedTarget())
 		{
-			printf("\nAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
-			
 			vSetHijackedProtocolIsCompletelyProcessed();
 			stopStimuli();
 		}

@@ -176,7 +176,11 @@ void CMaxonMotor::initializeDevice() {
 
 void CMaxonMotor::Move(long TargetPosition)
 {
+
 	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING \n" << endl;
+	int curr;
+	getCurrentPosition(curr);
+	//std::cout << "current position: " << curr << std::endl;
     unsigned int errorCode = 0;
 
     if( VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode) )
@@ -201,11 +205,9 @@ void CMaxonMotor::Move(long TargetPosition)
     {
         cout << "Activate profile position mode failed!" << endl;
     }
-	int curr;
-	getCurrentPosition(curr);
-	std::cout << "curr: " << curr << std::endl;
-	std::cout << "apply change of: " << TargetPosition << " to current position" <<std::endl;
-	
+
+	std::cout << "apply change of: " << TargetPosition << " to current position " << curr << std::endl;
+	std::cout << "New position should be: " << TargetPosition + curr << std::endl;
 
 }
 
