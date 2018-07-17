@@ -228,7 +228,8 @@ void TimerFunc(bool& bIsFirstCall) {
 
 	/* PROTOCOL INTERPRETATION */
 	int speakerIDX;
-	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
+	if (host_data_raw.length() != 0) 
+	{ // If a tcp-message has arrived
 		std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
 
 		// FIRST: Check if it is a get or set request for raspi data
@@ -301,7 +302,7 @@ void TimerFunc(bool& bIsFirstCall) {
 	}
 
 	/* STIMULI PROCESSING */
-
+	/*
 	stimuliLib.updateFSystem();
 	// Check if there is a protocol hicjacking
 	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue,motor)) // not protocl adaption, process as usual
@@ -317,7 +318,7 @@ void TimerFunc(bool& bIsFirstCall) {
 			//cout << "We try to play a stimulus if it has to be triggered" << endl;
 			stimuliLib.vPlayStimulusIfToBeTriggered();
 		}
-	}	
+	}	*/
 
 	/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++INFRARED PROCESSING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 //	szTxt2 = s;
