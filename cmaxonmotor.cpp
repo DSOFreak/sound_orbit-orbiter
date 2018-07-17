@@ -2,10 +2,12 @@
 
 #include <string.h>
 #include <iostream>
-
+#include <cstdio>
+#include <ctime>
 #include <lirc/lirc_client.h> //usleep
 
-
+#include <fstream>      // std::fstream
+#include <fcntl.h>
 
 
 //#include <curses.h>
@@ -26,22 +28,38 @@ CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
     nodeID = input_node_Id;
 }
 
-#define POSITION_TOLERANCE 100
 bool CMaxonMotor::reachedTarget()
 {
 	bool bRetVal = false;
 	int targetReached;
-	VCS_GetMovementState(keyHandle, nodeID, &targetReached, nullptr);
+	unsigned int uiErrorCode;
+	/*cout << "Check for target reach" << endl;
+	std::clock_t start;
+	double duration;
+	start = std::clock();
+	float load1;
+	int errorl = GetCPULoad(load1);*/
+	VCS_GetMovementState(keyHandle, nodeID, &targetReached, &uiErrorCode);
+	/*float load;
+	int error = GetCPULoad(load);
+	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+
+	std::cout << "Duration for Check for target reach : " << duration << "with cpu Loads: "<< load << " " << load1 << "errorcode: " << error << '\n';*/
+
+	
 	if (targetReached != 0) // We reached the target position
 	{
-		//cout << "We reached the target position, Wait for 1000ms" << endl;
-		//usleep(25000); // 1000000us = 1s
-		//cout << "ok, go on." << endl;
+		//cout << "----------------We reached the target position" << endl;
 		bRetVal = true;
 	}
 	else
 	{
+		//cout << "~~~~~~~~~~~~~~~~We did NOT reached the target position" << endl;
 		bRetVal = false;
+	}
+	if (uiErrorCode != 0)
+	{
+		cout << "ERROR IN ReachedTarget() number: " << uiErrorCode << endl;
 	}
 	return bRetVal;
 }
@@ -304,4 +322,19 @@ void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {
 	VCS_GetCurrentIs(keyHandle, nodeID, &piCurrent, &ErrorCode);
 	VCS_GetAnalogInput(keyHandle, nodeID, InputNumber, &pAnalogValue, &ErrorCode);
 	piVoltage = pAnalogValue;
+}
+
+
+
+int CMaxonMotor::GetCPULoad(float &load) {
+	int FileHandler;
+	char FileBuffer[1024];
+
+	FileHandler = open("/proc/loadavg", O_RDONLY);
+	if (FileHandler < 0) {
+		return -1;
+	}
+	read(FileHandler, FileBuffer, sizeof(FileBuffer) - 1);
+	sscanf(FileBuffer, "%f", &load);
+	close(FileHandler);
 }

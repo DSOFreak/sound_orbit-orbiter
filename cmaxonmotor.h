@@ -42,6 +42,9 @@ public:
 	void ErrorNbr(unsigned char * cErrorCode);
 
 	void GetSupply(unsigned short& piVoltage, short int& piCurrent);
+
+	//DEBUG
+	int GetCPULoad(float &load);
 };
 
 #endif // CMAXONMOTOR_H

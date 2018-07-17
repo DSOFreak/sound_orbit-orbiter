@@ -148,7 +148,6 @@ void TimerFunc(bool& bIsFirstCall) {
 		host_data_raw = tcp_queue.front(); // Get tcp messages
 		tcp_queue.pop();
 		tcp_mutex.unlock();
-
 	}
 
 	/* PROTOCOL INTERPRETATION */
@@ -190,6 +189,7 @@ void TimerFunc(bool& bIsFirstCall) {
 				}
 				pMovement->movement_queue.push(hostData);
 			}
+			
 			if (hostData->stim_queued) { // Add new data to queue
 				stimuliLib.stimuli_queue.push(hostData);
 				stimuli_skip = false;
@@ -232,7 +232,7 @@ void vMovementThread(bool &bIsFirstCall)
 	{
 		while (true)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			/* MOVEMENT PROCESSING */
 			if (!pMovement->movement_queue.empty())// movement pending 
 			{
@@ -250,7 +250,6 @@ void vMovementThread(bool &bIsFirstCall)
 					//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
 					//vProcessMovement();
 				}
-
 			}
 		}
 	}};
@@ -285,14 +284,14 @@ int main(int argc, char **argv)
 	vMovementThread(bIsFirstCall);
 	while (!exit_app) {
 		TimerFunc(bRef);
-		IdleFunc();
-		if (!exit_app)
-		{
-			usleep(100000);
-		}
+		//IdleFunc(); -> this one takes very very much time!
+		//if (!exit_app)
+		//{
+			//usleep(100000);
+		//}
 	}
 	motor->closeDevice(); // close EPOS2
-	printf("\n -------- Delete motor object quit main!");
+	printf("\n Delete motor object quit main!");
 
 	return 0;
 }
