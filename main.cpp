@@ -183,16 +183,16 @@ void vProcessMovement()
 	if (RaspiConfig::ownIndex == 1)
 	{
 		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngle = hostData->angularDistance * -1; // Correct
+			iAngle = hostData->angularDistance; // Correct
 		}
 		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngle = hostData->angularDistance;
+			iAngle = hostData->angularDistance * -1;
 		}
 	}
 	else
 	{
 		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngle = hostData->angularDistance; // Correct
+			iAngle = hostData->angularDistance * -1; // Correct
 		}
 		if (hostData->direction == 2) { // Dir 2 = counterclockwise
 			iAngle = hostData->angularDistance * -1;
