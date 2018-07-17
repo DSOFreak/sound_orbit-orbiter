@@ -39,7 +39,7 @@ int port;
 
 StimuliLibrary stimuliLib;
 
-
+bool bMovementMutex;
 void tcp_func() {
 	std::string msg;
 
@@ -144,6 +144,7 @@ void TimerFunc(bool& bIsFirstCall) {
 
 	std::string host_data_raw;
 	while (!tcp_queue.empty()) {
+		usleep(10000);
 		tcp_mutex.lock();
 		host_data_raw = tcp_queue.front(); // Get tcp messages
 		tcp_queue.pop();
@@ -177,17 +178,33 @@ void TimerFunc(bool& bIsFirstCall) {
 			shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
 			if (hostData->mov_queued) { // Add new data to queue
 				std::cout << "Add new data to queue" << endl;
+				while (bMovementMutex) { 
+					std::cout << "MUTEXLOCKED" << endl;
+					usleep(50000);
+				};
+				bMovementMutex = true;
 				pMovement->movement_queue.push(hostData);
+				bMovementMutex = false;
 				movement_skip = false;
 			}
 			else { // Clear Queue and Add new Data to Queue
 				std::cout << " Clear Queue and Add new Data to Queue" << endl;
 				movement_skip = true;
+				// DEEEEEEEEEEEEEEEEEEEEEEEEEEEEBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUG
+				for (int i = 1; i < 40; i++) {
+					cout << "DEBUG MOVEMENT SKIP" << endl;
+				}
+				while (bMovementMutex) {
+					std::cout << "MUTEXLOCKED Clear Queue and " << endl;
+					usleep(50000);
+				};
+				bMovementMutex = true;
 				while (!pMovement->movement_queue.empty())
 				{
 					pMovement->movement_queue.pop();
 				}
 				pMovement->movement_queue.push(hostData);
+				bMovementMutex = false;
 			}
 			
 			if (hostData->stim_queued) { // Add new data to queue
@@ -207,7 +224,7 @@ void TimerFunc(bool& bIsFirstCall) {
 	}
 
 	/* STIMULI PROCESSING */
-	
+	/*
 	stimuliLib.updateFSystem();
 	// Check if there is a protocol hicjacking
 	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue,motor)) // not protocl adaption, process as usual
@@ -223,7 +240,7 @@ void TimerFunc(bool& bIsFirstCall) {
 			//cout << "We try to play a stimulus if it has to be triggered" << endl;
 			stimuliLib.vPlayStimulusIfToBeTriggered();
 		}
-	}	
+	}*/	
 }
 
 void vMovementThread(bool &bIsFirstCall)
@@ -232,25 +249,31 @@ void vMovementThread(bool &bIsFirstCall)
 	{
 		while (true)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
 			/* MOVEMENT PROCESSING */
-			if (!pMovement->movement_queue.empty())// movement pending 
+			if (!bMovementMutex)
 			{
-				if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+				bMovementMutex = true;
+				if (!pMovement->movement_queue.empty())// movement pending 
 				{
-					vProcessMovement();
+					if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+					{
+						vProcessMovement();
+					}
+					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
+					else if (bIsFirstCall == true)
+					{
+						bIsFirstCall = false;
+						cout << "Movement due to first call" << endl;
+						vProcessMovement();
+						// is Motor moving? else: process further movement
+						//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
+						//vProcessMovement();
+					}
 				}
-				// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
-				else if (bIsFirstCall == true)
-				{
-					bIsFirstCall = false;
-					cout << "Movement due to first call" << endl;
-					vProcessMovement();
-					// is Motor moving? else: process further movement
-					//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
-					//vProcessMovement();
-				}
+				bMovementMutex = false;
 			}
+
 		}
 	}};
 	movementThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
@@ -258,6 +281,7 @@ void vMovementThread(bool &bIsFirstCall)
 
 int main(int argc, char **argv)
 {
+	bMovementMutex = false;
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
@@ -287,7 +311,7 @@ int main(int argc, char **argv)
 		//IdleFunc(); -> this one takes very very much time!
 		if (!exit_app)
 		{
-			usleep(300000);
+			usleep(100000);
 		}
 	}
 	motor->closeDevice(); // close EPOS2
