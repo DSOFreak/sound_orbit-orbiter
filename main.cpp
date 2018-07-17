@@ -195,7 +195,7 @@ void vProcessMovement()
 			iAngle = hostData->angularDistance * -1; // Correct
 		}
 		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngle = hostData->angularDistance * -1;
+			iAngle = hostData->angularDistance;
 		}
 	}
 
