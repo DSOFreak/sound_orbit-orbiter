@@ -1,17 +1,17 @@
 #include "Movement.h"
 
 
-Movement* Movement::pInstance = nullptr;
+std::shared_ptr<Movement> Movement::pInstance = nullptr;
 Movement::Movement()
 {
 }
 
 
-Movement * Movement::getInstance()
+std::shared_ptr<Movement>  Movement::getInstance()
 {
 	if (!pInstance)
 	{
-		pInstance = new Movement();
+		pInstance = std::make_shared<Movement>();
 	}
 	return pInstance;
 }

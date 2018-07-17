@@ -32,7 +32,7 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 	{
 		if (strRequest == "S_C_M") // clear all movements
 		{
-			Movement* pMovement = Movement::getInstance();
+			std::shared_ptr<Movement> pMovement = Movement::getInstance();
 			pMovement->vClearMovementQueue();
 			printf("Movement Queue Cleared \n");
 		}

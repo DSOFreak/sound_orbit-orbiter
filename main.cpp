@@ -29,7 +29,7 @@ int iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3]; // Motor errors
 std::shared_ptr<CMaxonMotor>  motor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
-Movement* pMovement;
+std::shared_ptr<Movement> pMovement;
 bool exit_app;
 std::queue<std::string> tcp_queue;
 std::mutex tcp_mutex;
@@ -206,28 +206,8 @@ void TimerFunc(bool& bIsFirstCall) {
 
 	}
 
-
-	/* MOVEMENT PROCESSING */
-	if (!pMovement->movement_queue.empty())// movement pending 
-	{
-		if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
-		{
-			vProcessMovement();
-		}
-		// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
-		else if (bIsFirstCall == true)
-		{
-			bIsFirstCall = false;
-			cout << "Movement due to first call" << endl;
-			vProcessMovement();
-			// is Motor moving? else: process further movement
-			//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
-			//vProcessMovement();
-		}
-	}
-
 	/* STIMULI PROCESSING */
-	/*
+	
 	stimuliLib.updateFSystem();
 	// Check if there is a protocol hicjacking
 	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue,motor)) // not protocl adaption, process as usual
@@ -243,16 +223,42 @@ void TimerFunc(bool& bIsFirstCall) {
 			//cout << "We try to play a stimulus if it has to be triggered" << endl;
 			stimuliLib.vPlayStimulusIfToBeTriggered();
 		}
-	}	*/
+	}	
 }
 
+void vMovementThread(bool &bIsFirstCall)
+{
+	std::thread movementThread{ [&]()
+	{
+		while (true)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+			/* MOVEMENT PROCESSING */
+			if (!pMovement->movement_queue.empty())// movement pending 
+			{
+				if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+				{
+					vProcessMovement();
+				}
+				// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
+				else if (bIsFirstCall == true)
+				{
+					bIsFirstCall = false;
+					cout << "Movement due to first call" << endl;
+					vProcessMovement();
+					// is Motor moving? else: process further movement
+					//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
+					//vProcessMovement();
+				}
 
+			}
+		}
+	}};
+	movementThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
+}
 
 int main(int argc, char **argv)
 {
-
-	// argv[1] = Ip
-	
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
@@ -276,15 +282,14 @@ int main(int argc, char **argv)
 	exit_app = false;
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
+	vMovementThread(bIsFirstCall);
 	while (!exit_app) {
 		TimerFunc(bRef);
 		IdleFunc();
 		if (!exit_app)
 		{
-			//printf("usleep(100000);\n");
 			usleep(100000);
 		}
-			
 	}
 	motor->closeDevice(); // close EPOS2
 	printf("\n -------- Delete motor object quit main!");
