@@ -232,7 +232,7 @@ void vMovementThread(bool &bIsFirstCall)
 	{
 		while (true)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			/* MOVEMENT PROCESSING */
 			if (!pMovement->movement_queue.empty())// movement pending 
 			{
@@ -285,10 +285,10 @@ int main(int argc, char **argv)
 	while (!exit_app) {
 		TimerFunc(bRef);
 		//IdleFunc(); -> this one takes very very much time!
-		//if (!exit_app)
-		//{
-			//usleep(100000);
-		//}
+		if (!exit_app)
+		{
+			usleep(300000);
+		}
 	}
 	motor->closeDevice(); // close EPOS2
 	printf("\n Delete motor object quit main!");
