@@ -203,7 +203,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 			break;
 		default:
-			printf("\n\n Playing NOTHING - undefined stimulus number %i \n\n", nr);
+			//printf("\n\n Playing NOTHING - undefined stimulus number %i \n\n", nr);
 			bRetIsValidStimuli = false;
 			break;
 	}
@@ -364,7 +364,7 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 	bool bIsValidStimulus;
 	if (bCurrentlyAHijackedProtcolIsProcessed())
 	{
-		printf("bIsStimulusToPlayAsLongAsMovementsPending() 1\n");
+		//printf("bIsStimulusToPlayAsLongAsMovementsPending() 1\n");
 		bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
 		if (bIsValidStimulus)
 		{
@@ -384,7 +384,7 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 		if (!stimuli_queue.empty())
 		{
 			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
-			printf("bIsStimulusToPlayAsLongAsMovementsPending() 2\n");
+			//printf("bIsStimulusToPlayAsLongAsMovementsPending() 2\n");
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 			//printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
 			//printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);

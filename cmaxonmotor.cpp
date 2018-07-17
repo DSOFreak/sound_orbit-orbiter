@@ -177,7 +177,7 @@ void CMaxonMotor::initializeDevice() {
 void CMaxonMotor::Move(long TargetPosition)
 {
 
-	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING \n" << endl;
+	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING" << endl;
 	int curr;
 	getCurrentPosition(curr);
 	//std::cout << "current position: " << curr << std::endl;

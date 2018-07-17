@@ -39,7 +39,7 @@ namespace Toolbox {
 		{
 			if (transmittedSpeakerID == RaspiConfig::ownIndex)
 			{
-				printf("\n \n \n \n \n \n Found the speaker \n \n \n");
+				//printf("\n \n \n \n \n \n Found the speaker \n \n \n");
 				break;
 			}
 			int startIdx = i * uiLengthOfProtocol;

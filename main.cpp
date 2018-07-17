@@ -175,7 +175,7 @@ void vProcessMovement()
 	shared_ptr<Toolbox::HostData> hostData = pMovement->movement_queue.front();
 	pMovement->movement_queue.pop();
 
-	std::cout << "Excecuting command:" << std::endl;
+	std::cout << "vProcessMovement:" << std::endl;
 	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
 	std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
 
@@ -229,7 +229,7 @@ void TimerFunc(bool& bIsFirstCall) {
 	/* PROTOCOL INTERPRETATION */
 	int speakerIDX;
 	if (host_data_raw.length() != 0) { // If a tcp-message has arrived
-		std::cout << "raw hostData: " << host_data_raw << std::endl;
+		std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
 
 		// FIRST: Check if it is a get or set request for raspi data
 		char charIsGetOrSetRequest = host_data_raw.at(0);
