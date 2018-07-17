@@ -40,6 +40,7 @@ int port;
 StimuliLibrary stimuliLib;
 
 bool bMovementMutex;
+bool bStimuliMutex;
 void tcp_func() {
 	std::string msg;
 
@@ -208,39 +209,70 @@ void TimerFunc(bool& bIsFirstCall) {
 			}
 			
 			if (hostData->stim_queued) { // Add new data to queue
+				while (bStimuliMutex) {
+					std::cout << "MUTEXLOCKED stimuli" << endl;
+					usleep(50000);
+				};
+				bStimuliMutex = true;
 				stimuliLib.stimuli_queue.push(hostData);
 				stimuli_skip = false;
+				bStimuliMutex = false;
 			}
 			else { // Clear Queue and Add new Data to Queue
+				while (bStimuliMutex) {
+					std::cout << "MUTEXLOCKED stimuli" << endl;
+					usleep(50000);
+				};
+				bStimuliMutex = true;
 				stimuli_skip = true;
 				while (!stimuliLib.stimuli_queue.empty())
 				{
 					stimuliLib.stimuli_queue.pop();
 				}
 				stimuliLib.stimuli_queue.push(hostData);
+				bStimuliMutex = false;
 			}
 		}
 
 	}
 
-	/* STIMULI PROCESSING */
-	/*
-	stimuliLib.updateFSystem();
-	// Check if there is a protocol hicjacking
-	if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue,motor)) // not protocl adaption, process as usual
+}
+/* STIMULI PROCESSING */
+void vStimuliThread()
+{
+	// falls nix geht... mache stimulilib shared pntr !!!!!!!!!!!!
+	std::thread stimuliThread{ [&]()
 	{
-		//cout << "No Hijacking" << endl;
-		if (stimuliLib.bGetIsThereAFractionLeftToPlay())
+		while (true)
 		{
-			//printf("\n We have a fraction left to play of %d milliseconds\n", stimuliLib.uiGetDesiredStimuliDuration_ms());
-			stimuliLib.playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			if (!bStimuliMutex)
+			{
+				bStimuliMutex = true;
+
+				stimuliLib.updateFSystem();
+				// Check if there is a protocol hicjacking
+				if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue, motor)) // not protocl adaption, process as usual
+				{
+					//cout << "No Hijacking" << endl;
+					if (stimuliLib.bGetIsThereAFractionLeftToPlay())
+					{
+						//printf("\n We have a fraction left to play of %d milliseconds\n", stimuliLib.uiGetDesiredStimuliDuration_ms());
+						stimuliLib.playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
+					}
+					else if (!stimuliLib.stimuli_queue.empty())
+					{
+						//cout << "We try to play a stimulus if it has to be triggered" << endl;
+						stimuliLib.vPlayStimulusIfToBeTriggered();
+					}
+				}
+
+				bStimuliMutex = false;
+			}
+
 		}
-		else if (!stimuliLib.stimuli_queue.empty())
-		{
-			//cout << "We try to play a stimulus if it has to be triggered" << endl;
-			stimuliLib.vPlayStimulusIfToBeTriggered();
-		}
-	}*/	
+	} };
+	stimuliThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
 }
 
 void vMovementThread(bool &bIsFirstCall)
@@ -282,6 +314,7 @@ void vMovementThread(bool &bIsFirstCall)
 int main(int argc, char **argv)
 {
 	bMovementMutex = false;
+	bStimuliMutex = false;
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
@@ -306,6 +339,7 @@ int main(int argc, char **argv)
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
 	vMovementThread(bIsFirstCall);
+	vStimuliThread();
 	while (!exit_app) {
 		TimerFunc(bRef);
 		//IdleFunc(); -> this one takes very very much time!
