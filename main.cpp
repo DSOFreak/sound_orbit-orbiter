@@ -52,7 +52,7 @@ enum eTasten {
 
 #define DEBOUNCE 500000000;
 #define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
-#define RAILPERI  float(2.16 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
+#define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
 using namespace std;
 
 unsigned short iVoltage;
