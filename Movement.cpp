@@ -28,7 +28,7 @@ void Movement::vClearMovementQueue()
 
 inline bool bIsNotOwnSpeakerIndex(std::shared_ptr<Toolbox::HostData> pTempHostData)
 {
-	if (pTempHostData->speakerIDX == RaspiConfig::ownIndex)
+	if (pTempHostData->speakerIDX != RaspiConfig::ownIndex)
 	{
 		return true;
 	}
@@ -39,23 +39,34 @@ inline bool bIsNotOwnSpeakerIndex(std::shared_ptr<Toolbox::HostData> pTempHostDa
 }
 void Movement::vConcatenateSuccessiveMovements()
 {
+	if ((vecMovementqueue.size() < 2) || (vecMovementqueue.empty()))
+	{
+		return;
+	}
+	std::cout << " Going in " << std::endl;
 	std::shared_ptr<Toolbox::HostData> pTempHostDataStart;
 	std::shared_ptr<Toolbox::HostData> pTempHostDataNext;
 	// first we remove all alues which are not for us from the queue
 	vecMovementqueue.erase(std::remove_if(vecMovementqueue.begin(), vecMovementqueue.end(), bIsNotOwnSpeakerIndex), vecMovementqueue.end());
+	std::cout << " vecMovementqueue.erase(std::remove_if(vecMovementqueue.begin(), " << std::endl;
 	// Check if we have movements wich are of the same velocity and direciton followed by each other
 	if ((vecMovementqueue.size() < 2) || (vecMovementqueue.empty())) // makes no sense to go on
 	{
+		std::cout << "return" << std::endl;
 		return;
 	}
 	else
 	{
 		std::vector<int> veciConsecutiveMovementsIndices;
 		//We only go in if we find successive movements 
+		std::cout << "We only go in if we find successive movements " << std::endl;
 		for (int i = 0; i < vecMovementqueue.size()-1; i++)
 		{
+			std::cout << "ecMovementqueue.at(i);" << std::endl;
 			pTempHostDataStart = vecMovementqueue.at(i);
+			std::cout << " pTempHostDataStart = vecMovementqueue.at(i);" << std::endl;
 			pTempHostDataNext = vecMovementqueue.at(i+1);
+			std::cout << " pTempHostDataStart = vecMovementqueue.at(i+1);" << std::endl;
 			if ((pTempHostDataStart->direction == pTempHostDataNext->direction) && (pTempHostDataStart->speed == pTempHostDataNext->speed))
 			{
 				// We store the indices of the movements which can be concatenated
@@ -63,8 +74,10 @@ void Movement::vConcatenateSuccessiveMovements()
 				veciConsecutiveMovementsIndices.push_back(i+1);
 			}
 		}
+		std::cout << "//Delte duplicates" << std::endl;
 		//Delte duplicates
 		veciConsecutiveMovementsIndices.erase(std::unique(veciConsecutiveMovementsIndices.begin(), veciConsecutiveMovementsIndices.end()), veciConsecutiveMovementsIndices.end());
+		std::cout << "//Delte duplicates good" << std::endl;
 		if ((veciConsecutiveMovementsIndices.size() < 2) || (veciConsecutiveMovementsIndices.empty())) // makes no sense to go on
 		{
 			return;
@@ -80,7 +93,9 @@ void Movement::vConcatenateSuccessiveMovements()
 			
 			if (!bIsSuccessiveMovement) // Init of new movement queue vector
 			{
+				std::cout << "vecTempMovementQueue.push_back" << std::endl;
 				vecTempMovementQueue.push_back(vecMovementqueue.at(veciConsecutiveMovementsIndices.at(k)));
+				std::cout << "vecTempMovementQueue.push_back GOOD" << std::endl;
 			}
 
 			if ((veciConsecutiveMovementsIndices.at(k)+1) == (veciConsecutiveMovementsIndices.at(k+1)))//successive?
@@ -91,13 +106,17 @@ void Movement::vConcatenateSuccessiveMovements()
 			else
 			{
 				// Store the accumulated data
+				std::cout << "ecTempMovementQueue.back()->angularDistanc.push_back GOOD" << std::endl;
 				vecTempMovementQueue.back()->angularDistance = fAngularDistance;
+				std::cout << "ecTempMovementQueue.back()->angularDistanc.push_back GOOD" << std::endl;
 				fAngularDistance = 0;
 				//Not a consecutive movement
 				bIsSuccessiveMovement = false;
 			}		
 		}
 		// we copy our vector
+		std::cout << "// we copy our vectorD" << std::endl;
 		vecMovementqueue = vecTempMovementQueue;
+		std::cout << "// we copy our vectorDGOOD" << std::endl;
 	}
 }
