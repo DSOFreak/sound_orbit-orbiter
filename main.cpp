@@ -144,8 +144,8 @@ void vProcessMovement()
 void TimerFunc(bool& bIsFirstCall) {
 
 	std::string host_data_raw;
-	while (!tcp_queue.empty()) {
-		usleep(10000);
+	while (!tcp_queue.empty() && (!bStimuliMutex && !bMovementMutex)) {
+		//usleep(10000);
 		tcp_mutex.lock();
 		host_data_raw = tcp_queue.front(); // Get tcp messages
 		tcp_queue.pop();
