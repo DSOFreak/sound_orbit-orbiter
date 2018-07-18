@@ -9,7 +9,7 @@
 using namespace std;
 #define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
-
+const int StimuliLibrary::iRaiseAndFallTimeMS = 30;
 //#include <unistd.h>		wyt todo
 StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
@@ -131,8 +131,40 @@ bool StimuliLibrary::isFinished()
 	return !val;
 }
 
+void StimuliLibrary::vSetFadeOutNow(int iFallTimeMs)
+{
+	unsigned long long dspclock;
+	int rate;
+
+	channel->getSystemObject(&fsystem);                        // OPTIONAL : Get System object
+	fsystem->getSoftwareFormat(&rate, 0, 0);                // Get mixer rate
+	channel->getDSPClock(0, &dspclock);                    // Get the reference clock, which is the parent channelnel group
+	channel->addFadePoint(dspclock, 1.0f);                 // Add a fade point at 'now' with full volume.
+
+	unsigned long long fadePoint = dspclock + (rate * (iFallTimeMs / 1000));
+
+	channel->addFadePoint(fadePoint, 0.0f);    // Add a fade point iFadeOutTimeMs later at 0 volume.
+	channel->setDelay(0, fadePoint, true);     // Add a delayed stop command at iFadeOutTimeMs ('stopchannels = true')
+
+}
+void StimuliLibrary::vSetFadeOutAtSpecificTime(int iSampleLengthOfAudioEnd,int iFallTimeMs)
+{
+	int rate;
+	unsigned long long clockDSP, parentDSP;
+	channelgroup->getDSPClock(&clockDSP, &parentDSP);
+	channel->getSystemObject(&fsystem);                        // OPTIONAL : Get System object
+	fsystem->getSoftwareFormat(&rate, 0, 0);                // Get mixer rate
+	channel->getDSPClock(0, &clockDSP);                    // Get the reference clock, which is the parent channelnel group
+	unsigned long long fadePointEnd = clockDSP + iSampleLengthOfAudioEnd;
+	unsigned long long fadePointStart = fadePointEnd - (rate * (iFallTimeMs / 1000));
+	channel->addFadePoint(fadePointStart, 1.0f);                 // Add a fade point at 'now' with full volume.
+
+	channel->addFadePoint(fadePointEnd, 0.0f);    // Add a fade point iFadeOutTimeMs later at 0 volume.
+	channel->setDelay(0, fadePointEnd, true);     // Add a delayed stop command at iFadeOutTimeMs ('stopchannels = true')
+}
 void StimuliLibrary::stopStimuli()
 {
+	vSetFadeOutNow(iRaiseAndFallTimeMS);
 
 	printf("\n\n  Stimuli Stop - \n\n");
 	audio->setMode(FMOD_LOOP_OFF);
@@ -236,14 +268,14 @@ void StimuliLibrary::playStimuli()
 
 		fsystem->getMasterChannelGroup(&channelgroup);
 
-		unsigned long long clockDSP, parentDSP;
-		channelgroup->getDSPClock(&clockDSP, &parentDSP);
+		//unsigned long long clockDSP, parentDSP;
+		//channelgroup->getDSPClock(&clockDSP, &parentDSP);
 		unsigned int bufferLength = 2048; // som arbitrary vlue
 		int numbuffers = 1;
 		fsystem->getDSPBufferSize(&bufferLength, &numbuffers);
 		fsystem->playSound(audio, channelgroup, true, &channel);
-		FMOD_RESULT myResult = channelgroup->setDelay(clockDSP, clockDSP+ iSampleLengthOfAudio,true);
-
+		//FMOD_RESULT myResult = channelgroup->setDelay(clockDSP, clockDSP+ iSampleLengthOfAudio,true); CHANGE ..lieber fadeout
+		vSetFadeOutAtSpecificTime(iSampleLengthOfAudio, iRaiseAndFallTimeMS);
 		channel->setPaused(false);
 		vSetdFractionOfAudioFileLeftToPlay(0.00);
 	}

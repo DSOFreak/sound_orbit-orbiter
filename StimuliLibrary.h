@@ -61,7 +61,10 @@ private:
 	FMOD::DSP *pDSPChanGrpHead;
 	FMOD::DSP	*dsp_Eq_125Hz;*/
 	void vSetChannelToInvinitePlay();
+
+
 public:
+	static const int iRaiseAndFallTimeMS;
 	FMOD::Channel* getChannel();
 	FMOD::ChannelGroup* getChannelGroup();
 	FMOD::System * getSystem();
@@ -76,6 +79,8 @@ public:
 	StimuliLibrary();
 	~StimuliLibrary();
 	bool isFinished();
+	void vSetFadeOutNow(int iFadeOutTimeMs);
+	void vSetFadeOutAtSpecificTime(int iFadeOutFinnishedTime, int iFallTimeMs);
 	void stopStimuli();
 	bool bLoadStimuli(int nr, float volume, unsigned int duration);
 	void playStimuli();
