@@ -18,8 +18,8 @@ private:
 	std::shared_ptr<Equalizer> pEqSpeakerPN;
 
 	// Audio files
-	string pathToAudio_01WhiteNoise = "../../../../TestFiles/WN_N24_FS48k_Flanke10ms_30Sec.flac";
-	string pathToAudio_02PinkNoise = "../../../../TestFiles/PN_N24_FS48k_Flanke10ms_30Sec.flac";
+	string pathToAudio_01WhiteNoise = "../../../../TestFiles/WN_N24_FS48k_Flanke10ms_6min.flac";
+	string pathToAudio_02PinkNoise = "../../../../TestFiles/PN_N24_FS48k_Flanke10ms_6min.flac";
 	string pathToAudio_03Sin500 = "../../../../TestFiles/03_sin500.flac";
 	string pathToCurrentAudioFile;
 	unsigned int audioFileLength_ms;

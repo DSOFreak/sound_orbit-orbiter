@@ -151,7 +151,6 @@ void StimuliLibrary::stopStimuli()
 
 bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 {
-	//printf("\n\n  bLoadStimuli - \n\n");
 	bool bRetIsValidStimuli = true;
 	uiDesiredDuration_ms = duration;
 	dsp_lowpass->setBypass(true);
@@ -380,7 +379,18 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 	if (bCurrentlyAHijackedProtcolIsProcessed())
 	{
 		//printf("bIsStimulusToPlayAsLongAsMovementsPending() 1\n");
-		bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+		// Only Load if necessary
+		bool bIsCurrentlyPlaying;
+		channel->getPaused(&bIsCurrentlyPlaying);
+		if (!bIsCurrentlyPlaying)
+		{
+			//printf("YEEEEEEEEEEEEEEEEES\n");
+			bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+		}
+		//else
+		//{
+			//printf("NOOOOOOOOOOOOOOOOOOOOOO\n");
+		//}
 		if (bIsValidStimulus)
 		{
 			//printf("\nbIsStimulusToPlayAsLongAsMovementsPending bIsValidStimulus\n");
@@ -399,7 +409,6 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 		if (!stimuli_queue.empty())
 		{
 			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
-			//printf("bIsStimulusToPlayAsLongAsMovementsPending() 2\n");
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 			//printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
 			//printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);
