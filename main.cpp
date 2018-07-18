@@ -288,7 +288,7 @@ void vMovementThread(bool &bIsFirstCall)
 				if (!pMovement->vecMovementqueue.empty())// movement pending 
 				{
 					// If we have concatenated movements with the same velocity and same direction -> add the angular distances to avoid "stops" during a trajectory of the same direcion
-
+					pMovement->vConcatenateSuccessiveMovements();
 
 					if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
 					{
