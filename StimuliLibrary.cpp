@@ -218,6 +218,7 @@ void StimuliLibrary::playStimuli()
 	printf("\n playStimuli() \n");
 	if (audioFileLength_ms == 0)
 	{
+		printf("\n audioFileLength_ms == 0 -> stopStimuli() \n");
 		stopStimuli();
 	}
 	//printf("\n audioFileLength_ms %i \n", audioFileLength_ms);
@@ -308,7 +309,7 @@ void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 	}
 }
 
-bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_ptr<Toolbox::HostData>> movementQueue, std::shared_ptr<CMaxonMotor> pMotor)
+bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_ptr<Toolbox::HostData>> &movementQueue, std::shared_ptr<CMaxonMotor> pMotor)
 {
 	//printf("\n Going IN: bAdaptStimulusParametersDueToHijacking\n");
 	bool bRetVal = false;
@@ -320,8 +321,9 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_pt
 	// Check for all protocl hicjacking options (currently only one)
 	if (bIsStimulusToPlayAsLongAsMovementsPending())
 	{
+		bRetVal = true;
 		//printf("\n IsStimulusToPlayAsLongAsMovementsPending == True\n");
-		if (!bCurrentlyAHijackedProtcolIsProcessed())
+		if (!bCurrentlyAHijackedProtcolIsProcessed()) // there is noprocess going gon
 		{
 			printf("\n bCurrentlyAHijackedProtcolIsProcessed\n");
 			hostDataOfHijackedProtocol = stimuli_queue.front();
@@ -333,31 +335,33 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_pt
 		{
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{	
-				printf("\n Tryining infintie play\n");
-				channel->setMode(FMOD_LOOP_NORMAL);
-				channel->setLoopCount(-1); // -1: is infinite
-				channel->setPaused(false);
-				hostDataOfHijackedProtocol->toBeTriggerd = 0;
+				vSetChannelToInvinitePlay();
 			}
 		}
 		else if (!pMotor->reachedTarget()) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
 		{
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{
-				printf("\n Tryining infintie play\n");
-				channel->setMode(FMOD_LOOP_NORMAL);
-				channel->setLoopCount(-1); // -1: is infinite
-
-				channel->setPaused(false);
-				hostDataOfHijackedProtocol->toBeTriggerd = 0;
+				vSetChannelToInvinitePlay();
 			}
 		}
 		else
 		{
-			vSetHijackedProtocolIsCompletelyProcessed();
-			stopStimuli();
+			// Wait for some time to check if if everything is really finnished
+			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+			if (!movementQueue.empty() || !pMotor->reachedTarget())
+			{
+				vSetChannelToInvinitePlay();
+				return bRetVal;
+			}
+			else
+			{
+				printf("\n stop stimulus vSetHijackedProtocolIsCompletelyProcessed\n");
+				vSetHijackedProtocolIsCompletelyProcessed();
+				stopStimuli();
+			}
 		}
-		bRetVal =  true;
+
 	}
 	else
 	{
@@ -450,6 +454,15 @@ FMOD_RESULT F_CALLBACK StimuliLibrary::EndOfSong(FMOD_CHANNELCONTROL*channelCont
 
 
 	return FMOD_OK;
+}
+
+void StimuliLibrary::vSetChannelToInvinitePlay()
+{
+	printf("\n Tryining infintie play\n");
+	channel->setMode(FMOD_LOOP_NORMAL);
+	channel->setLoopCount(-1); // -1: is infinite
+	channel->setPaused(false);
+	hostDataOfHijackedProtocol->toBeTriggerd = 0;
 }
 
 FMOD::Channel * StimuliLibrary::getChannel()

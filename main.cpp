@@ -210,7 +210,10 @@ void TimerFunc(bool& bIsFirstCall) {
 					usleep(50000);
 				};
 				bStimuliMutex = true;
-				stimuliLib.stimuli_queue.push(hostData);
+				if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
+				{
+					stimuliLib.stimuli_queue.push(hostData);
+				}
 				stimuli_skip = false;
 				bStimuliMutex = false;
 			}
