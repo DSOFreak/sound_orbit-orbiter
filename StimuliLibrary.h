@@ -86,7 +86,7 @@ public:
 	void playStimuli();
 	void vPlayStimulusIfToBeTriggered();
 	// Protocol hijacking to add specific non-time information for stimulus
-	bool bAdaptStimulusParametersDueToHijacking(std::queue<shared_ptr<Toolbox::HostData>> &movementQueue, std::shared_ptr<CMaxonMotor> pMotor);
+	bool bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue, std::shared_ptr<CMaxonMotor> pMotor);
 	//StimulusDuration(000000 - 999999) -> 6Digits in ms ~=15min max length for time framed stimulus
 	static const int iPlayStimulusAsLongAsMovementsPending; // For example for the DSD360 test. Plays as long as there is something in the queue
 	bool bIsStimulusToPlayAsLongAsMovementsPending();

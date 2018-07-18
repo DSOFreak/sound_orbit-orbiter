@@ -22,6 +22,25 @@ Movement::~Movement()
 
 void Movement::vClearMovementQueue()
 {
-	std::queue<std::shared_ptr<Toolbox::HostData>> empty;
-	std::swap(movement_queue, empty);
+	vecMovementqueue.clear();
+}
+
+void Movement::vConcatenateSuccessiveMovements()
+{
+	Toolbox::HostData tempHostData;
+	// Check if we have movements wich are of the same velocity and direciton followed by each other
+	if (vecMovementqueue.size() < 2) // makes no sense to go on
+	{
+		return;
+	}
+	else
+	{
+		for (int i = 0; i < vecMovementqueue.size(); i++)
+		{
+			//tempHostData = movement_queue.at
+			// Check for speakerID,direction and speed
+			//if (movement_queue.front)
+		}
+
+	}
 }

@@ -102,8 +102,8 @@ bool movement_skip;
 bool stimuli_skip;
 void vProcessMovement()
 {
-	shared_ptr<Toolbox::HostData> hostData = pMovement->movement_queue.front();
-	pMovement->movement_queue.pop();
+	shared_ptr<Toolbox::HostData> hostData = pMovement->vecMovementqueue.front();
+	pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
 
 	std::cout << "vProcessMovement:" << std::endl;
 	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
@@ -181,7 +181,7 @@ void TimerFunc(bool& bIsFirstCall) {
 				bMovementMutex = true;
 				if (hostData->angularDistance > 0.0)
 				{
-					pMovement->movement_queue.push(hostData);
+					pMovement->vecMovementqueue.push_back(hostData);
 				}
 				bMovementMutex = false;
 				movement_skip = false;
@@ -194,11 +194,11 @@ void TimerFunc(bool& bIsFirstCall) {
 					usleep(50000);
 				};
 				bMovementMutex = true;
-				while (!pMovement->movement_queue.empty())
+				while (!pMovement->vecMovementqueue.empty())
 				{
-					pMovement->movement_queue.pop();
+					pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
 				}
-				pMovement->movement_queue.push(hostData);
+				pMovement->vecMovementqueue.push_back(hostData);
 				bMovementMutex = false;
 			}
 			
@@ -250,7 +250,7 @@ void vStimuliThread()
 				stimuliLib.updateFSystem();
 				// Check if there is a protocol hicjacking
 				bMovementMutex = true;
-				if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue, motor)) // not protocl adaption, process as usual
+				if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, motor)) // not protocl adaption, process as usual
 				{
 					bMovementMutex = false;
 					//cout << "No Hijacking" << endl;
@@ -285,8 +285,11 @@ void vMovementThread(bool &bIsFirstCall)
 			if (!bMovementMutex)
 			{
 				bMovementMutex = true;
-				if (!pMovement->movement_queue.empty())// movement pending 
+				if (!pMovement->vecMovementqueue.empty())// movement pending 
 				{
+					// If we have concatenated movements with the same velocity and same direction -> add the angular distances to avoid "stops" during a trajectory of the same direcion
+
+
 					if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
 					{
 						vProcessMovement();

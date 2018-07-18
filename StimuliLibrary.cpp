@@ -314,7 +314,7 @@ void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 	}
 }
 
-bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_ptr<Toolbox::HostData>> &movementQueue, std::shared_ptr<CMaxonMotor> pMotor)
+bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue, std::shared_ptr<CMaxonMotor> pMotor)
 {
 	//printf("\n Going IN: bAdaptStimulusParametersDueToHijacking\n");
 	bool bRetVal = false;
