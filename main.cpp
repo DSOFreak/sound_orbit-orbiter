@@ -191,10 +191,6 @@ void TimerFunc(bool& bIsFirstCall) {
 			else { // Clear Queue and Add new Data to Queue
 				std::cout << " Clear Queue and Add new Data to Queue" << endl;
 				movement_skip = true;
-				// DEEEEEEEEEEEEEEEEEEEEEEEEEEEEBUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUG
-				for (int i = 1; i < 40; i++) {
-					cout << "DEBUG MOVEMENT SKIP" << endl;
-				}
 				while (bMovementMutex) {
 					std::cout << "MUTEXLOCKED Clear Queue and " << endl;
 					usleep(50000);
@@ -307,7 +303,6 @@ void vMovementThread(bool &bIsFirstCall)
 				}
 				bMovementMutex = false;
 			}
-
 		}
 	}};
 	movementThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
@@ -347,7 +342,7 @@ int main(int argc, char **argv)
 		//IdleFunc(); -> this one takes very very much time!
 		if (!exit_app)
 		{
-			usleep(100000);
+			usleep(10000);
 		}
 	}
 	printf("\n Delete motor object quit main!");

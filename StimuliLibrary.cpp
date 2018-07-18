@@ -329,10 +329,21 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_pt
 			bool bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
 		}
 
-		if (!movementQueue.empty() || !pMotor->reachedTarget())
+		if (!movementQueue.empty())
 		{
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{	
+				printf("\n Tryining infintie play\n");
+				channel->setMode(FMOD_LOOP_NORMAL);
+				channel->setLoopCount(-1); // -1: is infinite
+				channel->setPaused(false);
+				hostDataOfHijackedProtocol->toBeTriggerd = 0;
+			}
+		}
+		else if (!pMotor->reachedTarget()) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
+		{
+			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
+			{
 				printf("\n Tryining infintie play\n");
 				channel->setMode(FMOD_LOOP_NORMAL);
 				channel->setLoopCount(-1); // -1: is infinite
@@ -341,7 +352,7 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::queue<shared_pt
 				hostDataOfHijackedProtocol->toBeTriggerd = 0;
 			}
 		}
-		else if (pMotor->reachedTarget())
+		else
 		{
 			vSetHijackedProtocolIsCompletelyProcessed();
 			stopStimuli();
