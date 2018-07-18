@@ -15,13 +15,43 @@ const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_
 void StimuliLibrary::initAllStimuli()
 {
 	//Stimuli 1:
+	/*
 	fsystem->createDSPByType(FMOD_DSP_TYPE_OSCILLATOR, &dsp_sin);
 	fsystem->createDSPByType(FMOD_DSP_TYPE_OSCILLATOR, &dsp_noise);
 	fsystem->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &dsp_lowpass);
 	dsp_sin->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 0);
 	dsp_noise->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 5);
 	channel->addDSP(0, dsp_lowpass);
-	dsp_lowpass->setBypass(true);
+	dsp_lowpass->setBypass(true);*/
+
+	/*
+	FMOD::Sound		*audio_Stimulus0;
+	FMOD::Sound		*audio_Stimulus1;
+	FMOD::Sound		*audio_Stimulus2;*/
+	bool isPlaybackPaused = true;
+	//DEBUG TEST
+	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
+	fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+	audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+	//Stimulus1
+//	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus1);
+	//fsystem->playSound(audio_Stimulus1, channelgroup, isPlaybackPaused, &channel);
+
+
+	/*
+	//Stimulus2
+	fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus2);
+	fsystem->playSound(audio_Stimulus2, channelgroup, isPlaybackPaused, &channel);
+	pEqSpeakerPN->initDSPWithEQSettings(channel, channelgroup, fsystem);
+
+	//Stimulus3
+	fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus3);
+	//audio_Stimulus3->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+
+
+	channel->setChannelGroup(channelgroup);
+	fsystem->playSound(audio_Stimulus3, channelgroup, isPlaybackPaused, &channel);
+	*/
 }
 
 
@@ -153,17 +183,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 {
 	bool bRetIsValidStimuli = true;
 	uiDesiredDuration_ms = duration;
-	dsp_lowpass->setBypass(true);
 	dFractionOfAudioFileLeftToPlay = 0.00;
-	// Drin lassen für Referenz um sounds zu erzeugen
-	if(nr >= 2 && nr <= 60)
-	{
-		//float pitch = scale.getPitch(4, nr);
-		//dsp_sin->setParameterFloat(FMOD_DSP_OSCILLATOR_RATE, pitch);
-		//printf("\n\n  fsystem->playDSP(dsp_sin, 0, true, &channel);  \n\n");
-		//exit(-1);
-		//fsystem->playDSP(dsp_sin, 0, true, &channel);
-	}
 	bool isPlaybackPaused = true;
 	switch (nr)
 	{
@@ -172,12 +192,10 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 
 		//To load a sound into memory
 	case 1:
-		pathToCurrentAudioFile = pathToAudio_01WhiteNoise;
-		//printf("\n\n Playing 01_chirp - no loop - \n\n");
+		/*pathToCurrentAudioFile = pathToAudio_01WhiteNoise;
 		fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
 		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-		channel->setChannelGroup(channelgroup);
-		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);*/
 		break;
 	case 2:
 	{
@@ -185,7 +203,6 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		//printf("\n\n Playing 02_pink - no loop - \n\n");
 		fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio);
 		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-		//channel->setChannelGroup(channelgroup);
 		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 		printf("\n\n Playing 02_pink - no loop - \n\n");
 		pEqSpeakerPN->initDSPWithEQSettings(channel,channelgroup,fsystem);
@@ -198,7 +215,6 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 			//printf("\n\n Playing 03_sinus - no loop - \n\n");
 			fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio);
 			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-			channel->setChannelGroup(channelgroup);
 			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 			break;
 		default:
