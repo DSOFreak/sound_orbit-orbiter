@@ -20,11 +20,9 @@
 #include "tcpParameterRequestHandler.h"
 using namespace std;
 
-#define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
-#define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
+
 
 unsigned short iVoltage;
-long lMotorMovementToProcess;
 int iCurrentPosition, iNumbOffs, iAngle;
 unsigned char cErrorNbr, cNumb[3]; // Motor errors
 std::shared_ptr<CMaxonMotor>  motor;
@@ -91,10 +89,6 @@ float A_freqs[] = { 22.5f, 55.0f,110.0f,220.0f,440.0f,880.0f,1760.0f,3520.0f,704
 
 
 
-void calcMovementToProcess(void) {
-	lMotorMovementToProcess = 65536 * (float(iAngle) / 360.0) * (RAILPERI / WHEELPERI);
-}
-
 
 
 void IdleFunc(void) {
@@ -136,9 +130,10 @@ void vProcessMovement()
 	}
 
 	if (hostData->direction != 0) { // Dir 0 = no movement
-		calcMovementToProcess();
+		long lMotorDataTargetPosition = motor->lConvertAngleInDegreeToMotorData(iAngle);
+		motor->setCurrentTargetPositionInMotorData(lMotorDataTargetPosition);
 		motor->setSpeed(hostData->speed);
-		motor->Move(lMotorMovementToProcess);
+		motor->Move(motor->lgetCurrentTargetPositionInMotorData());
 	}
 }
 void TimerFunc(bool& bIsFirstCall) {

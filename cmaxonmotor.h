@@ -14,8 +14,11 @@ private:
     unsigned short nodeID;
     void *keyHandle;//
 
-
+	long lCurrentTargetPositionInMotorData;
 public:
+	long lgetCurrentTargetPositionInMotorData();
+	long setCurrentTargetPositionInMotorData(long lTargetPositionInMotorData);
+	long lConvertAngleInDegreeToMotorData(int iAngle);
     // ********* I N I T *********
 	CMaxonMotor();
     CMaxonMotor(char[], unsigned short );

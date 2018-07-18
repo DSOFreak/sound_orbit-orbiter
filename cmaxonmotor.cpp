@@ -9,10 +9,27 @@
 #include <fstream>      // std::fstream
 #include <fcntl.h>
 
-
+#define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
+#define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
 //#include <curses.h>
 
 using namespace std;
+
+long CMaxonMotor::lgetCurrentTargetPositionInMotorData()
+{
+	return lCurrentTargetPositionInMotorData;
+}
+
+long CMaxonMotor::setCurrentTargetPositionInMotorData(long lTargetPositionInMotorData)
+{
+	lCurrentTargetPositionInMotorData = lTargetPositionInMotorData;
+}
+
+long CMaxonMotor::lConvertAngleInDegreeToMotorData(int iAngle)
+{
+	long lretVal = 65536 * (float(iAngle) / 360.0) * (RAILPERI / WHEELPERI);
+	return lretVal;
+}
 
 CMaxonMotor::CMaxonMotor()
 {
