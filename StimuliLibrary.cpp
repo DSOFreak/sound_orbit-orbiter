@@ -19,22 +19,12 @@ void StimuliLibrary::initAllStimuli()
 	//Stimulus1
 	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus1);
 
-
-
-	/*
 	//Stimulus2
 	fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus2);
-	fsystem->playSound(audio_Stimulus2, channelgroup, isPlaybackPaused, &channel);
-	pEqSpeakerPN->initDSPWithEQSettings(channel, channelgroup, fsystem);
+	//pEqSpeakerPN->initDSPWithEQSettings(channel_Stimulus2, channelgroup, fsystem);
 
 	//Stimulus3
 	fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus3);
-	//audio_Stimulus3->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-
-
-	channel->setChannelGroup(channelgroup);
-	fsystem->playSound(audio_Stimulus3, channelgroup, isPlaybackPaused, &channel);
-	*/
 }
 
 
@@ -170,47 +160,26 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	bool isPlaybackPaused = true;
 	switch (nr)
 	{
-		// TO do: Put stimuli in an array to improve speed. Indexed access (fischti)
-		// - Create Object of each audio file at startup -> No need to do things like "getLength" more often
-
-		//To load a sound into memory
 	case 1:
-		/*pathToCurrentAudioFile = pathToAudio_01WhiteNoise;
-		fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
-		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);*/
-		channel = channel_Stimulus1;
-		channel->setChannelGroup(channelgroup);
 		audio = audio_Stimulus1;
-		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 		break;
 	case 2:
 	{
-		pathToCurrentAudioFile = pathToAudio_02PinkNoise;
-		//printf("\n\n Playing 02_pink - no loop - \n\n");
-		fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio);
-		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-		printf("\n\n Playing 02_pink - no loop - \n\n");
-		pEqSpeakerPN->initDSPWithEQSettings(channel,channelgroup,fsystem);
-
-
+		audio = audio_Stimulus2;
+		channel = channel_Stimulus2;
 		break;
 	}
-		case 3:
-			pathToCurrentAudioFile = pathToAudio_03Sin500;
-			//printf("\n\n Playing 03_sinus - no loop - \n\n");
-			fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio);
-			audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-			fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-			break;
-		default:
-			//printf("\n\n Playing NOTHING - undefined stimulus number %i \n\n", nr);
-			bRetIsValidStimuli = false;
-			break;
+	case 3:
+		audio = audio_Stimulus3;
+		break;
+	default:
+		//printf("\n\n Playing NOTHING - undefined stimulus number %i \n\n", nr);
+		bRetIsValidStimuli = false;
+		break;
 	}
-
+	channel->setChannelGroup(channelgroup);
+	audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+	fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 	channel->setVolume(volume);
 	return bRetIsValidStimuli;
 }

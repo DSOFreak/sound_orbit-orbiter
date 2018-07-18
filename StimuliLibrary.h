@@ -21,7 +21,6 @@ private:
 	string pathToAudio_01WhiteNoise = "../../../../TestFiles/WN_N24_FS48k_Flanke10ms_6min.flac";
 	string pathToAudio_02PinkNoise = "../../../../TestFiles/PN_N24_FS48k_Flanke10ms_6min.flac";
 	string pathToAudio_03Sin500 = "../../../../TestFiles/03_sin500.flac";
-	string pathToCurrentAudioFile; //deprecated
 	unsigned int audioFileLength_ms;
 	unsigned int uiDesiredDuration_ms;
 
@@ -35,9 +34,7 @@ private:
 	FMOD::Sound		*audio_Stimulus1;
 	FMOD::Sound		*audio_Stimulus2;
 	FMOD::Sound		*audio_Stimulus3;
-	FMOD::Channel   *channel_Stimulus1;
-	FMOD::Channel   *channel_Stimulus2;
-	FMOD::Channel   *channel_Stimulus3;
+	FMOD::Channel   *channel_Stimulus2; // Due to equalizer
 	FMOD::DSP       *dsp_sin;
 	FMOD::DSP       *dsp_noise;
 	FMOD::DSP		*dsp_lowpass;
