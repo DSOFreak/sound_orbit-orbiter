@@ -97,7 +97,7 @@ void Equalizer::initDSPWithEQSettings(FMOD::Channel* pChannel, FMOD::ChannelGrou
 		if (i == 0)
 		{
 			res6 = pDSPChanGrpHead->addInput(arrEqDSPObjects[i], 0);
-	}	
+		}	
 		else
 		{
 			res1337 = arrEqDSPObjects[i-1]->addInput(arrEqDSPObjects[i], 0); // 

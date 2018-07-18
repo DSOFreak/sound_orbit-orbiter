@@ -11,6 +11,24 @@ using namespace std;
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
 
 //#include <unistd.h>		wyt todo
+StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
+{
+	printf("StimuliLibrary constructor called \n");
+	FMOD::System_Create(&fsystem);
+	fsystem->getVersion(&version);
+
+	if (version < FMOD_VERSION)
+	{
+		printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
+	}
+
+	fsystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
+
+	// Init the equalizer objects
+	initEqualizers();
+
+	initAllStimuli();
+}
 
 void StimuliLibrary::initAllStimuli()
 {
@@ -21,7 +39,8 @@ void StimuliLibrary::initAllStimuli()
 
 	//Stimulus2
 	fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus2);
-	//pEqSpeakerPN->initDSPWithEQSettings(channel_Stimulus2, channelgroup, fsystem);
+	fsystem->playSound(audio_Stimulus2, channelgroup, isPlaybackPaused, &channel_Stimulus2);
+	pEqSpeakerPN->initDSPWithEQSettings(channel_Stimulus2, channelgroup, fsystem);
 
 	//Stimulus3
 	fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus3);
@@ -98,24 +117,6 @@ void StimuliLibrary::initEqualizers()
 
 }
 
-StimuliLibrary::StimuliLibrary(): extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
-{
-	printf("StimuliLibrary constructor called \n");
-	FMOD::System_Create(&fsystem);
-	fsystem->getVersion(&version);
-
-	if (version < FMOD_VERSION)
-	{
-		printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
-	}
-
-	fsystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	
-	// Init the equalizer objects
-	initEqualizers();
-
-	initAllStimuli();
-}
 
 
 StimuliLibrary::~StimuliLibrary()
