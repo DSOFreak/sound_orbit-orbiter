@@ -184,7 +184,10 @@ void TimerFunc(bool& bIsFirstCall) {
 					usleep(50000);
 				};
 				bMovementMutex = true;
-				pMovement->movement_queue.push(hostData);
+				if (hostData->angularDistance > 0.0)
+				{
+					pMovement->movement_queue.push(hostData);
+				}
 				bMovementMutex = false;
 				movement_skip = false;
 			}
