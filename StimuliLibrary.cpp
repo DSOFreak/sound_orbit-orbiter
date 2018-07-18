@@ -14,28 +14,11 @@ const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_
 
 void StimuliLibrary::initAllStimuli()
 {
-	//Stimuli 1:
-	/*
-	fsystem->createDSPByType(FMOD_DSP_TYPE_OSCILLATOR, &dsp_sin);
-	fsystem->createDSPByType(FMOD_DSP_TYPE_OSCILLATOR, &dsp_noise);
-	fsystem->createDSPByType(FMOD_DSP_TYPE_LOWPASS, &dsp_lowpass);
-	dsp_sin->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 0);
-	dsp_noise->setParameterInt(FMOD_DSP_OSCILLATOR_TYPE, 5);
-	channel->addDSP(0, dsp_lowpass);
-	dsp_lowpass->setBypass(true);*/
-
-	/*
-	FMOD::Sound		*audio_Stimulus0;
-	FMOD::Sound		*audio_Stimulus1;
-	FMOD::Sound		*audio_Stimulus2;*/
 	bool isPlaybackPaused = true;
-	//DEBUG TEST
-	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
-	fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
-	audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+
 	//Stimulus1
-//	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus1);
-	//fsystem->playSound(audio_Stimulus1, channelgroup, isPlaybackPaused, &channel);
+	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus1);
+
 
 
 	/*
@@ -196,6 +179,11 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio);
 		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
 		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);*/
+		channel = channel_Stimulus1;
+		channel->setChannelGroup(channelgroup);
+		audio = audio_Stimulus1;
+		audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+		fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
 		break;
 	case 2:
 	{

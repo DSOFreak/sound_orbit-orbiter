@@ -35,6 +35,9 @@ private:
 	FMOD::Sound		*audio_Stimulus1;
 	FMOD::Sound		*audio_Stimulus2;
 	FMOD::Sound		*audio_Stimulus3;
+	FMOD::Channel   *channel_Stimulus1;
+	FMOD::Channel   *channel_Stimulus2;
+	FMOD::Channel   *channel_Stimulus3;
 	FMOD::DSP       *dsp_sin;
 	FMOD::DSP       *dsp_noise;
 	FMOD::DSP		*dsp_lowpass;
