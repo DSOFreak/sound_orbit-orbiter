@@ -252,8 +252,10 @@ void vStimuliThread()
 
 				stimuliLib.updateFSystem();
 				// Check if there is a protocol hicjacking
+				bMovementMutex = true;
 				if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->movement_queue, motor)) // not protocl adaption, process as usual
 				{
+					bMovementMutex = false;
 					//cout << "No Hijacking" << endl;
 					if (stimuliLib.bGetIsThereAFractionLeftToPlay())
 					{
@@ -266,7 +268,7 @@ void vStimuliThread()
 						stimuliLib.vPlayStimulusIfToBeTriggered();
 					}
 				}
-
+				bMovementMutex = false;
 				bStimuliMutex = false;
 			}
 
@@ -348,8 +350,7 @@ int main(int argc, char **argv)
 			usleep(100000);
 		}
 	}
-	motor->closeDevice(); // close EPOS2
 	printf("\n Delete motor object quit main!");
-
+	motor->closeDevice(); // close EPOS2
 	return 0;
 }
