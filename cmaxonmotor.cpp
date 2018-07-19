@@ -25,6 +25,23 @@ CMaxonMotor::CMaxonMotor()
 	setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
 	currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
 	int iTempPos;
+	unsigned int errorCode;
+	if (VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode))
+	{
+		int Absolute = FALSE;
+		if (!Absolute)
+		{
+			int PositionIs = 0;
+			if (VCS_GetPositionIs(keyHandle, nodeID, &PositionIs, &errorCode)) {
+
+			}
+		}
+	}
+	else
+	{
+		cout << "Activate profile position mode failed!" << endl;
+	}
+
 	getCurrentPosition(iTempPos);
 	currenTargetPos = iTempPos;
 }
@@ -228,30 +245,13 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 	getCurrentPosition(curr);
 	//std::cout << "current position: " << curr << std::endl;
     unsigned int errorCode = 0;
+	int Absolute = FALSE;
+	int Immediately = TRUE;
 
-    if( VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode) )
-    {
-        int Absolute = FALSE;
-        int Immediately = TRUE;
-
-        if( !Absolute )
-        {
-            int PositionIs = 0;
-			if (VCS_GetPositionIs(keyHandle, nodeID, &PositionIs, &errorCode)) {
-
-			}
-        }
-
-        if( !VCS_MoveToPosition(keyHandle, nodeID, addToCurrentPosition, Absolute, Immediately, &errorCode) )
-        {
-            cout << "Move to position failed!, error code="<<errorCode<<endl;
-        }
-    }
-    else
-    {
-        cout << "Activate profile position mode failed!" << endl;
-    }
-
+	if (!VCS_MoveToPosition(keyHandle, nodeID, addToCurrentPosition, Absolute, Immediately, &errorCode))
+	{
+		cout << "Move to position failed!, error code=" << errorCode << endl;
+	}
 	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
 	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl;
 	currenTargetPos = addToCurrentPosition + curr;
