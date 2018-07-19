@@ -1,11 +1,11 @@
 #include "cmaxonmotor.h"
-
+#include "Movement.h"
 #include <string.h>
 #include <iostream>
 #include <cstdio>
 #include <ctime>
 #include <lirc/lirc_client.h> //usleep
-
+#include "RaspiConfig.h"
 #include <fstream>      // std::fstream
 #include <fcntl.h>
 
@@ -15,6 +15,25 @@
 
 using namespace std;
 
+
+
+CMaxonMotor::CMaxonMotor()
+{
+    strcpy(PortName, "USB0");
+    ErrorCode = 0x00;
+    nodeID = 1;
+	setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
+	currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
+	int iTempPos;
+	getCurrentPosition(iTempPos);
+	currenTargetPos = iTempPos;
+}
+CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
+{
+    PortName = portNamestr;
+    ErrorCode = 0x00;
+    nodeID = input_node_Id;
+}
 long CMaxonMotor::lgetCurrentTargetPositionInMotorData()
 {
 	return lCurrentTargetPositionInMotorData;
@@ -30,21 +49,6 @@ long CMaxonMotor::lConvertAngleInDegreeToMotorData(int iAngle)
 	long lretVal = 65536 * (float(iAngle) / 360.0) * (RAILPERI / WHEELPERI);
 	return lretVal;
 }
-
-CMaxonMotor::CMaxonMotor()
-{
-    strcpy(PortName, "USB0");
-    ErrorCode = 0x00;
-    nodeID = 1;
-
-}
-CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
-{
-    PortName = portNamestr;
-    ErrorCode = 0x00;
-    nodeID = input_node_Id;
-}
-
 bool CMaxonMotor::reachedTarget()
 {
 	bool bRetVal = false;
@@ -66,8 +70,15 @@ bool CMaxonMotor::reachedTarget()
 	
 	if (targetReached != 0) // We reached the target position
 	{
-		//cout << "----------------We reached the target position" << endl;
+		
 		bRetVal = true;
+		setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
+		if (currentlyProcessedMovementData != nullptr)
+		{
+			currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
+		}
+		
+		
 	}
 	else
 	{
@@ -209,7 +220,7 @@ void CMaxonMotor::initializeDevice() {
 	SetPosModeParameter();
 }
 
-void CMaxonMotor::Move(long TargetPosition)
+void CMaxonMotor::Move(long addToCurrentPosition)
 {
 
 	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING" << endl;
@@ -231,7 +242,7 @@ void CMaxonMotor::Move(long TargetPosition)
 			}
         }
 
-        if( !VCS_MoveToPosition(keyHandle, nodeID, TargetPosition, Absolute, Immediately, &errorCode) )
+        if( !VCS_MoveToPosition(keyHandle, nodeID, addToCurrentPosition, Absolute, Immediately, &errorCode) )
         {
             cout << "Move to position failed!, error code="<<errorCode<<endl;
         }
@@ -241,12 +252,13 @@ void CMaxonMotor::Move(long TargetPosition)
         cout << "Activate profile position mode failed!" << endl;
     }
 
-	std::cout << "apply change of: " << TargetPosition << " to current position " << curr << std::endl;
-	std::cout << "New position should be: " << TargetPosition + curr << std::endl;
-
+	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
+	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl;
+	currenTargetPos = addToCurrentPosition + curr;
+	
 }
 
-void CMaxonMotor::getTargetPosition(long int &targetPosition)
+void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 {
 
     unsigned int errorCode = 0;
@@ -354,4 +366,65 @@ int CMaxonMotor::GetCPULoad(float &load) {
 	read(FileHandler, FileBuffer, sizeof(FileBuffer) - 1);
 	sscanf(FileBuffer, "%f", &load);
 	close(FileHandler);
+}
+
+
+bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
+{
+	shared_ptr<Movement> pMovement = Movement::getInstance();
+	if (pMovement->vecMovementqueue.empty() || (currentlyProcessedMovementData == nullptr) || (pMovement->vecMovementqueue.front()->direction == 0))
+	{
+		return false;
+	}
+	// movement pending 
+	if ((currentlyProcessedMovementData->direction == pMovement->vecMovementqueue.front()->direction) && (currentlyProcessedMovementData->speed == pMovement->vecMovementqueue.front()->speed))
+	{// we have a match
+		// add the movement to the current motor movement (means, call it with an updated targetPosition)
+		long int liCurrentlyProcessedAddToPosition;
+		getCurrentlyProcessedTargetPosition(liCurrentlyProcessedAddToPosition);
+		int iCurrentPosition;
+		getCurrentPosition(iCurrentPosition);
+		cout << "iCurrentPosition " << iCurrentPosition << endl;
+		cout << "iCurrentTargetPosition " << currenTargetPos << endl;
+		cout << "liCurrentlyProcessedAddToPosition " << liCurrentlyProcessedAddToPosition << endl;
+		long int liLeftOfCurrentWayToTargetPos = abs(currenTargetPos - iCurrentPosition);
+		cout << "liLeftOfCurrentWayToTargetPos " << liLeftOfCurrentWayToTargetPos << endl;
+
+
+
+		long int liDistanceInMotorData;
+		if (RaspiConfig::ownIndex == 1)
+		{
+			if (pMovement->vecMovementqueue.front()->direction == 1) { // Dir 1 = clockwise
+				liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos; // Correct
+			}
+			if (pMovement->vecMovementqueue.front()->direction == 2) { // Dir 2 = counterclockwise
+				liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance)  + liLeftOfCurrentWayToTargetPos) * -1;
+			}
+		}
+		else
+		{
+			if (pMovement->vecMovementqueue.front()->direction == 1) { // Dir 1 = clockwise
+				liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos) * -1 ; // Correct
+			}
+			if (pMovement->vecMovementqueue.front()->direction == 2) { // Dir 2 = counterclockwise
+				liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos;
+			}
+		}
+
+		//Update the target position
+
+
+		cout << "liDistanceInMotorData " << liDistanceInMotorData << endl;
+		setCurrentTargetPositionInMotorData(liDistanceInMotorData);
+		Move(lgetCurrentTargetPositionInMotorData());
+
+		// delete the first element of the movement queue
+		pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

@@ -23,7 +23,7 @@ using namespace std;
 
 
 unsigned short iVoltage;
-int iCurrentPosition, iNumbOffs, iAngle;
+int iCurrentPosition, iNumbOffs;
 unsigned char cErrorNbr, cNumb[3]; // Motor errors
 std::shared_ptr<CMaxonMotor>  motor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
@@ -102,10 +102,12 @@ bool movement_skip;
 bool stimuli_skip;
 void vProcessMovement()
 {
+	int iAngleDegree;
+	std::cout << "vProcessMovement:" << std::endl;
 	shared_ptr<Toolbox::HostData> hostData = pMovement->vecMovementqueue.front();
 	pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
 
-	std::cout << "vProcessMovement:" << std::endl;
+	
 	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
 	std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
 
@@ -113,27 +115,28 @@ void vProcessMovement()
 	if (RaspiConfig::ownIndex == 1)
 	{
 		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngle = hostData->angularDistance; // Correct
+			iAngleDegree = hostData->angularDistance; // Correct
 		}
 		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngle = hostData->angularDistance * -1;
+			iAngleDegree = hostData->angularDistance * -1;
 		}
 	}
 	else
 	{
 		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngle = hostData->angularDistance * -1; // Correct
+			iAngleDegree = hostData->angularDistance * -1; // Correct
 		}
 		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngle = hostData->angularDistance;
+			iAngleDegree = hostData->angularDistance;
 		}
 	}
 
 	if (hostData->direction != 0) { // Dir 0 = no movement
-		long lMotorDataTargetPosition = motor->lConvertAngleInDegreeToMotorData(iAngle);
+		long lMotorDataTargetPosition = motor->lConvertAngleInDegreeToMotorData(iAngleDegree);
 		motor->setCurrentTargetPositionInMotorData(lMotorDataTargetPosition);
 		motor->setSpeed(hostData->speed);
 		motor->Move(motor->lgetCurrentTargetPositionInMotorData());
+		motor->currentlyProcessedMovementData = hostData;
 	}
 }
 void TimerFunc(bool& bIsFirstCall) {
@@ -274,7 +277,7 @@ void vStimuliThread()
 	stimuliThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
 }
 
-void vMovementThread(bool &bIsFirstCall)
+void vMovementThread()
 {
 	std::thread movementThread{ [&]()
 	{
@@ -285,23 +288,14 @@ void vMovementThread(bool &bIsFirstCall)
 			if (!bMovementMutex)
 			{
 				bMovementMutex = true;
-				// If we have concatenated movements with the same velocity and same direction -> add the angular distances to avoid "stops" during a trajectory of the same direcion
-				pMovement->vConcatenateSuccessiveMovements();
-				if (!pMovement->vecMovementqueue.empty())// movement pending 
+				if (!motor->bTryToAddMovementDataToCurrentMovement())
 				{
-					if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+					if (!pMovement->vecMovementqueue.empty())// movement pending 
 					{
-						vProcessMovement();
-					}
-					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
-					else if (bIsFirstCall == true)
-					{
-						bIsFirstCall = false;
-						cout << "Movement due to first call" << endl;
-						vProcessMovement();
-						// is Motor moving? else: process further movement
-						//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
-						//vProcessMovement();
+						if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+						{
+							vProcessMovement();
+						}
 					}
 				}
 				bMovementMutex = false;
@@ -338,7 +332,7 @@ int main(int argc, char **argv)
 	exit_app = false;
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
-	vMovementThread(bIsFirstCall);
+	vMovementThread();
 	vStimuliThread();
 	while (!exit_app) {
 		TimerFunc(bRef);
