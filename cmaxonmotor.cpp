@@ -336,7 +336,7 @@ void CMaxonMotor::setSpeed(float speed)
 
 	
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 182 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
+	iProfileVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
 
