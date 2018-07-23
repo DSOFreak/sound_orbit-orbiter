@@ -1,5 +1,15 @@
 #include "TCPClient.h"
 
+void TCPClient::vSetbIsConnectionEstablished(bool isEstablished)
+{
+	bIsConnectionEstablished = isEstablished;
+}
+
+bool TCPClient::bGetbIsConnectionEstablished()
+{
+	return bIsConnectionEstablished;
+}
+
 TCPClient::TCPClient()
 {
 	sock = -1;
@@ -9,6 +19,7 @@ TCPClient::TCPClient()
 
 bool TCPClient::setup(string address , int port)
 {
+	vSetbIsConnectionEstablished(false);
   	if(sock == -1)
 	{
 		sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -36,9 +47,7 @@ bool TCPClient::setup(string address , int port)
   	}
   	else
   	{
-		cout << "BUG vermuted start"<<endl;
     		server.sin_addr.s_addr = inet_addr( address.c_str() ); // ich glaube hier steigt er beim startup manchmal aus (unbestätigt ...). vermutlich: address.empty() = true
-			cout << "BUG vermuted end" << endl;
   	}
   	server.sin_family = AF_INET;
   	server.sin_port = htons( port );
@@ -49,6 +58,7 @@ bool TCPClient::setup(string address , int port)
   	}
 	else
 	{
+		vSetbIsConnectionEstablished(true);
 		cout << "\n CONNECTION ESTABLISHED \n";
 	}
   	return true;

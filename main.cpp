@@ -326,7 +326,8 @@ int main(int argc, char **argv)
 	port = 1234;
 	do {
 		printf("Connecting to server at %s:%d ... \n", ip_addr, port);
-	} while (!tcp.setup(ip_addr, port));
+		usleep(1000000);
+	} while (!tcp.bGetbIsConnectionEstablished());
 	printf("Connected!");
 
 	exit_app = false;

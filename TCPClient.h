@@ -24,6 +24,7 @@ class TCPClient
     int port;
     struct sockaddr_in server;
 
+	bool bIsConnectionEstablished;
   public:
     TCPClient();
     bool setup(string address, int port);
@@ -31,6 +32,9 @@ class TCPClient
     string receive(int size = 4096);
     string read();
     void exit();
+	
+	void vSetbIsConnectionEstablished(bool isEstablished);
+	bool bGetbIsConnectionEstablished();
 };
 
 #endif
