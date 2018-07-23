@@ -36,7 +36,9 @@ bool TCPClient::setup(string address , int port)
   	}
   	else
   	{
-    		server.sin_addr.s_addr = inet_addr( address.c_str() );
+		cout << "BUG vermuted start"<<endl;
+    		server.sin_addr.s_addr = inet_addr( address.c_str() ); // ich glaube hier steigt er beim startup manchmal aus (unbestätigt ...). vermutlich: address.empty() = true
+			cout << "BUG vermuted end" << endl;
   	}
   	server.sin_family = AF_INET;
   	server.sin_port = htons( port );
