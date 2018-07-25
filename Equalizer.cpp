@@ -27,28 +27,40 @@ Equalizer::Equalizer( unsigned int uiSpeakerID, unsigned int uiStimulusNumber) :
 				printf("fBandwidth (%f)\n", fBandwidth);
 				printf("fGain! (%f)\n", fGain);*/
 			}
-			else
+		case 1:
+			if (uiStimulusNumber == 1) // WN
 			{
-				
+				std::copy(&arrfSpeaker1WN[0][0], &arrfSpeaker1WN[0][0] + NUMBER_OF_TERCEBANDS*NUMBER_OF_STIMULI, &myEqSettings[0][0]);
 			}
-		/*case 1:
-			if (uiStimulusNumber == 1)
+			else if (uiStimulusNumber == 2) // PN
 			{
-				myEqSettings =
-			}
-			else if (uiStimulusNumber == 2)
-			{
-				myEqSettings = arrfSpeaker1PN;
+				std::copy(&arrfSpeaker1PN[0][0], &arrfSpeaker1PN[0][0] + NUMBER_OF_TERCEBANDS*NUMBER_OF_STIMULI, &myEqSettings[0][0]);
+				//Debug
+				/*
+				float fCenterFreq = myEqSettings[0][0];
+				float fBandwidth = myEqSettings[0][1];
+				float fGain = myEqSettings[0][2];
+				printf("fCenterFreq (%f)\n", fCenterFreq);
+				printf("fBandwidth (%f)\n", fBandwidth);
+				printf("fGain! (%f)\n", fGain);*/
 			}
 		case 2:
-			if (uiStimulusNumber == 1)
+			if (uiStimulusNumber == 1) // WN
 			{
-				myEqSettings =
+				std::copy(&arrfSpeaker2WN[0][0], &arrfSpeaker2WN[0][0] + NUMBER_OF_TERCEBANDS*NUMBER_OF_STIMULI, &myEqSettings[0][0]);
 			}
-			else if (uiStimulusNumber == 2)
+			else if (uiStimulusNumber == 2) // PN
 			{
-				myEqSettings = arrfSpeaker2PN;
-			}*/
+				std::copy(&arrfSpeaker2PN[0][0], &arrfSpeaker2PN[0][0] + NUMBER_OF_TERCEBANDS*NUMBER_OF_STIMULI, &myEqSettings[0][0]);
+				//Debug
+				/*
+				float fCenterFreq = myEqSettings[0][0];
+				float fBandwidth = myEqSettings[0][1];
+				float fGain = myEqSettings[0][2];
+				printf("fCenterFreq (%f)\n", fCenterFreq);
+				printf("fBandwidth (%f)\n", fBandwidth);
+				printf("fGain! (%f)\n", fGain);*/
+			}
 		default:
 			break;
 	};

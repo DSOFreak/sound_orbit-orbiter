@@ -277,7 +277,7 @@ void vStimuliThread()
 	stimuliThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
 }
 
-void vMovementThread()
+void vMovementThread(bool &bIsFirstCall)
 {
 	std::thread movementThread{ [&]()
 	{
@@ -295,6 +295,16 @@ void vMovementThread()
 						if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
 						{
 							vProcessMovement();
+						}
+						// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
+						else if (bIsFirstCall == true)
+						{
+							bIsFirstCall = false;
+							cout << "Movement due to first call" << endl;
+							vProcessMovement();
+							// is Motor moving? else: process further movement
+							//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
+							//vProcessMovement();
 						}
 					}
 				}
@@ -333,7 +343,7 @@ int main(int argc, char **argv)
 	exit_app = false;
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
-	vMovementThread();
+	vMovementThread(bRef);
 	vStimuliThread();
 	while (!exit_app) {
 		TimerFunc(bRef);
