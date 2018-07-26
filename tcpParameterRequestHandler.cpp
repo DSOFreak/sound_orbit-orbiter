@@ -1,5 +1,6 @@
 #include "tcpParameterRequestHandler.h"
 #include <algorithm>
+#include "StimuliLibrary.h"
 #include "Movement.h"
 const std::string tcpParameterRequestHandler::strEndIndicatorForProtocol = "Q"; // End of Telegram
 tcpParameterRequestHandler::tcpParameterRequestHandler(std::shared_ptr<CMaxonMotor> pMaxonMotor) : m_pMaxonMotor(pMaxonMotor)
@@ -34,9 +35,14 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 		{
 			std::shared_ptr<Movement> pMovement = Movement::getInstance();
 			pMovement->vClearMovementQueue();
+			m_pMaxonMotor->vResetTargetPositionToCurrentPosition();
 			printf("Movement Queue Cleared \n");
 			// Debug clear also stimuliLib
-			
+			std::shared_ptr<StimuliLibrary> pStimuliLib = StimuliLibrary::getInstance();
+			pStimuliLib->vClearStimuliQueue();
+			printf("Stimuli Queue Cleared \n");
+			// -> Vielleicht auch auf nullptr setzen und die Bewegung sofort stoppen (Motor->Stop) schicken
+			// -> Dann das Kommando umbenennen in S_C_A Set Clear All
 		}
 		// TO DO: Hier habe ich noch nicht das sich lohnen würde.. nichts zu setzen!
 	}

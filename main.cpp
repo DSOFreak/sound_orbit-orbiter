@@ -25,7 +25,7 @@ using namespace std;
 unsigned short iVoltage;
 int iCurrentPosition, iNumbOffs;
 unsigned char cErrorNbr, cNumb[3]; // Motor errors
-std::shared_ptr<CMaxonMotor>  motor;
+std::shared_ptr<CMaxonMotor>  pMotor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
 std::shared_ptr<Movement> pMovement;
 bool exit_app;
@@ -92,10 +92,10 @@ float A_freqs[] = { 22.5f, 55.0f,110.0f,220.0f,440.0f,880.0f,1760.0f,3520.0f,704
 
 
 void IdleFunc(void) {
-	motor->getCurrentPosition(iCurrentPosition);
-	motor->ErrorNbr(&cErrorNbr);
-	if (motor->ErrorCode == 0x34000007) motor->initializeDevice();
-	if (cErrorNbr != 0) motor->initializeDevice();
+	pMotor->getCurrentPosition(iCurrentPosition);
+	pMotor->ErrorNbr(&cErrorNbr);
+	if (pMotor->ErrorCode == 0x34000007) pMotor->initializeDevice();
+	if (cErrorNbr != 0) pMotor->initializeDevice();
 }
 
 bool movement_skip;
@@ -132,11 +132,11 @@ void vProcessMovement()
 	}
 
 	if (hostData->direction != 0) { // Dir 0 = no movement
-		long lMotorDataTargetPosition = motor->lConvertAngleInDegreeToMotorData(iAngleDegree);
-		motor->setCurrentTargetPositionInMotorData(lMotorDataTargetPosition);
-		motor->setSpeed(hostData->speed);
-		motor->Move(motor->lgetCurrentTargetPositionInMotorData());
-		motor->currentlyProcessedMovementData = hostData;
+		long lMotorDataTargetPosition = pMotor->lConvertAngleInDegreeToMotorData(iAngleDegree);
+		pMotor->setCurrentTargetPositionInMotorData(lMotorDataTargetPosition);
+		pMotor->setSpeed(hostData->speed);
+		pMotor->Move(pMotor->lgetCurrentTargetPositionInMotorData());
+		pMotor->currentlyProcessedMovementData = hostData;
 	}
 }
 void TimerFunc(bool& bIsFirstCall) {
@@ -254,7 +254,7 @@ void vStimuliThread()
 				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
 				bMovementMutex = true;
-				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, motor)) // not protocl adaption, process as usual
+				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, pMotor)) // not protocl adaption, process as usual
 				{
 					bMovementMutex = false;
 					//cout << "No Hijacking" << endl;
@@ -289,11 +289,11 @@ void vMovementThread(bool &bIsFirstCall)
 			if (!bMovementMutex)
 			{
 				bMovementMutex = true;
-				if (!motor->bTryToAddMovementDataToCurrentMovement())
+				if (!pMotor->bTryToAddMovementDataToCurrentMovement())
 				{
 					if (!pMovement->vecMovementqueue.empty())// movement pending 
 					{
-						if (motor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+						if (pMotor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
 						{
 							vProcessMovement();
 						}
@@ -324,9 +324,9 @@ int main(int argc, char **argv)
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
-	motor = std::make_shared<CMaxonMotor>(InterfaceName, 1);
-	motor->initializeDevice(); // initialize EPOS2
-	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(motor);
+	pMotor = std::make_shared<CMaxonMotor>(InterfaceName, 1);
+	pMotor->initializeDevice(); // initialize EPOS2
+	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
 
 	std::thread tcp_thread(tcp_func);
 	if (argc == 1)
@@ -356,6 +356,6 @@ int main(int argc, char **argv)
 		}
 	}
 	printf("\n Delete motor object quit main!");
-	motor->closeDevice(); // close EPOS2
+	pMotor->closeDevice(); // close EPOS2
 	return 0;
 }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <utility>
 #include <limits>
 #include "RaspiConfig.h"
 using namespace std;
@@ -459,6 +460,12 @@ bool StimuliLibrary::bCurrentlyAHijackedProtcolIsProcessed()
 void StimuliLibrary::vSetHijackedProtocolIsCompletelyProcessed()
 {
 	hostDataOfHijackedProtocol = nullptr;
+}
+
+void StimuliLibrary::vClearStimuliQueue()
+{
+	std::queue<shared_ptr<Toolbox::HostData >> empty;
+	std::swap(stimuli_queue, empty);
 }
 
 

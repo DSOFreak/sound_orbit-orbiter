@@ -96,6 +96,7 @@ public:
 	bool bCurrentlyAHijackedProtcolIsProcessed();
 	void vSetHijackedProtocolIsCompletelyProcessed();
 
+	void vClearStimuliQueue();
 };
 
 #endif

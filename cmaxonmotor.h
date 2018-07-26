@@ -39,6 +39,7 @@ public:
     void Move(long TargetPosition);
 	void getCurrentlyProcessedTargetPosition(long int &targetPosition);
     void getCurrentPosition(int& CurrentPosition);
+	void vResetTargetPositionToCurrentPosition();
     void Halt();
     void activate_device();
 	void SetPosModeParameter();

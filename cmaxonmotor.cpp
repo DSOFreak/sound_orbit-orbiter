@@ -280,6 +280,12 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 
 }
 
+void CMaxonMotor::vResetTargetPositionToCurrentPosition()
+{
+	Move(1);
+	Halt();
+}
+
 void CMaxonMotor::Halt()
 {
         unsigned int ErrorCode = 0;
