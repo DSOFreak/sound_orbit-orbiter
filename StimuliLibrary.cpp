@@ -6,6 +6,7 @@
 #include <iostream>
 #include <utility>
 #include <limits>
+#include <chrono>
 #include "RaspiConfig.h"
 using namespace std;
 #define PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING 991111 // own hijacking of protocol
@@ -13,9 +14,32 @@ const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_
 const int StimuliLibrary::iRaiseAndFallTimeMS = 30;
 //#include <unistd.h>		wyt todo
 std::shared_ptr<StimuliLibrary> StimuliLibrary::pInstance = nullptr;
-StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
+
+StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr), bStimuliMutex(false)
 {
 	printf("StimuliLibrary constructor called \n");
+	vSetUp();
+}
+void StimuliLibrary::vSetResetStimuliLib(bool bIsPlannedToReset)
+{
+	bResetStimuliLib = bIsPlannedToReset;
+}
+bool StimuliLibrary::bGetResetStimuliLib()
+{
+	return bResetStimuliLib;
+}
+void StimuliLibrary::vDoRebootOfStimuliLib()
+{
+	vSetResetStimuliLib(false);
+	printf("vDoRebootOfStimuliLib called \n");
+	vClearStimuliQueue();
+	stopStimuli();
+	pInstance = nullptr;
+	//vSetUp();
+}
+void StimuliLibrary::vSetUp()
+{
+	vSetResetStimuliLib(false);
 	FMOD::System_Create(&fsystem);
 	fsystem->getVersion(&version);
 
@@ -31,7 +55,6 @@ StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFil
 
 	initAllStimuli();
 }
-
 void StimuliLibrary::initAllStimuli()
 {
 	bool isPlaybackPaused = true;
@@ -49,7 +72,8 @@ void StimuliLibrary::initAllStimuli()
 }
 std::shared_ptr<StimuliLibrary>  StimuliLibrary::getInstance()
 {
-	if (!pInstance)
+
+	if (pInstance == nullptr)
 	{
 		pInstance = std::make_shared<StimuliLibrary>();
 	}
@@ -176,22 +200,17 @@ void StimuliLibrary::stopStimuli()
 	vSetFadeOutNow(iRaiseAndFallTimeMS);
 
 	printf("\n\n  Stimuli Stop - \n\n");
-	audio->setMode(FMOD_LOOP_OFF);
-	channel->setMode(FMOD_LOOP_OFF);
+	//audio->setMode(FMOD_LOOP_OFF);
+	//channel->setMode(FMOD_LOOP_OFF);
 
-
-	early_stop = true;
 	channel->setPaused(true);
-	channel->stop();
+
 	audio->release();
 	fsystem->release();
-	FMOD::System_Create(&fsystem);
-	fsystem->getVersion(&version);
-	if (version < FMOD_VERSION)
-	{
-		printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
-	}
-	fsystem->init(32, FMOD_INIT_NORMAL, nullptr);
+
+
+	//FMOD::System_Create(&fsystem);
+	//fsystem->init(32, FMOD_INIT_NORMAL, nullptr);
 }
 
 bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)

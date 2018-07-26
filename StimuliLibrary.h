@@ -13,6 +13,8 @@ using namespace std;
 class StimuliLibrary
 {
 private:
+	bool bStimuliMutex;
+	bool bResetStimuliLib;
 	// Equalizer objects
 	std::shared_ptr<Equalizer> pEqSpeakerWN;
 	std::shared_ptr<Equalizer> pEqSpeakerPN;
@@ -64,6 +66,10 @@ private:
 
 
 public:
+	void vSetResetStimuliLib(bool bIsPlannedToReset);
+	bool bGetResetStimuliLib();
+	void vDoRebootOfStimuliLib();
+	void vSetUp();
 	static std::shared_ptr<StimuliLibrary> pInstance;
 	static std::shared_ptr<StimuliLibrary> getInstance();
 

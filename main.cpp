@@ -243,11 +243,10 @@ void vStimuliThread()
 	// falls nix geht... mache stimulilib shared pntr !!!!!!!!!!!!
 	std::thread stimuliThread{ [&]()
 	{
-		
 		while (true)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			if (!bStimuliMutex)
+			if (!bStimuliMutex && (pStimuliLib->pInstance != nullptr))
 			{
 				bStimuliMutex = true;
 
@@ -268,6 +267,12 @@ void vStimuliThread()
 						//cout << "We try to play a stimulus if it has to be triggered" << endl;
 						pStimuliLib->vPlayStimulusIfToBeTriggered();
 					}
+				}
+
+				if (pStimuliLib->bGetResetStimuliLib())
+				{
+					pStimuliLib->vDoRebootOfStimuliLib();
+					pStimuliLib = StimuliLibrary::getInstance();
 				}
 				bMovementMutex = false;
 				bStimuliMutex = false;

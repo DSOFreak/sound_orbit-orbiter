@@ -39,7 +39,9 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 			printf("Movement Queue Cleared \n");
 			// Debug clear also stimuliLib
 			std::shared_ptr<StimuliLibrary> pStimuliLib = StimuliLibrary::getInstance();
-			pStimuliLib->vClearStimuliQueue();
+			pStimuliLib->vSetResetStimuliLib(true);
+
+			//pStimuliLib->vSetUp();
 			printf("Stimuli Queue Cleared \n");
 			// -> Vielleicht auch auf nullptr setzen und die Bewegung sofort stoppen (Motor->Stop) schicken
 			// -> Dann das Kommando umbenennen in S_C_A Set Clear All
