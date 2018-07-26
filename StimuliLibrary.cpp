@@ -11,6 +11,7 @@ using namespace std;
 const int StimuliLibrary::iPlayStimulusAsLongAsMovementsPending = PLAY_STIMULUS_AS_LONG_AS_MOVEMENT_PENDING;
 const int StimuliLibrary::iRaiseAndFallTimeMS = 30;
 //#include <unistd.h>		wyt todo
+std::shared_ptr<StimuliLibrary> StimuliLibrary::pInstance = nullptr;
 StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
 	printf("StimuliLibrary constructor called \n");
@@ -45,7 +46,14 @@ void StimuliLibrary::initAllStimuli()
 	//Stimulus3
 	fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus3);
 }
-
+std::shared_ptr<StimuliLibrary>  StimuliLibrary::getInstance()
+{
+	if (!pInstance)
+	{
+		pInstance = std::make_shared<StimuliLibrary>();
+	}
+	return pInstance;
+}
 
 
 

@@ -312,8 +312,8 @@ void CMaxonMotor::SetPosModeParameter()
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
 	iProfileVelocity = 10000;
-	iProfileAcceleration = 5000;
-	iProfileDeceleration = 10000;
+	iProfileAcceleration = 5000; //prev. 5000
+	iProfileDeceleration = 10000; //prev. 10000
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 
 

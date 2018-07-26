@@ -35,6 +35,8 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 			std::shared_ptr<Movement> pMovement = Movement::getInstance();
 			pMovement->vClearMovementQueue();
 			printf("Movement Queue Cleared \n");
+			// Debug clear also stimuliLib
+			
 		}
 		// TO DO: Hier habe ich noch nicht das sich lohnen würde.. nichts zu setzen!
 	}

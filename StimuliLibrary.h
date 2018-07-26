@@ -64,6 +64,9 @@ private:
 
 
 public:
+	static std::shared_ptr<StimuliLibrary> pInstance;
+	static std::shared_ptr<StimuliLibrary> getInstance();
+
 	static const int iRaiseAndFallTimeMS;
 	FMOD::Channel* getChannel();
 	FMOD::ChannelGroup* getChannelGroup();

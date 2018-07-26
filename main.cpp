@@ -35,7 +35,7 @@ TCPClient tcp;
 char *ip_addr;
 int port;
 
-StimuliLibrary stimuliLib;
+std::shared_ptr<StimuliLibrary> pStimuliLib;
 
 bool bMovementMutex;
 bool bStimuliMutex;
@@ -213,7 +213,7 @@ void TimerFunc(bool& bIsFirstCall) {
 				bStimuliMutex = true;
 				if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
 				{
-					stimuliLib.stimuli_queue.push(hostData);
+					pStimuliLib->stimuli_queue.push(hostData);
 				}
 				stimuli_skip = false;
 				bStimuliMutex = false;
@@ -225,11 +225,11 @@ void TimerFunc(bool& bIsFirstCall) {
 				};
 				bStimuliMutex = true;
 				stimuli_skip = true;
-				while (!stimuliLib.stimuli_queue.empty())
+				while (!pStimuliLib->stimuli_queue.empty())
 				{
-					stimuliLib.stimuli_queue.pop();
+					pStimuliLib->stimuli_queue.pop();
 				}
-				stimuliLib.stimuli_queue.push(hostData);
+				pStimuliLib->stimuli_queue.push(hostData);
 				bStimuliMutex = false;
 			}
 		}
@@ -243,6 +243,7 @@ void vStimuliThread()
 	// falls nix geht... mache stimulilib shared pntr !!!!!!!!!!!!
 	std::thread stimuliThread{ [&]()
 	{
+		
 		while (true)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -250,22 +251,22 @@ void vStimuliThread()
 			{
 				bStimuliMutex = true;
 
-				stimuliLib.updateFSystem();
+				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
 				bMovementMutex = true;
-				if (!stimuliLib.bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, motor)) // not protocl adaption, process as usual
+				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, motor)) // not protocl adaption, process as usual
 				{
 					bMovementMutex = false;
 					//cout << "No Hijacking" << endl;
-					if (stimuliLib.bGetIsThereAFractionLeftToPlay())
+					if (pStimuliLib->bGetIsThereAFractionLeftToPlay())
 					{
-						//printf("\n We have a fraction left to play of %d milliseconds\n", stimuliLib.uiGetDesiredStimuliDuration_ms());
-						stimuliLib.playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
+						//printf("\n We have a fraction left to play of %d milliseconds\n", stimuliLib->uiGetDesiredStimuliDuration_ms());
+						pStimuliLib->playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
 					}
-					else if (!stimuliLib.stimuli_queue.empty())
+					else if (!pStimuliLib->stimuli_queue.empty())
 					{
 						//cout << "We try to play a stimulus if it has to be triggered" << endl;
-						stimuliLib.vPlayStimulusIfToBeTriggered();
+						pStimuliLib->vPlayStimulusIfToBeTriggered();
 					}
 				}
 				bMovementMutex = false;
@@ -319,6 +320,7 @@ int main(int argc, char **argv)
 {
 	bMovementMutex = false;
 	bStimuliMutex = false;
+	pStimuliLib = StimuliLibrary::getInstance();
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
