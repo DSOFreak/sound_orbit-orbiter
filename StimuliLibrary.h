@@ -8,12 +8,11 @@
 #include "MusicScale.h"
 #include "cmaxonmotor.h"
 #include "Toolbox.h"
-
+#include <mutex>
 using namespace std;
 class StimuliLibrary
 {
 private:
-	bool bStimuliMutex;
 	bool bResetStimuliLib;
 	// Equalizer objects
 	std::shared_ptr<Equalizer> pEqSpeakerWN;
@@ -32,10 +31,10 @@ private:
 	FMOD::System    *fsystem;
 	FMOD::Channel   *channel;
 	FMOD::ChannelGroup *channelgroup;
-	FMOD::Sound		*audio;
-	FMOD::Sound		*audio_Stimulus1;
-	FMOD::Sound		*audio_Stimulus2;
-	FMOD::Sound		*audio_Stimulus3;
+	FMOD::Sound		*pAudio;
+	FMOD::Sound		*pAudio_Stimulus1;
+	FMOD::Sound		*pAudio_Stimulus2;
+	FMOD::Sound		*pAudio_Stimulus3;
 	FMOD::Channel   *channel_Stimulus2; // Due to equalizer
 	FMOD::DSP       *dsp_sin;
 	FMOD::DSP       *dsp_noise;
@@ -49,6 +48,7 @@ private:
 
 	void *extradriverdata;
 	bool early_stop;
+	std::vector<int> veciStimuliToInit;
 	void initAllStimuli();
 	static void timedStop(FMOD::Channel* channel, unsigned time_ms);
 
@@ -66,6 +66,7 @@ private:
 
 
 public:
+	std::mutex mutexStimuli;
 	void vSetResetStimuliLib(bool bIsPlannedToReset);
 	bool bGetResetStimuliLib();
 	void vDoRebootOfStimuliLib();

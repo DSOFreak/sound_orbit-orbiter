@@ -15,7 +15,7 @@ const int StimuliLibrary::iRaiseAndFallTimeMS = 30;
 //#include <unistd.h>		wyt todo
 std::shared_ptr<StimuliLibrary> StimuliLibrary::pInstance = nullptr;
 
-StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr), bStimuliMutex(false)
+StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
 	printf("StimuliLibrary constructor called \n");
 	vSetUp();
@@ -42,33 +42,62 @@ void StimuliLibrary::vSetUp()
 	vSetResetStimuliLib(false);
 	FMOD::System_Create(&fsystem);
 	fsystem->getVersion(&version);
-
+	
 	if (version < FMOD_VERSION)
 	{
 		printf("FMOD lib version %08x doesn't match header version %08x \n", version, FMOD_VERSION);
 	}
-
 	fsystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 
 	// Init the equalizer objects
 	initEqualizers();
-
+	veciStimuliToInit = { 1,2,3 };
 	initAllStimuli();
 }
 void StimuliLibrary::initAllStimuli()
 {
 	bool isPlaybackPaused = true;
 
-	//Stimulus1
-	fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus1);
-
-	//Stimulus2
-	fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus2);
-	fsystem->playSound(audio_Stimulus2, channelgroup, isPlaybackPaused, &channel_Stimulus2);
-	pEqSpeakerPN->initDSPWithEQSettings(channel_Stimulus2, channelgroup, fsystem);
-
-	//Stimulus3
-	fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &audio_Stimulus3);
+	for (int i = 0; i < veciStimuliToInit.size(); i++)
+	{
+		switch (veciStimuliToInit.at(i))
+		{
+		case (1):
+		{
+			//Stimulus1
+			//printf("initAllStimuli - Stimulus1(); \n");
+			fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus1);
+			break;
+		}
+		case(2):
+		{
+			//Stimulus2
+			//printf("initAllStimuli - Stimulus2(); \n");
+			fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus2);
+			//printf("initAllStimuli - Stimulus2()playSound; \n");
+			FMOD_RESULT res0 = fsystem->playSound(pAudio_Stimulus2, channelgroup, isPlaybackPaused, &channel_Stimulus2);
+			if (res0 != FMOD_OK)
+			{
+				printf("FMOD error res0! (%d)\n", res0);
+				exit(-1);
+			}
+			//printf("initAllStimuli - Stimulus2()initDSPWithEQSettings; \n");
+			pEqSpeakerPN->initDSPWithEQSettings(channel_Stimulus2, channelgroup, fsystem);
+			break;
+		}
+		case (3):
+		{
+			//Stimulus3
+			//printf("initAllStimuli - Stimulus3(); \n");
+			fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus3);
+			break;
+		}
+		default:
+			printf("WRONG STIMULI NUMBER TO INIT RECEIVED \n");
+			break;
+		}
+	}
+	veciStimuliToInit.clear();
 }
 std::shared_ptr<StimuliLibrary>  StimuliLibrary::getInstance()
 {
@@ -182,6 +211,7 @@ void StimuliLibrary::vSetFadeOutNow(int iFallTimeMs)
 }
 void StimuliLibrary::vSetFadeOutAtSpecificTime(int iSampleLengthOfAudioEnd,int iFallTimeMs)
 {
+	
 	int rate;
 	unsigned long long clockDSP, parentDSP;
 	channelgroup->getDSPClock(&clockDSP, &parentDSP);
@@ -200,17 +230,33 @@ void StimuliLibrary::stopStimuli()
 	vSetFadeOutNow(iRaiseAndFallTimeMS);
 
 	printf("\n\n  Stimuli Stop - \n\n");
-	//audio->setMode(FMOD_LOOP_OFF);
-	//channel->setMode(FMOD_LOOP_OFF);
+	pAudio->setMode(FMOD_LOOP_OFF);
+	channel->setMode(FMOD_LOOP_OFF);
 
 	channel->setPaused(true);
-
-	audio->release();
-	fsystem->release();
-
-
-	//FMOD::System_Create(&fsystem);
-	//fsystem->init(32, FMOD_INIT_NORMAL, nullptr);
+	channel->stop();
+	pAudio->release();
+	//printf("Stimuli Stop - pAudio %p)\n", pAudio);
+	initAllStimuli(); // necessary for the next stimulus call
+	
+	
+	/*FMOD_RESULT res0 = fsystem->release();
+	printf("Stimuli Stop - pAudio after  fsystem->release() %p)\n", pAudio);
+	if (res0 != FMOD_OK)
+	{
+		printf("FMOD error fsystem->release (%d)\n", res0);
+	}
+	res0 = FMOD::System_Create(&fsystem);
+	if (res0 != FMOD_OK)
+	{
+		printf("FMOD error System_Create (%d)\n", res0);
+	}
+	res0 = fsystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
+	if (res0 != FMOD_OK)
+	{
+		printf("FMOD error  fsystem->init (%d)\n", res0);
+	}
+	*/
 }
 
 bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
@@ -222,25 +268,30 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	switch (nr)
 	{
 	case 1:
-		audio = audio_Stimulus1;
+		pAudio = pAudio_Stimulus1;
+		veciStimuliToInit.push_back(1);
 		break;
 	case 2:
 	{
-		audio = audio_Stimulus2;
+		pAudio = pAudio_Stimulus2;
 		channel = channel_Stimulus2;
+		veciStimuliToInit.push_back(2);
 		break;
 	}
 	case 3:
-		audio = audio_Stimulus3;
+		pAudio = pAudio_Stimulus3;
+		veciStimuliToInit.push_back(3);
 		break;
 	default:
 		//printf("\n\n Playing NOTHING - undefined stimulus number %i \n\n", nr);
 		bRetIsValidStimuli = false;
 		break;
 	}
-	channel->setChannelGroup(channelgroup);
-	audio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
-	fsystem->playSound(audio, channelgroup, isPlaybackPaused, &channel);
+	//delete duplicates
+	std::unique(veciStimuliToInit.begin(), veciStimuliToInit.end());
+
+	pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);;
+	fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
 	channel->setVolume(volume);
 	return bRetIsValidStimuli;
 }
@@ -284,7 +335,7 @@ void StimuliLibrary::playStimuli()
 		printf("\n\n (audioFileLength_ms > desiredDuration_ms) \n\n");
 
 		unsigned int audioFileLength_Samples;
-		audio->getLength(&audioFileLength_Samples, FMOD_TIMEUNIT_PCM);
+		pAudio->getLength(&audioFileLength_Samples, FMOD_TIMEUNIT_PCM);
 		// Get length of one sample
 		double dMsLengthOfOneSample = (double)audioFileLength_Samples / (double)audioFileLength_ms;
 		// Multipli with desired ms
@@ -301,7 +352,7 @@ void StimuliLibrary::playStimuli()
 		unsigned int bufferLength = 2048; // som arbitrary vlue
 		int numbuffers = 1;
 		fsystem->getDSPBufferSize(&bufferLength, &numbuffers);
-		fsystem->playSound(audio, channelgroup, true, &channel);
+		fsystem->playSound(pAudio, channelgroup, true, &channel);
 		//FMOD_RESULT myResult = channelgroup->setDelay(clockDSP, clockDSP+ iSampleLengthOfAudio,true); CHANGE ..lieber fadeout
 		vSetFadeOutAtSpecificTime(iSampleLengthOfAudio, iRaiseAndFallTimeMS);
 		channel->setPaused(false);
@@ -355,10 +406,8 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 	if (bIsStimulusToPlayAsLongAsMovementsPending())
 	{
 		bRetVal = true;
-		//printf("\n IsStimulusToPlayAsLongAsMovementsPending == True\n");
 		if (!bCurrentlyAHijackedProtcolIsProcessed()) // there is noprocess going gon
 		{
-			printf("\n bCurrentlyAHijackedProtcolIsProcessed\n");
 			hostDataOfHijackedProtocol = stimuli_queue.front();
 			stimuli_queue.pop(); // Delete the stimulus either way.
 			bool bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
@@ -389,7 +438,6 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 			}
 			else
 			{
-				printf("\n stop stimulus vSetHijackedProtocolIsCompletelyProcessed\n");
 				vSetHijackedProtocolIsCompletelyProcessed();
 				stopStimuli();
 			}
@@ -400,7 +448,6 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 	{
 		bRetVal = false;
 	}
-	//printf("\n Going OUT: bAdaptStimulusParametersDueToHijacking\n");
 	return bRetVal;
 }
 
@@ -408,11 +455,9 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 
 bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 {
-	
 	bool bIsValidStimulus;
 	if (bCurrentlyAHijackedProtcolIsProcessed())
 	{
-		//printf("bIsStimulusToPlayAsLongAsMovementsPending() 1\n");
 		// Only Load if necessary
 		bool bIsCurrentlyPlaying;
 		channel->getPaused(&bIsCurrentlyPlaying);
@@ -443,6 +488,7 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 		if (!stimuli_queue.empty())
 		{
 			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
+			//printf("\nbLoadStimuli \n");
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 			//printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
 			//printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);

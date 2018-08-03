@@ -38,7 +38,7 @@ int port;
 std::shared_ptr<StimuliLibrary> pStimuliLib;
 
 bool bMovementMutex;
-bool bStimuliMutex;
+
 void tcp_func() {
 	std::string msg;
 
@@ -142,7 +142,7 @@ void vProcessMovement()
 void TimerFunc(bool& bIsFirstCall) {
 
 	std::string host_data_raw;
-	while (!tcp_queue.empty() && (!bStimuliMutex && !bMovementMutex)) {
+	while (!tcp_queue.empty()) {
 		//usleep(10000);
 		tcp_mutex.lock();
 		host_data_raw = tcp_queue.front(); // Get tcp messages
@@ -206,32 +206,26 @@ void TimerFunc(bool& bIsFirstCall) {
 			}
 			
 			if (hostData->stim_queued) { // Add new data to queue
-				while (bStimuliMutex) {
-					std::cout << "MUTEXLOCKED stimuli" << endl;
-					usleep(50000);
-				};
-				bStimuliMutex = true;
+				pStimuliLib->mutexStimuli.lock();
 				if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
 				{
 					pStimuliLib->stimuli_queue.push(hostData);
 				}
 				stimuli_skip = false;
-				bStimuliMutex = false;
+				pStimuliLib->mutexStimuli.unlock();
 			}
 			else { // Clear Queue and Add new Data to Queue
-				while (bStimuliMutex) {
-					std::cout << "MUTEXLOCKED stimuli" << endl;
-					usleep(50000);
-				};
-				bStimuliMutex = true;
+				pStimuliLib->mutexStimuli.lock();
+
 				stimuli_skip = true;
 				while (!pStimuliLib->stimuli_queue.empty())
 				{
 					pStimuliLib->stimuli_queue.pop();
 				}
 				pStimuliLib->stimuli_queue.push(hostData);
-				bStimuliMutex = false;
+				pStimuliLib->mutexStimuli.unlock();
 			}
+			std::cout << "Add new data to queue DONE" << endl;
 		}
 
 	}
@@ -246,15 +240,17 @@ void vStimuliThread()
 		while (true)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			if (!bStimuliMutex && (pStimuliLib->pInstance != nullptr))
+			pStimuliLib->mutexStimuli.lock();
+			if ((pStimuliLib->pInstance != nullptr))
 			{
-				bStimuliMutex = true;
-
+				//std::cout << "pStimuliLib->updateFSystem();" << endl;
 				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
 				bMovementMutex = true;
+				//std::cout << "Check if there is a protocol hicjacking" << endl;
 				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, pMotor)) // not protocl adaption, process as usual
 				{
+					//std::cout << "Check if there is a protocol hicjacking DONE" << endl;
 					bMovementMutex = false;
 					//cout << "No Hijacking" << endl;
 					if (pStimuliLib->bGetIsThereAFractionLeftToPlay())
@@ -268,14 +264,16 @@ void vStimuliThread()
 						pStimuliLib->vPlayStimulusIfToBeTriggered();
 					}
 				}
-
+				//std::cout << "Check if there is a protocol hicjackingDONE" << endl;
 				if (pStimuliLib->bGetResetStimuliLib())
 				{
-					pStimuliLib->vDoRebootOfStimuliLib();
-					pStimuliLib = StimuliLibrary::getInstance();
+					pStimuliLib->vClearStimuliQueue();
+					//pStimuliLib->vDoRebootOfStimuliLib();
+					//pStimuliLib = StimuliLibrary::getInstance();
+					//printf("Reboot DONE \n");
 				}
 				bMovementMutex = false;
-				bStimuliMutex = false;
+				pStimuliLib->mutexStimuli.unlock();
 			}
 
 		}
@@ -324,7 +322,6 @@ void vMovementThread(bool &bIsFirstCall)
 int main(int argc, char **argv)
 {
 	bMovementMutex = false;
-	bStimuliMutex = false;
 	pStimuliLib = StimuliLibrary::getInstance();
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
