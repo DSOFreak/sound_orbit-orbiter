@@ -34,10 +34,9 @@ std::mutex tcp_mutex;
 TCPClient tcp;
 char *ip_addr;
 int port;
-
+std::mutex timerAndMovementMutex;
 std::shared_ptr<StimuliLibrary> pStimuliLib;
 
-bool bMovementMutex;
 
 void tcp_func() {
 	std::string msg;
@@ -54,6 +53,7 @@ void tcp_func() {
 		tcp_mutex.lock();
 		tcp_queue.push(msg);
 		tcp_mutex.unlock();
+		//usleep(200000);
 	}
 }
 
@@ -139,97 +139,131 @@ void vProcessMovement()
 		pMotor->currentlyProcessedMovementData = hostData;
 	}
 }
-void TimerFunc(bool& bIsFirstCall) {
 
-	std::string host_data_raw;
-	while (!tcp_queue.empty()) {
-		//usleep(10000);
-		tcp_mutex.lock();
-		host_data_raw = tcp_queue.front(); // Get tcp messages
-		tcp_queue.pop();
-		tcp_mutex.unlock();
-	}
-
-	/* PROTOCOL INTERPRETATION */
-	int speakerIDX;
-	if (host_data_raw.length() != 0) 
-	{ // If a tcp-message has arrived
-		std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
-
-		// FIRST: Check if it is a get or set request for raspi data
-		char charIsGetOrSetRequest = host_data_raw.at(0);
-		//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
-		if (charIsGetOrSetRequest == 'G')
+void vMovementThread(bool &bIsFirstCall)
+{
+	std::thread movementThread{ [&]()
+	{
+		while (true)
 		{
-			std::string strsAnsnwerToServerRequest;
-			strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
-
-			tcp.Send(strsAnsnwerToServerRequest);
-			std::cout << "Battery Voltage" << strsAnsnwerToServerRequest <<endl;;
-		}
-		else if (charIsGetOrSetRequest == 'S') // no answer sned needed
-		{
-			std::string strsAnsnwerToServerRequest;
-			strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
-		}
-		else
-		{
-			shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
-			if (hostData->mov_queued) { // Add new data to queue
-				std::cout << "Add new data to queue" << endl;
-				while (bMovementMutex) { 
-					std::cout << "MUTEXLOCKED" << endl;
-					usleep(50000);
-				};
-				bMovementMutex = true;
-				if (hostData->angularDistance > 0.0)
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			timerAndMovementMutex.lock();
+			cout << "** MOVMENT THREAD START" << endl;
+		// MOVEMENT PROCESSING 
+			if (!pMotor->bTryToAddMovementDataToCurrentMovement())
+			{
+				if (!pMovement->vecMovementqueue.empty())// movement pending 
 				{
-					pMovement->vecMovementqueue.push_back(hostData);
+					if (pMotor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
+					{
+						vProcessMovement();
+					}
+					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
+					else if (bIsFirstCall == true)
+					{
+						bIsFirstCall = false;
+						cout << "Movement due to first call" << endl;
+						vProcessMovement();
+						// is Motor moving? else: process further movement
+						//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
+						//vProcessMovement();
+					}
 				}
-				bMovementMutex = false;
-				movement_skip = false;
 			}
-			else { // Clear Queue and Add new Data to Queue
-				std::cout << " Clear Queue and Add new Data to Queue" << endl;
-				movement_skip = true;
-				while (bMovementMutex) {
-					std::cout << "MUTEXLOCKED Clear Queue and " << endl;
-					usleep(50000);
-				};
-				bMovementMutex = true;
-				while (!pMovement->vecMovementqueue.empty())
-				{
-					pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
+			cout << "** MOVMENT THREAD END" << endl;
+			timerAndMovementMutex.unlock();
+		}
+	} };
+	movementThread.detach();
+}
+void TimerFunc() {
+	std::vector<std::shared_ptr<Toolbox::HostData>> vecTempStoreMovementQueue;
+	while (true)
+	{
+		std::string host_data_raw;
+		while (!tcp_queue.empty()) {
+			tcp_mutex.lock();
+			host_data_raw = tcp_queue.front(); // Get tcp messages
+			tcp_queue.pop();
+			tcp_mutex.unlock();
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+		timerAndMovementMutex.lock();
+		vecTempStoreMovementQueue = pMovement->vecMovementqueue; // DEBUG to avoid the mutex
+		timerAndMovementMutex.unlock();
+		/* PROTOCOL INTERPRETATION */
+		int speakerIDX;
+		if (host_data_raw.length() != 0)
+		{ // If a tcp-message has arrived
+			std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
+
+			// FIRST: Check if it is a get or set request for raspi data
+			char charIsGetOrSetRequest = host_data_raw.at(0);
+			//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
+			if (charIsGetOrSetRequest == 'G')
+			{
+				std::string strsAnsnwerToServerRequest;
+				strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+
+				tcp.Send(strsAnsnwerToServerRequest);
+				std::cout << "Battery Voltage" << strsAnsnwerToServerRequest << endl;;
+			}
+			else if (charIsGetOrSetRequest == 'S') // no answer sned needed
+			{
+				std::string strsAnsnwerToServerRequest;
+				strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+			}
+			else
+			{
+				shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
+				if (hostData->mov_queued) { // Add new data to queue
+					std::cout << "Add new data to queue" << endl;
+	
+					if (hostData->angularDistance > 0.0)
+					{
+						vecTempStoreMovementQueue.push_back(hostData);
+					}
+					movement_skip = false;
 				}
-				pMovement->vecMovementqueue.push_back(hostData);
-				bMovementMutex = false;
-			}
-			
-			if (hostData->stim_queued) { // Add new data to queue
-				pStimuliLib->mutexStimuli.lock();
-				if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
-				{
+				else { // Clear Queue and Add new Data to Queue
+					std::cout << " Clear Queue and Add new Data to Queue" << endl;
+					movement_skip = true;
+					while (!vecTempStoreMovementQueue.empty())
+					{
+						vecTempStoreMovementQueue.erase(vecTempStoreMovementQueue.begin());
+					}
+					vecTempStoreMovementQueue.push_back(hostData);
+				}
+				/*
+				if (hostData->stim_queued) { // Add new data to queue
+					pStimuliLib->mutexStimuli.lock();
+					if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
+					{
+						pStimuliLib->stimuli_queue.push(hostData);
+					}
+					stimuli_skip = false;
+					pStimuliLib->mutexStimuli.unlock();
+				}
+				else { // Clear Queue and Add new Data to Queue
+					pStimuliLib->mutexStimuli.lock();
+
+					stimuli_skip = true;
+					while (!pStimuliLib->stimuli_queue.empty())
+					{
+						pStimuliLib->stimuli_queue.pop();
+					}
 					pStimuliLib->stimuli_queue.push(hostData);
+					pStimuliLib->mutexStimuli.unlock();
 				}
-				stimuli_skip = false;
-				pStimuliLib->mutexStimuli.unlock();
+				std::cout << "Add new data to queue DONE" << endl;
+				*/
 			}
-			else { // Clear Queue and Add new Data to Queue
-				pStimuliLib->mutexStimuli.lock();
-
-				stimuli_skip = true;
-				while (!pStimuliLib->stimuli_queue.empty())
-				{
-					pStimuliLib->stimuli_queue.pop();
-				}
-				pStimuliLib->stimuli_queue.push(hostData);
-				pStimuliLib->mutexStimuli.unlock();
-			}
-			std::cout << "Add new data to queue DONE" << endl;
 		}
-
+		timerAndMovementMutex.lock();
+		pMovement->vecMovementqueue = vecTempStoreMovementQueue; // DEBUG to avoid the mutex
+		timerAndMovementMutex.unlock();
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
 	}
-
 }
 /* STIMULI PROCESSING */
 void vStimuliThread()
@@ -246,12 +280,10 @@ void vStimuliThread()
 				//std::cout << "pStimuliLib->updateFSystem();" << endl;
 				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
-				bMovementMutex = true;
 				//std::cout << "Check if there is a protocol hicjacking" << endl;
 				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, pMotor)) // not protocl adaption, process as usual
 				{
 					//std::cout << "Check if there is a protocol hicjacking DONE" << endl;
-					bMovementMutex = false;
 					//cout << "No Hijacking" << endl;
 					if (pStimuliLib->bGetIsThereAFractionLeftToPlay())
 					{
@@ -272,7 +304,6 @@ void vStimuliThread()
 					//pStimuliLib = StimuliLibrary::getInstance();
 					//printf("Reboot DONE \n");
 				}
-				bMovementMutex = false;
 				pStimuliLib->mutexStimuli.unlock();
 			}
 
@@ -281,47 +312,9 @@ void vStimuliThread()
 	stimuliThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
 }
 
-void vMovementThread(bool &bIsFirstCall)
-{
-	std::thread movementThread{ [&]()
-	{
-		while (true)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(50));
-			/* MOVEMENT PROCESSING */
-			if (!bMovementMutex)
-			{
-				bMovementMutex = true;
-				if (!pMotor->bTryToAddMovementDataToCurrentMovement())
-				{
-					if (!pMovement->vecMovementqueue.empty())// movement pending 
-					{
-						if (pMotor->reachedTarget() || movement_skip) // (movementFinnished OR Skip_this_movement)
-						{
-							vProcessMovement();
-						}
-						// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
-						else if (bIsFirstCall == true)
-						{
-							bIsFirstCall = false;
-							cout << "Movement due to first call" << endl;
-							vProcessMovement();
-							// is Motor moving? else: process further movement
-							//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
-							//vProcessMovement();
-						}
-					}
-				}
-				bMovementMutex = false;
-			}
-		}
-	}};
-	movementThread.detach(); // Prevents the thread from bein destroyed when the its out of scope
-}
 
 int main(int argc, char **argv)
 {
-	bMovementMutex = false;
 	pStimuliLib = StimuliLibrary::getInstance();
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
@@ -348,14 +341,13 @@ int main(int argc, char **argv)
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
 	vMovementThread(bRef);
-	vStimuliThread();
-	while (!exit_app) {
-		TimerFunc(bRef);
-		//IdleFunc(); -> this one takes very very much time!
-		if (!exit_app)
-		{
-			usleep(10000);
-		}
+	//vStimuliThread();
+	std::cout << "main()" << std::endl;
+	std::thread timerThread(TimerFunc);
+
+	while (!exit_app)
+	{
+		sleep(2);
 	}
 	printf("\n Delete motor object quit main!");
 	pMotor->closeDevice(); // close EPOS2

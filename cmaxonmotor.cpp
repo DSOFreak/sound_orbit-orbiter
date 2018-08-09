@@ -247,11 +247,25 @@ void CMaxonMotor::Move(long addToCurrentPosition)
     unsigned int errorCode = 0;
 	int Absolute = FALSE;
 	int Immediately = TRUE;
+	cout << "Check for target reach" << endl;
+	std::clock_t start;
+	double duration;
+	start = std::clock();
+
 
 	if (!VCS_MoveToPosition(keyHandle, nodeID, addToCurrentPosition, Absolute, Immediately, &errorCode))
 	{
 		cout << "Move to position failed!, error code=" << errorCode << endl;
 	}
+
+	duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC)*1000;
+
+	std::cout << "Duration for VCS_MoveToPosition : " << duration << "ms" << endl;
+
+
+
+
+
 	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
 	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl;
 	currenTargetPos = addToCurrentPosition + curr;
