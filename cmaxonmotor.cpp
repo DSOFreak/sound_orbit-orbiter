@@ -9,6 +9,8 @@
 #include <fstream>      // std::fstream
 #include <fcntl.h>
 
+#define NOT_STARTET_YET -43// DEBUG
+
 #define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
 #define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
 //#include <curses.h>
@@ -19,6 +21,10 @@ using namespace std;
 
 CMaxonMotor::CMaxonMotor()
 {
+	// DEBUG
+	duration = NOT_STARTET_YET;
+	start = NOT_STARTET_YET;
+
     strcpy(PortName, "USB0");
     ErrorCode = 0x00;
     nodeID = 1;
@@ -66,28 +72,37 @@ long CMaxonMotor::lConvertAngleInDegreeToMotorData(int iAngle)
 	long lretVal = 65536 * (float(iAngle) / 360.0) * (RAILPERI / WHEELPERI);
 	return lretVal;
 }
-bool CMaxonMotor::reachedTarget()
+bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls)//debug
 {
 	bool bRetVal = false;
 	int targetReached;
 	unsigned int uiErrorCode;
-	/*cout << "Check for target reach" << endl;
-	std::clock_t start;
-	double duration;
-	start = std::clock();
-	float load1;
-	int errorl = GetCPULoad(load1);*/
-	VCS_GetMovementState(keyHandle, nodeID, &targetReached, &uiErrorCode);
-	/*float load;
-	int error = GetCPULoad(load);
-	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	//cout << "Check for target reach" << endl
 
-	std::cout << "Duration for Check for target reach : " << duration << "with cpu Loads: "<< load << " " << load1 << "errorcode: " << error << '\n';*/
+
+
+
+
+	VCS_GetMovementState(keyHandle, nodeID, &targetReached, &uiErrorCode);
+	if (start != NOT_STARTET_YET)
+	{
+		duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	}
+	
+	/*while (duration < 111) // DEBUG TIME
+	{
+		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
+		usleep(1500);
+	}*/
 
 	
 	if (targetReached != 0) // We reached the target position
 	{
-		
+		cout << "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu     TARGET REACHED in " << duration << "s" << endl;
+		cout << "number of numberOfTimerCalls" << numberOfTimerCalls << endl;
+		cout << "number of numberOfMovementcalls" << numberOfMovementcalls << endl;
+		cout << "number of numberOfTCPCalls" << numberOfTCPCalls << endl;
+		duration = NOT_STARTET_YET;
 		bRetVal = true;
 		setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
 		if (currentlyProcessedMovementData != nullptr)
@@ -246,23 +261,17 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 	//std::cout << "current position: " << curr << std::endl;
     unsigned int errorCode = 0;
 	int Absolute = FALSE;
-	int Immediately = TRUE;
-	cout << "Check for target reach" << endl;
-	std::clock_t start;
-	double duration;
-	start = std::clock();
+	int iImmediately = TRUE;
 
 
-	if (!VCS_MoveToPosition(keyHandle, nodeID, addToCurrentPosition, Absolute, Immediately, &errorCode))
+	if (duration == NOT_STARTET_YET) { // measurement till target reached
+		cout << "StartMeasurement" << endl;
+		start = std::clock();
+	}
+	if (!VCS_MoveToPosition(keyHandle, nodeID, addToCurrentPosition, Absolute, iImmediately, &errorCode))
 	{
 		cout << "Move to position failed!, error code=" << errorCode << endl;
 	}
-
-	duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC)*1000;
-
-	std::cout << "Duration for VCS_MoveToPosition : " << duration << "ms" << endl;
-
-
 
 
 
@@ -276,22 +285,34 @@ void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 {
 
     unsigned int errorCode = 0;
-
+	std::clock_t start;
+	double duration;
+	start = std::clock();
     if( !VCS_GetTargetPosition(keyHandle, nodeID, &targetPosition, &errorCode) ){
         cout << " error while getting target position , error code="<<errorCode<<endl;
     }
-
+	/*while (duration < 111) // DEBUG TIME
+	{
+		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
+		usleep(1500);
+	}*/
 }
 
 void CMaxonMotor::getCurrentPosition(int &currentPosition)
 {
 
 	unsigned int errorCode = 0;
-
+	std::clock_t start;
+	double duration;
+	start = std::clock();
 	if (!VCS_GetPositionIs(keyHandle, nodeID, &currentPosition, &errorCode)) {
 		//cout << " error while getting current position , error code=" << errorCode << endl;
 	}
-
+	/*while (duration < 111) // DEBUG TIME
+	{
+		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
+		usleep(1500);
+	}*/
 }
 
 void CMaxonMotor::vResetTargetPositionToCurrentPosition()
@@ -303,11 +324,18 @@ void CMaxonMotor::vResetTargetPositionToCurrentPosition()
 void CMaxonMotor::Halt()
 {
         unsigned int ErrorCode = 0;
-
+		std::clock_t start;
+		double duration;
+		start = std::clock();
         if( !VCS_HaltPositionMovement(keyHandle, nodeID, &ErrorCode) )
         {
                 cout<<"Halt position movement failed!, error code="<<ErrorCode<<endl;
         }
+		/*while (duration < 111) // DEBUG TIME
+		{
+			duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
+			usleep(1500);
+		}*/
 }
 void CMaxonMotor::Error(unsigned int ErrorInfo)
 {
@@ -331,7 +359,7 @@ void CMaxonMotor::SetPosModeParameter()
 
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 10000;
+	iProfileVelocity = 10000; // prev. 10000
 	iProfileAcceleration = 5000; //prev. 5000
 	iProfileDeceleration = 10000; //prev. 10000
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
@@ -356,7 +384,8 @@ void CMaxonMotor::setSpeed(float speed)
 
 	
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
+	//iProfileVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
+	iProfileVelocity = 130 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
 
@@ -391,6 +420,7 @@ int CMaxonMotor::GetCPULoad(float &load) {
 
 bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 {
+
 	shared_ptr<Movement> pMovement = Movement::getInstance();
 	if (pMovement->vecMovementqueue.empty() || (currentlyProcessedMovementData == nullptr) || (pMovement->vecMovementqueue.front()->direction == 0))
 	{
@@ -433,8 +463,6 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 		}
 
 		//Update the target position
-
-
 		cout << "liDistanceInMotorData " << liDistanceInMotorData << endl;
 		setCurrentTargetPositionInMotorData(liDistanceInMotorData);
 		Move(lgetCurrentTargetPositionInMotorData());

@@ -3,7 +3,7 @@
 #include <memory>
 #include "Toolbox.h"
 #include "Definitions.h" // Maxon Motor Header file
-
+#include <ctime>
 #define TRUE 1
 #define FALSE 0
 
@@ -11,6 +11,9 @@
 class CMaxonMotor
 {
 private:
+	// DEBUG
+	std::clock_t start;
+	double duration;
 
     char* PortName;
     unsigned short nodeID;
@@ -25,7 +28,7 @@ public:
     // ********* I N I T *********
 	CMaxonMotor();
     CMaxonMotor(char[], unsigned short );
-	bool reachedTarget();
+	bool reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls);
 
 	unsigned int ErrorCode;
 	double dStatus;

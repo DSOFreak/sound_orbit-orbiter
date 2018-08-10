@@ -420,7 +420,7 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 				vSetChannelToInvinitePlay();
 			}
 		}
-		else if (!pMotor->reachedTarget()) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
+		else if (!pMotor->reachedTarget(1337, 1337, 1337)) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
 		{
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{
@@ -430,8 +430,9 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		else
 		{
 			// Wait for some time to check if if everything is really finnished
+			cout << "---------------------------------------------- Wait for some time to check if if everything is really finnished" << endl;
 			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-			if (!movementQueue.empty() || !pMotor->reachedTarget())
+			if (!movementQueue.empty() || !pMotor->reachedTarget(1337,1337,1337))
 			{
 				vSetChannelToInvinitePlay();
 				return bRetVal;
