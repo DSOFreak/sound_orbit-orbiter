@@ -1,4 +1,4 @@
-#include "TCPServer.h" 
+/*#include "TCPServer.h"
 
 string TCPServer::Message;
 
@@ -68,3 +68,4 @@ void TCPServer::detach()
 	close(sockfd);
 	close(newsockfd);
 } 
+*/

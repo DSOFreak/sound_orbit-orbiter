@@ -14,6 +14,7 @@ private:
 	// DEBUG
 	std::clock_t start;
 	double duration;
+	double dOverallDuration;
 
     char* PortName;
     unsigned short nodeID;

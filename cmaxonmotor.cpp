@@ -22,6 +22,7 @@ using namespace std;
 CMaxonMotor::CMaxonMotor()
 {
 	// DEBUG
+	dOverallDuration = 0;
 	duration = NOT_STARTET_YET;
 	start = NOT_STARTET_YET;
 
@@ -42,6 +43,7 @@ CMaxonMotor::CMaxonMotor()
 
 			}
 		}
+		cout << "Activate profile position mode!" << endl;
 	}
 	else
 	{
@@ -88,7 +90,7 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 	{
 		duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
 	}
-	
+
 	/*while (duration < 111) // DEBUG TIME
 	{
 		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
@@ -99,6 +101,13 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 	if (targetReached != 0) // We reached the target position
 	{
 		cout << "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu     TARGET REACHED in " << duration << "s" << endl;
+		// Debug first movement rausnehmen
+		if (duration < 25)
+		{
+			dOverallDuration += duration;
+		}
+		
+		cout << "Overall duration of movements: " << dOverallDuration << endl;
 		cout << "number of numberOfTimerCalls" << numberOfTimerCalls << endl;
 		cout << "number of numberOfMovementcalls" << numberOfMovementcalls << endl;
 		cout << "number of numberOfTCPCalls" << numberOfTCPCalls << endl;
@@ -340,7 +349,7 @@ void CMaxonMotor::Halt()
 void CMaxonMotor::Error(unsigned int ErrorInfo)
 {
 	char* pErrorInfo;
-	unsigned short iMaxStrSize=10;
+	unsigned short iMaxStrSize=100;
 	VCS_GetErrorInfo(ErrorInfo, pErrorInfo, iMaxStrSize);
 }
 void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
@@ -352,16 +361,16 @@ void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
 
 void CMaxonMotor::SetPosModeParameter()
 {
-	unsigned int uiMaxFollowingError = 20000;
+	unsigned int uiMaxFollowingError = 1000;
 	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
 	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
 	//int iError=0;
 
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 10000; // prev. 10000
-	iProfileAcceleration = 5000; //prev. 5000
-	iProfileDeceleration = 10000; //prev. 10000
+	iProfileVelocity = 4000; // prev. 10000
+	iProfileAcceleration = 2000; //prev. 5000
+	iProfileDeceleration = 5000; //prev. 10000
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 
 
@@ -375,20 +384,22 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed)
 {
-	unsigned int uiMaxFollowingError = 20000;
+	/*
+	unsigned int uiMaxFollowingError = 10;
 	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
-	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
 	//int iError=0;
 
 	unsigned int errorCode = 0;
-
+	iProfileVelocity = 3000; // prev. 10000
+	iProfileAcceleration = 5000; //prev. 5000
+	iProfileDeceleration = 10000; //prev. 10000
 	
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
 	//iProfileVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
-	iProfileVelocity = 130 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
+	//iProfileVelocity = 130 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
-
+	*/
 	
 }
 
