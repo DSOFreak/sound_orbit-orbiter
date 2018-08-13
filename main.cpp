@@ -31,6 +31,7 @@ std::shared_ptr<Movement> pMovement;
 bool exit_app;
 std::queue<std::string> tcp_queue;
 std::mutex tcp_mutex;
+std::mutex movementTimerMutex;
 TCPClient tcp;
 char *ip_addr;
 int port;
@@ -41,7 +42,7 @@ long long llDebugNumOfTCPFuncCalls = 0;
 void tcp_func() {
 	std::string msg;
 
-	//while (!exit_app) {
+	while (!exit_app) {
 		llDebugNumOfTCPFuncCalls++;
 		msg = tcp.receive(100);
 		if (msg.length() == 0) {
@@ -54,8 +55,8 @@ void tcp_func() {
 		tcp_mutex.lock();
 		tcp_queue.push(msg);
 		tcp_mutex.unlock();
-		//usleep(10000);
-	//}
+		usleep(10000);
+	}
 }
 
 // LED Pin - wiringPi pin 0 is BCM_GPIO 17.
@@ -143,13 +144,11 @@ void vProcessMovement()
 long long llNumberOfRelevantThreadCalls = 0;
 void TimerFunc() {
 
-	//while (true) //es ist entweder gerade bewegung oder die queue ist leer
-	//{
+	while (true) //es ist entweder gerade bewegung oder die queue ist leer
+	{
+	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	llNumberOfRelevantThreadCalls++;
 	//if ((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty()))
-		if (true)
-	{
-
 		std::string host_data_raw;
 		while(!tcp_queue.empty()) {
 			tcp_mutex.lock();
@@ -166,6 +165,7 @@ void TimerFunc() {
 				// FIRST: Check if it is a get or set request for raspi data
 				char charIsGetOrSetRequest = host_data_raw.at(0);
 				//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
+				movementTimerMutex.lock();
 				if (charIsGetOrSetRequest == 'G')
 				{
 					std::string strsAnsnwerToServerRequest;
@@ -200,7 +200,7 @@ void TimerFunc() {
 						}
 						pMovement->vecMovementqueue.push_back(hostData);
 					}
-					/*
+					
 					if (hostData->stim_queued) { // Add new data to queue
 					pStimuliLib->mutexStimuli.lock();
 					if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
@@ -222,11 +222,11 @@ void TimerFunc() {
 					pStimuliLib->mutexStimuli.unlock();
 					}
 					std::cout << "Add new data to queue DONE" << endl;
-					*/
+					
 				}
+				movementTimerMutex.unlock();
 			}
-		}
-	//}
+	}
 
 	}
 }
@@ -238,40 +238,41 @@ void vMovementThread(bool &bIsFirstCall)
 		long long llNumberOfRelevantThreadCalls = 0;
 		while (true)
 		{
-			//std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			llNumberOfRelevantThreadCalls++;
 			//cout << "** MOVMENT THREAD START" << endl;
 		// MOVEMENT PROCESSING 
-			//if (!pMotor->bTryToAddMovementDataToCurrentMovement())
-			//{
-
-			if (!pMovement->vecMovementqueue.empty())// movement pending 
+			movementTimerMutex.lock();
+			if (!pMotor->bTryToAddMovementDataToCurrentMovement())
 			{
 
-				if (pMotor->reachedTarget(llNumberOfRelevantThreadCalls, llNumberOfRelevantThreadCalls, llDebugNumOfTCPFuncCalls) || movement_skip) // (movementFinnished OR Skip_this_movement)
+				if (!pMovement->vecMovementqueue.empty())// movement pending 
 				{
-					if (movement_skip)
-					{
-						cout << "############################++We did not reach the target .... WHY THE FUCK DO WE MOVE!" << endl;
-					}
 
-					vProcessMovement();
-				}
-				// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
-				else if (bIsFirstCall == true)
-				{
-					bIsFirstCall = false;
-					cout << endl << endl << endl << endl << "´++++++++++++++++++++++++++++++++++++++++++++++++++++++++Movement due to first call" << endl << endl;
-					vProcessMovement();
-					// is Motor moving? else: process further movement
-					//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
-					//vProcessMovement();
+					if (pMotor->reachedTarget(llNumberOfRelevantThreadCalls, llNumberOfRelevantThreadCalls, llDebugNumOfTCPFuncCalls) || movement_skip) // (movementFinnished OR Skip_this_movement)
+					{
+						if (movement_skip)
+						{
+							cout << "############################++We did not reach the target .... WHY THE FUCK DO WE MOVE!" << endl;
+						}
+
+						vProcessMovement();
+					}
+					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
+					else if (bIsFirstCall == true)
+					{
+						bIsFirstCall = false;
+						cout << endl << endl << endl << endl << "´++++++++++++++++++++++++++++++++++++++++++++++++++++++++Movement due to first call" << endl << endl;
+						vProcessMovement();
+						// is Motor moving? else: process further movement
+						//cout << "++++++++++++++++++++++++++Motor not in position we wait for movement to finish" << endl;
+						//vProcessMovement();
+					}
 				}
 			}
+			movementTimerMutex.unlock();
 		}
 		}}; movementThread.detach();
-			//}
-		//}
 }
 
 /* STIMULI PROCESSING */
@@ -282,7 +283,7 @@ void vStimuliThread()
 	{
 		while (true)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 			pStimuliLib->mutexStimuli.lock();
 			if ((pStimuliLib->pInstance != nullptr))
 			{
@@ -339,26 +340,18 @@ int main(int argc, char **argv)
 	}
 	ip_addr = argv[1];
 	port = 1234;
+	std::thread tcpThread(tcp_func);
+	std::thread timerThread(TimerFunc);
 	do {
 		printf("Connecting to server at %s:%d ... \n", ip_addr, port);
 		usleep(1000000);
-		tcp_func();
 	} while (!tcp.bGetbIsConnectionEstablished());
 	printf("Connected!");
 	
 	exit_app = false;
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
-	//vMovementThread(bRef);
-	//vStimuliThread();
-
-	while (tcp_queue.size() < 15)
-	{
-		tcp_func();
-	}
-
-	TimerFunc();
-	printf("Stored 15 messages, now process them DEBUG \n");
+	vStimuliThread();
 	vMovementThread(bRef);
 	while (!exit_app)
 	{
