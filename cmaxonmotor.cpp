@@ -368,11 +368,12 @@ void CMaxonMotor::SetPosModeParameter()
 
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 4000; // prev. 10000
-	iProfileAcceleration = 2000; //prev. 5000
-	iProfileDeceleration = 5000; //prev. 10000
+	iProfileVelocity = 3000; // prev. -> 3000 ist max geschwindigkeit
+	iProfileAcceleration = 5000; //prev. 5000
+	iProfileDeceleration = 10000; //prev. 10000
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
 
+	cout << "SetPosModeParameter()" << endl;
 
 	VCS_GetDcMotorParameter(keyHandle, nodeID, &iNominalCurrent, &iMaxOutputCurrent, &iThermalTimeConstant, &ErrorCode);
 	VCS_SetDcMotorParameter(keyHandle, nodeID, 1800, 2000, 40, &ErrorCode);

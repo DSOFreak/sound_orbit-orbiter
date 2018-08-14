@@ -259,7 +259,7 @@ void vMovementThread(bool &bIsFirstCall)
 						vProcessMovement();
 					}
 					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
-					else if (bIsFirstCall == true)
+					else if ((bIsFirstCall == true) && (pMotor->lgetCurrentTargetPositionInMotorData() == NO_MOVEMENT_IN_PROCESS))
 					{
 						bIsFirstCall = false;
 						cout << endl << endl << endl << endl << "´++++++++++++++++++++++++++++++++++++++++++++++++++++++++Movement due to first call" << endl << endl;

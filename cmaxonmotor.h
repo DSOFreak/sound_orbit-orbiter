@@ -21,6 +21,11 @@ private:
     void *keyHandle;//
 
 	long lCurrentTargetPositionInMotorData;
+
+
+	int iProfileVelocity_m; // prev. 10000
+	int iProfileAcceleration_m; //prev. 5000
+	int iProfileDeceleration_m; //prev. 10000
 public:
 	long currenTargetPos;
 	long lgetCurrentTargetPositionInMotorData();
