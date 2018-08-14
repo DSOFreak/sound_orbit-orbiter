@@ -108,9 +108,9 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 		}
 		
 		cout << "Overall duration of movements: " << dOverallDuration << endl;
-		cout << "number of numberOfTimerCalls" << numberOfTimerCalls << endl;
-		cout << "number of numberOfMovementcalls" << numberOfMovementcalls << endl;
-		cout << "number of numberOfTCPCalls" << numberOfTCPCalls << endl;
+		//cout << "number of numberOfTimerCalls" << numberOfTimerCalls << endl;
+		//cout << "number of numberOfMovementcalls" << numberOfMovementcalls << endl;
+		//cout << "number of numberOfTCPCalls" << numberOfTCPCalls << endl;
 		duration = NOT_STARTET_YET;
 		bRetVal = true;
 		setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
