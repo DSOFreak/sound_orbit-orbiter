@@ -385,7 +385,7 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed)
 {
-	int iDesiredVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
+	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
 	if (iDesiredVelocity <= MAX_VELOCITY)
 	{
 		iProfileVelocity_m = iDesiredVelocity;
