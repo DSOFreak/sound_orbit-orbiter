@@ -10,6 +10,9 @@
 #include <fcntl.h>
 
 #define NOT_STARTET_YET -43// DEBUG
+#define MAX_VELOCITY 3000
+#define MAX_DECCELERATION 10000
+#define MAX_ACCELERATION 5000
 
 #define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
 #define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
@@ -52,6 +55,10 @@ CMaxonMotor::CMaxonMotor()
 
 	getCurrentPosition(iTempPos);
 	currenTargetPos = iTempPos;
+
+	iProfileVelocity_m = MAX_VELOCITY; // prev. 10000
+	iProfileAcceleration_m = MAX_ACCELERATION; //prev. 5000
+	iProfileDeceleration_m = MAX_DECCELERATION; //prev. 10000
 }
 CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
 {
@@ -362,20 +369,13 @@ void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
 void CMaxonMotor::SetPosModeParameter()
 {
 	unsigned int uiMaxFollowingError = 1000;
-	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
 	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
 	//int iError=0;
 
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
-	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	iProfileVelocity = 3000; // prev. -> 3000 ist max geschwindigkeit
-	iProfileAcceleration = 5000; //prev. 5000
-	iProfileDeceleration = 10000; //prev. 10000
-	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
+	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
 
 	cout << "SetPosModeParameter()" << endl;
-
-	VCS_GetDcMotorParameter(keyHandle, nodeID, &iNominalCurrent, &iMaxOutputCurrent, &iThermalTimeConstant, &ErrorCode);
 	VCS_SetDcMotorParameter(keyHandle, nodeID, 1800, 2000, 40, &ErrorCode);
 	cout << "1.8A" << endl;
 }
@@ -385,23 +385,18 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed)
 {
-	/*
-	unsigned int uiMaxFollowingError = 10;
-	unsigned int iProfileVelocity, iProfileAcceleration, iProfileDeceleration;
-	//int iError=0;
+	int iDesiredVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
+	if (iDesiredVelocity <= MAX_VELOCITY)
+	{
+		iProfileVelocity_m = iDesiredVelocity;
+	}
+	else
+	{
+		iDesiredVelocity = MAX_VELOCITY;
+	}
+	
+	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
 
-	unsigned int errorCode = 0;
-	iProfileVelocity = 3000; // prev. 10000
-	iProfileAcceleration = 5000; //prev. 5000
-	iProfileDeceleration = 10000; //prev. 10000
-	
-	VCS_GetPositionProfile(keyHandle, nodeID, &iProfileVelocity, &iProfileAcceleration, &iProfileDeceleration, &ErrorCode);
-	//iProfileVelocity = 183 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
-	//iProfileVelocity = 130 * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPI
-	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity, iProfileAcceleration, iProfileDeceleration, &ErrorCode);
-	VCS_ActivateProfilePositionMode(keyHandle, nodeID, &errorCode);
-	*/
-	
 }
 
 void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {
