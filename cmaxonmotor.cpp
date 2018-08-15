@@ -451,23 +451,12 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 
 
 		long int liDistanceInMotorData;
-		if (RaspiConfig::ownIndex == 1)
-		{
-			if (pMovement->vecMovementqueue.front()->direction == 1) { // Dir 1 = clockwise
-				liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos; // Correct
-			}
-			if (pMovement->vecMovementqueue.front()->direction == 2) { // Dir 2 = counterclockwise
-				liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance)  + liLeftOfCurrentWayToTargetPos) * -1;
-			}
+
+		if (pMovement->vecMovementqueue.front()->direction == 1) { // Dir 1 = clockwise
+			liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos) * -1 ; // Correct
 		}
-		else
-		{
-			if (pMovement->vecMovementqueue.front()->direction == 1) { // Dir 1 = clockwise
-				liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos) * -1 ; // Correct
-			}
-			if (pMovement->vecMovementqueue.front()->direction == 2) { // Dir 2 = counterclockwise
-				liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos;
-			}
+		if (pMovement->vecMovementqueue.front()->direction == 2) { // Dir 2 = counterclockwise
+			liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos;
 		}
 
 		//Update the target position

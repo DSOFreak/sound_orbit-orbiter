@@ -113,25 +113,14 @@ void vProcessMovement()
 	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
 	std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
 
-	//DEBUG! Bei speaker 01 ist das kabel nicht gleich wie bei den anderen im controller. vermutlich muss hier mit der EPSON software neu konfiguriert werden?
-	if (RaspiConfig::ownIndex == 1)
-	{
-		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngleDegree = hostData->angularDistance; // Correct
-		}
-		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngleDegree = hostData->angularDistance * -1;
-		}
+
+	if (hostData->direction == 1) { // Dir 1 = clockwise
+		iAngleDegree = hostData->angularDistance * -1; // Correct
 	}
-	else
-	{
-		if (hostData->direction == 1) { // Dir 1 = clockwise
-			iAngleDegree = hostData->angularDistance * -1; // Correct
-		}
-		if (hostData->direction == 2) { // Dir 2 = counterclockwise
-			iAngleDegree = hostData->angularDistance;
-		}
+	if (hostData->direction == 2) { // Dir 2 = counterclockwise
+		iAngleDegree = hostData->angularDistance;
 	}
+	
 
 	if (hostData->direction != 0) { // Dir 0 = no movement
 		long lMotorDataTargetPosition = pMotor->lConvertAngleInDegreeToMotorData(iAngleDegree);
