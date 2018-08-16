@@ -10,9 +10,7 @@
 #include <fcntl.h>
 
 #define NOT_STARTET_YET -43// DEBUG
-#define MAX_VELOCITY 3000
-#define MAX_DECCELERATION 10000
-#define MAX_ACCELERATION 5000
+
 
 #define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
 #define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
@@ -59,15 +57,29 @@ CMaxonMotor::CMaxonMotor()
 	getCurrentPosition(iTempPos);
 	currenTargetPos = iTempPos;
 
-	iProfileVelocity_m = MAX_VELOCITY; // prev. 10000
-	iProfileAcceleration_m = MAX_ACCELERATION; //prev. 5000
-	iProfileDeceleration_m = MAX_DECCELERATION; //prev. 10000
-
 	strcpy(PortName, "USB0");
 	strcpy(pcDeviceName, "EPOS2");
 	strcpy(pcProtocolStackName, "MAXON SERIAL V2");
 	strcpy(pcInterfaceName,"USB");
 
+	uiTimeout = 500;
+	uiBaudrate = 1000000;
+
+	usNominalCurrent = 1800;
+	usMaxCurrent = 2000;
+	usThermalConstant = 4;
+
+	uiEncoderResolution = 1024;
+	bIsInvertedPolarity = false;
+	uiMaxFollowingError = 2000;
+
+	uiMaxVelocity = 3000;
+	uiMaxDecceleration = 10000;
+	uiMaxAcceleration = 5000;
+
+	iProfileVelocity_m = uiMaxVelocity; // prev. 10000
+	iProfileAcceleration_m = uiMaxAcceleration; //prev. 5000
+	iProfileDeceleration_m = uiMaxDecceleration; //prev. 10000
 }
 
 long CMaxonMotor::lgetCurrentTargetPositionInMotorData()
@@ -91,10 +103,6 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 	int targetReached;
 	unsigned int uiErrorCode;
 	//cout << "Check for target reach" << endl
-
-
-
-
 
 	VCS_GetMovementState(keyHandle, nodeID, &targetReached, &uiErrorCode);
 	if (start != NOT_STARTET_YET)
@@ -239,15 +247,22 @@ void CMaxonMotor::vOpenDevice()
 		cout << "Open device success!" << endl;
 	}
 }
+void CMaxonMotor::vSetCommunicationSettings()
+{
+	if (!VCS_SetProtocolStackSettings(keyHandle, uiBaudrate, uiTimeout, &ErrorCode))
+	{
+		cout << "Set protocol stack settings failed!, error code=" << ErrorCode << endl;
+		closeDevice();
+	}
+}
 
 void CMaxonMotor::activate_device()
 {
 
 	unsigned int ErrorCode = 0x00;
-	unsigned long timeout_ = 500;
-	unsigned long baudrate_ = 1000000;
 
 
+	cout << "Try to open the motor device .... " << endl;
 	keyHandle = VCS_OpenDevice(pcDeviceName, pcProtocolStackName, pcInterfaceName, PortName, &ErrorCode);
 
 	if (keyHandle == 0)
@@ -260,7 +275,7 @@ void CMaxonMotor::activate_device()
 	}
 
 
-	if (!VCS_SetProtocolStackSettings(keyHandle, baudrate_, timeout_, &ErrorCode))
+	if (!VCS_SetProtocolStackSettings(keyHandle, uiBaudrate, uiTimeout, &ErrorCode))
 	{
 		cout << "Set protocol stack settings failed!, error code=" << ErrorCode << endl;
 		closeDevice();
@@ -275,6 +290,59 @@ void CMaxonMotor::initializeDevice() {
 	SetPosModeParameter();
 }
 
+
+void CMaxonMotor::vSetMainSensorType()
+{
+	if (!VCS_SetSensorType(keyHandle, nodeID, ST_INC_ENCODER_3CHANNEL, &ErrorCode))
+	{
+		cout << "Set main sensor type failed!, error code=" << ErrorCode << endl;
+		closeDevice();
+	}
+}
+void CMaxonMotor::vSetMotorData()
+{
+	if (!VCS_SetDcMotorParameter(keyHandle, nodeID, usNominalCurrent, usMaxCurrent, usThermalConstant, &ErrorCode))
+	{
+		cout << "Set DC Motor Data Failed with error code " << ErrorCode << endl;
+		closeDevice();
+	}
+
+}
+void CMaxonMotor::vSetEncoderParameter()
+{
+	if (!VCS_SetIncEncoderParameter(keyHandle, nodeID, uiEncoderResolution, bIsInvertedPolarity, &ErrorCode))
+	{
+		cout << "Set encoder parameter failed with error code " << ErrorCode << endl;
+		closeDevice();
+	}
+}
+
+void CMaxonMotor::vSetMaxFollowingError()
+{
+	if (!VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode))
+	{
+		cout << "Max setting max Following Error Failed with error code: " << ErrorCode << endl;
+		closeDevice();
+	}
+}
+
+void CMaxonMotor::vSetMaxVelocity()
+{
+	if (!VCS_SetMaxProfileVelocity(keyHandle, nodeID, uiMaxVelocity, &ErrorCode))
+	{
+		cout << "Max setting max velocity Failed with error code: " << ErrorCode << endl;
+		closeDevice();
+	}
+}
+void CMaxonMotor::vSetMaxAcceleration()
+{
+	if (!VCS_SetMaxAcceleration(keyHandle, nodeID, uiMaxDecceleration, &ErrorCode))
+	{
+		cout << "Max setting max acceleration Failed with error code: " << ErrorCode << endl;
+		closeDevice();
+	}
+}
+
 void CMaxonMotor::initializeDeviceNew()
 {
 	// To close if opend		
@@ -286,25 +354,32 @@ void CMaxonMotor::initializeDeviceNew()
 		cout << "Reset Device OK" << ErrorCode << endl;
 
 		// open device
-
+		vOpenDevice();
 
 		// Set communication settings (USB baudrate etc)
-
+		vSetCommunicationSettings();
 
 		// Set main sensor type
+		vSetMainSensorType();
 
-		// Set max application speed
+		// Set max application velocity
+		vSetMaxVelocity();
 
-		// set nominal curent
+		// Set max application acceleration
+		vSetMaxAcceleration();
 
-	   //set thermal time constant
+		// set motor data
+		vSetMotorData();
 
-		// set encoder resolution
-		//SetIncEncoderParameter
+		// set encoder parameter
+		vSetEncoderParameter();
 
 		// set max following error
+		vSetMaxFollowingError();
 
-		// Ggf fehlt hier OPENDEVICE() davor
+		// Set profile position mode 8set operation mode auf OMD_PROFILE_POSITION_MODE)
+
+		// Enable
 		EnableDevice();
 	}
 	else
@@ -435,13 +510,13 @@ void CMaxonMotor::setSpeed(float speed)
 
 	if (iDesiredVelocity != iProfileVelocity_m)
 	{
-		if (iDesiredVelocity <= MAX_VELOCITY)
+		if (iDesiredVelocity <= uiMaxVelocity)
 		{
 			iProfileVelocity_m = iDesiredVelocity;
 		}
 		else
 		{
-			iDesiredVelocity = MAX_VELOCITY;
+			iDesiredVelocity = uiMaxVelocity;
 		}
 
 		VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);

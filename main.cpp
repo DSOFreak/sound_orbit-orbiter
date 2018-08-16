@@ -315,12 +315,12 @@ void vStimuliThread()
 int main(int argc, char **argv)
 {
 	pStimuliLib = StimuliLibrary::getInstance();
-	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
+	pMovement = Movement::getInstance();
 	char InterfaceName[] = "USB0";
 	pMotor = std::make_shared<CMaxonMotor>();
-	//pMotor->initializeDevice(); // initialize EPOS2
-	pMotor->initializeDeviceNew(); // initialize EPOS2
+	pMotor->initializeDevice(); // initialize EPOS2
+	//pMotor->initializeDeviceNew(); // initialize EPOS2
 	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
 
 	if (argc == 1)

@@ -33,6 +33,24 @@ private:
 	char* pcProtocolStackName;
 	char* pcInterfaceName;
 
+	unsigned long uiTimeout;
+	unsigned long uiBaudrate;
+
+	unsigned short usNominalCurrent;
+	unsigned short usMaxCurrent;
+	unsigned short usThermalConstant;
+
+	unsigned int uiEncoderResolution;
+	bool bIsInvertedPolarity;
+
+	unsigned int uiMaxFollowingError;
+
+	unsigned int uiMaxVelocity;
+	unsigned int uiMaxDecceleration;
+	unsigned int uiMaxAcceleration;
+
+
+
 public:
 	long currenTargetPos;
 	long lgetCurrentTargetPositionInMotorData();
@@ -47,12 +65,19 @@ public:
 	std::shared_ptr<Toolbox::HostData> currentlyProcessedMovementData;
 
     void initializeDevice(); 
+	void vSetMainSensorType();
+	void vSetMotorData();
+	void vSetEncoderParameter();
+	void vSetMaxFollowingError();
+	void vSetMaxVelocity();
+	void vSetMaxAcceleration();
 	void initializeDeviceNew();
 	
     void closeDevice();
     void EnableDevice();
     void DisableDevice();
 	void vOpenDevice();
+	void vSetCommunicationSettings();
     void Move(long TargetPosition);
 	void getCurrentlyProcessedTargetPosition(long int &targetPosition);
     void getCurrentPosition(int& CurrentPosition);
