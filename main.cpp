@@ -318,8 +318,9 @@ int main(int argc, char **argv)
 	pMovement = Movement::getInstance();
 	printf("Starting Orbiter Program.");
 	char InterfaceName[] = "USB0";
-	pMotor = std::make_shared<CMaxonMotor>(InterfaceName, 1);
-	pMotor->initializeDevice(); // initialize EPOS2
+	pMotor = std::make_shared<CMaxonMotor>();
+	//pMotor->initializeDevice(); // initialize EPOS2
+	pMotor->initializeDeviceNew(); // initialize EPOS2
 	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
 
 	if (argc == 1)

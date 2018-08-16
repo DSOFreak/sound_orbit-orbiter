@@ -29,7 +29,10 @@ CMaxonMotor::CMaxonMotor()
 	duration = NOT_STARTET_YET;
 	start = NOT_STARTET_YET;
 
-    strcpy(PortName, "USB0");
+	ErrorCode = 0x00;
+
+
+    
     ErrorCode = 0x00;
     nodeID = 1;
 	setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
@@ -59,13 +62,14 @@ CMaxonMotor::CMaxonMotor()
 	iProfileVelocity_m = MAX_VELOCITY; // prev. 10000
 	iProfileAcceleration_m = MAX_ACCELERATION; //prev. 5000
 	iProfileDeceleration_m = MAX_DECCELERATION; //prev. 10000
+
+	strcpy(PortName, "USB0");
+	strcpy(pcDeviceName, "EPOS2");
+	strcpy(pcProtocolStackName, "MAXON SERIAL V2");
+	strcpy(pcInterfaceName,"USB");
+
 }
-CMaxonMotor::CMaxonMotor(char* portNamestr, unsigned short input_node_Id)
-{
-    PortName = portNamestr;
-    ErrorCode = 0x00;
-    nodeID = input_node_Id;
-}
+
 long CMaxonMotor::lgetCurrentTargetPositionInMotorData()
 {
 	return lCurrentTargetPositionInMotorData;
@@ -143,129 +147,171 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 
 void CMaxonMotor::closeDevice()
 {
-    DisableDevice();
+	DisableDevice();
 
-    unsigned int ErrorCode = 0;
+	unsigned int ErrorCode = 0;
 
-	//move(17, 10);
+	cout << "Closing Device!" << endl;
 
-    if(keyHandle != 0)
-        VCS_CloseDevice(keyHandle, &ErrorCode);
+	if (keyHandle != 0)
+	{
+		VCS_CloseDevice(keyHandle, &ErrorCode);
+	}
+		
 
-    VCS_CloseAllDevices(&ErrorCode);
-	//move(16, 10);
-	//printw("Status: \t%x", ErrorCode);
+	VCS_CloseAllDevices(&ErrorCode);
 }
 void CMaxonMotor::EnableDevice()
 {
 
-    unsigned int ErrorCode = 0;
-    int IsInFault = FALSE;
+	unsigned int ErrorCode = 0;
+	int IsInFault = FALSE;
 
-    if( VCS_GetFaultState(keyHandle, nodeID, &IsInFault, &ErrorCode) )
-    {
-        if( IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode) )
-        {
-            cout << "Clear fault failed! , error code="<<ErrorCode<<endl;
-            return;
-        }
+	if (VCS_GetFaultState(keyHandle, nodeID, &IsInFault, &ErrorCode))
+	{
+		if (IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode))
+		{
+			cout << "Clear fault failed! , error code=" << ErrorCode << endl;
+			return;
+		}
 
-        int IsEnabled = FALSE;
-        if( VCS_GetEnableState(keyHandle, nodeID, &IsEnabled, &ErrorCode) )
-        {
-            if( !IsEnabled && !VCS_SetEnableState(keyHandle, nodeID, &ErrorCode) )
-            {
-                cout << "Set enable state failed!, error code="<<ErrorCode<<endl;
-            }
-            else
-            {
-				//move(16, 10);
-				//printw("Status: \t%x", ErrorCode);
-				
-            }
-        }
-    }
-    else
-    {
-		//move(16, 10);
-		//printw("Status: %x", ErrorCode);
-
-    }
+		int IsEnabled = FALSE;
+		if (VCS_GetEnableState(keyHandle, nodeID, &IsEnabled, &ErrorCode))
+		{
+			if (!IsEnabled && !VCS_SetEnableState(keyHandle, nodeID, &ErrorCode))
+			{
+				cout << "Set enable state failed!, error code=" << ErrorCode << endl;
+			}
+			else
+			{
+				cout << "Enable succeeded!" << endl;
+			}
+		}
+	}
+	else
+	{
+		cout << "Get fault state failed!, error code, error code=" << ErrorCode << endl;
+	}
 
 }
 void CMaxonMotor::DisableDevice()
 {
 
-    unsigned int ErrorCode = 0;
-    int IsInFault = FALSE;
+	unsigned int ErrorCode = 0;
+	int IsInFault = FALSE;
 
-    if( VCS_GetFaultState(keyHandle, nodeID, &IsInFault, &ErrorCode) )
-    {
-        if( IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode) )
-        {
- 			//move(16, 10);
-			//printw("Status: \tError 0x%x", ErrorCode);
+	if (VCS_GetFaultState(keyHandle, nodeID, &IsInFault, &ErrorCode))
+	{
+		if (IsInFault && !VCS_ClearFault(keyHandle, nodeID, &ErrorCode))
+		{
+			cout << "Clear fault failed!, error code=" << ErrorCode << endl;
 			return;
-        }
+		}
 
-        int IsEnabled = FALSE;
-        if( VCS_GetEnableState(keyHandle, nodeID, &IsEnabled, &ErrorCode) )
-        {
-            if( IsEnabled && !VCS_SetDisableState(keyHandle, nodeID, &ErrorCode) )
-            {
-				//move(16, 10);
-				//printw("Status: \tError 0x%x", ErrorCode);
+		int IsEnabled = FALSE;
+		if (VCS_GetEnableState(keyHandle, nodeID, &IsEnabled, &ErrorCode))
+		{
+			if (IsEnabled && !VCS_SetDisableState(keyHandle, nodeID, &ErrorCode))
+			{
+				cout << "Set disable state failed!, error code=" << ErrorCode << endl;
 			}
-            else
-            {
-				//move(16, 10);
-				//printw("Status: \t%x", ErrorCode);
+			else
+			{
+				cout << "Set disable state succeeded!" << endl;
 			}
-        }
-    }
-    else
-    {
-		//move(16, 10);
-		//printw("Status: Error 0x%x", ErrorCode);
+		}
+	}
+	else
+	{
+		cout << "Get fault state failed!, error code=" << ErrorCode << endl;
 	}
 }
+void CMaxonMotor::vOpenDevice()
+{
+	keyHandle = VCS_OpenDevice(pcDeviceName, pcProtocolStackName, pcInterfaceName, PortName, &ErrorCode);
+
+	if (keyHandle == 0)
+	{
+		cout << "Open device failure, error code=" << ErrorCode << endl;
+	}
+	else
+	{
+		cout << "Open device success!" << endl;
+	}
+}
+
 void CMaxonMotor::activate_device()
 {
-    // Configuring EPOS for analog motor control
-    char DeviceName[]="EPOS2";
-    char ProtocolStackName[] = "MAXON SERIAL V2";
-    char InterfaceName[] = "USB";
-    unsigned int ErrorCode = 0x00;
-    unsigned long timeout_ = 500;
-    unsigned long baudrate_ = 1000000;
+
+	unsigned int ErrorCode = 0x00;
+	unsigned long timeout_ = 500;
+	unsigned long baudrate_ = 1000000;
 
 
-    keyHandle = VCS_OpenDevice(DeviceName,ProtocolStackName,InterfaceName,PortName,&ErrorCode);
+	keyHandle = VCS_OpenDevice(pcDeviceName, pcProtocolStackName, pcInterfaceName, PortName, &ErrorCode);
 
-    if( keyHandle == 0 )
-    {
-        cout<<"Open device failure, error code="<<ErrorCode<<endl;
-    }
-    else
-    {
-        cout<<"Open device success!"<<endl;
-    }
+	if (keyHandle == 0)
+	{
+		cout << "Open device failure, error code=" << ErrorCode << endl;
+	}
+	else
+	{
+		cout << "Open device success!" << endl;
+	}
 
 
-    if( !VCS_SetProtocolStackSettings(keyHandle, baudrate_, timeout_, &ErrorCode) )
-    {
-        cout<<"Set protocol stack settings failed!, error code="<<ErrorCode<<endl;
-        closeDevice();
-    }
+	if (!VCS_SetProtocolStackSettings(keyHandle, baudrate_, timeout_, &ErrorCode))
+	{
+		cout << "Set protocol stack settings failed!, error code=" << ErrorCode << endl;
+		closeDevice();
+	}
 
-    EnableDevice();
-	VCS_ResetPositionMarkerCounter(keyHandle, nodeID, &ErrorCode);
+	EnableDevice();
 
 }
 void CMaxonMotor::initializeDevice() {
 	        closeDevice(); // To close if opend					
 	    activate_device();
 	SetPosModeParameter();
+}
+
+void CMaxonMotor::initializeDeviceNew()
+{
+	// To close if opend		
+	closeDevice(); 
+	bool bResult = false;
+	bResult = VCS_ResetDevice(keyHandle, nodeID, &ErrorCode);
+	if (bResult)
+	{
+		cout << "Reset Device OK" << ErrorCode << endl;
+
+		// open device
+
+
+		// Set communication settings (USB baudrate etc)
+
+
+		// Set main sensor type
+
+		// Set max application speed
+
+		// set nominal curent
+
+	   //set thermal time constant
+
+		// set encoder resolution
+		//SetIncEncoderParameter
+
+		// set max following error
+
+		// Ggf fehlt hier OPENDEVICE() davor
+		EnableDevice();
+	}
+	else
+	{
+		cout << "Reset Device Fail with code " << bResult << endl;
+	}
+
 }
 
 void CMaxonMotor::Move(long addToCurrentPosition)
@@ -368,14 +414,14 @@ void CMaxonMotor::ErrorNbr(unsigned char * cErrorInfo)
 
 void CMaxonMotor::SetPosModeParameter()
 {
-	unsigned int uiMaxFollowingError = 1000;
-	unsigned short iNominalCurrent, iMaxOutputCurrent, iThermalTimeConstant;
-	//int iError=0;
 
+	//int iError=0;
+	unsigned int uiMaxFollowingError = 2000;
 	VCS_SetMaxFollowingError(keyHandle, nodeID, uiMaxFollowingError, &ErrorCode);
 	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
 
-	cout << "SetPosModeParameter()" << endl;
+
+	//cout << "SetPosModeParameter()" << endl;
 	VCS_SetDcMotorParameter(keyHandle, nodeID, 1800, 2000, 40, &ErrorCode);
 	cout << "1.8A" << endl;
 }
@@ -385,19 +431,21 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed)
 {
-	
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
-	if (iDesiredVelocity <= MAX_VELOCITY)
+
+	if (iDesiredVelocity != iProfileVelocity_m)
 	{
-		iProfileVelocity_m = iDesiredVelocity;
+		if (iDesiredVelocity <= MAX_VELOCITY)
+		{
+			iProfileVelocity_m = iDesiredVelocity;
+		}
+		else
+		{
+			iDesiredVelocity = MAX_VELOCITY;
+		}
+
+		VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
 	}
-	else
-	{
-		iDesiredVelocity = MAX_VELOCITY;
-	}
-	
-	VCS_SetPositionProfile(keyHandle, nodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
-	
 }
 
 void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {

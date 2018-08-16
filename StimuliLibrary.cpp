@@ -17,7 +17,7 @@ std::shared_ptr<StimuliLibrary> StimuliLibrary::pInstance = nullptr;
 
 StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
-	printf("StimuliLibrary constructor called1\n");
+	printf("StimuliLibrary constructor called_NOINIT_DEVICEMAXXON\n");
 	vSetUp();
 }
 void StimuliLibrary::vSetResetStimuliLib(bool bIsPlannedToReset)

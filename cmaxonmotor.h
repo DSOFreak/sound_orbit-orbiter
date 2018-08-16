@@ -27,6 +27,12 @@ private:
 	int iProfileAcceleration_m; //prev. 5000
 	int iProfileDeceleration_m; //prev. 10000
 	const unsigned int uiVelocityCalibrationFactor = 185;
+
+	// Configuring EPOS for analog motor control
+	char* pcDeviceName;
+	char* pcProtocolStackName;
+	char* pcInterfaceName;
+
 public:
 	long currenTargetPos;
 	long lgetCurrentTargetPositionInMotorData();
@@ -34,18 +40,19 @@ public:
 	long lConvertAngleInDegreeToMotorData(int iAngle);
     // ********* I N I T *********
 	CMaxonMotor();
-    CMaxonMotor(char[], unsigned short );
 	bool reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls);
 
 	unsigned int ErrorCode;
 	double dStatus;
 	std::shared_ptr<Toolbox::HostData> currentlyProcessedMovementData;
 
-    void initializeDevice();
+    void initializeDevice(); 
+	void initializeDeviceNew();
 	
     void closeDevice();
     void EnableDevice();
     void DisableDevice();
+	void vOpenDevice();
     void Move(long TargetPosition);
 	void getCurrentlyProcessedTargetPosition(long int &targetPosition);
     void getCurrentPosition(int& CurrentPosition);
