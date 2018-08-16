@@ -16,8 +16,8 @@ private:
 	double duration;
 	double dOverallDuration;
 
-    char* PortName;
-    unsigned short nodeID;
+    char* pcPortName;
+    unsigned short usNodeID;
     void *keyHandle;//
 
 	long lCurrentTargetPositionInMotorData;
@@ -71,6 +71,7 @@ public:
 	void vSetMaxFollowingError();
 	void vSetMaxVelocity();
 	void vSetMaxAcceleration();
+	void vSetOperationMode();
 	void initializeDeviceNew();
 	
     void closeDevice();
