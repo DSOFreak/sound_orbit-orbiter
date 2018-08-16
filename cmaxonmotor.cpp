@@ -9,6 +9,9 @@
 #include <fstream>      // std::fstream
 #include <fcntl.h>
 
+#include "Toolbox.h"
+#include <memory>
+
 #define NOT_STARTET_YET -43// DEBUG
 
 
@@ -206,7 +209,7 @@ void CMaxonMotor::DisableDevice()
 	}
 	else
 	{
-		cout << "Get fault state failed!, error code=" << ErrorCode << endl;
+		//cout << "Get fault state failed!, error code=" << ErrorCode << endl;
 	}
 }
 void CMaxonMotor::vOpenDevice()
@@ -332,14 +335,12 @@ void CMaxonMotor::initializeDeviceNew()
 	// To close if opend		
 	closeDevice(); 
 	bool bResult = false;
+	// open device
+	vOpenDevice();
 	bResult = VCS_ResetDevice(keyHandle, usNodeID, &ErrorCode);
 	if (bResult)
 	{
 		cout << "Reset Device OK" << ErrorCode << endl;
-
-		// open device
-		vOpenDevice();
-
 		// Set communication settings (USB baudrate etc)
 		vSetCommunicationSettings();
 
@@ -369,7 +370,11 @@ void CMaxonMotor::initializeDeviceNew()
 
 		// das folgende sollte in den konstruktor, ebenso die obige init funktion .... wenn alles klappt !
 		setCurrentTargetPositionInMotorData(NO_MOVEMENT_IN_PROCESS);
-		currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
+		if (currentlyProcessedMovementData != nullptr)
+		{
+			currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
+		}
+
 		int iTempPos;
 		unsigned int errorCode;
 		if (VCS_ActivateProfilePositionMode(keyHandle, usNodeID, &errorCode))
@@ -388,11 +393,8 @@ void CMaxonMotor::initializeDeviceNew()
 		{
 			cout << "Activate profile position mode failed!" << endl;
 		}
-		cout << "CMaxxon constructor called start2" << endl;
 		getCurrentPosition(iTempPos);
 		currenTargetPos = iTempPos;
-		cout << "CMaxxon constructor called start3" << endl;
-
 	}
 	else
 	{
