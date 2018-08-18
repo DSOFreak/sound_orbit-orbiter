@@ -48,9 +48,9 @@ CMaxonMotor::CMaxonMotor()
 	bIsInvertedPolarity = false;
 	uiMaxFollowingError = 2000;
 
-	uiMaxVelocity = 4000;
+	uiMaxVelocity = 5000;
 	uiMaxDecceleration = 10000;
-	uiMaxAcceleration = uiMaxVelocity *1.5;
+	uiMaxAcceleration = 6000;
 	//const unsigned int uiVelocityCalibrationFactor = 185; 
 
 	iProfileVelocity_m = uiMaxVelocity; // prev. 10000
