@@ -24,6 +24,7 @@ private:
 	string pathToAudio_03Sin500 = "../../../../TestFiles/03_sin500.flac";
 	unsigned int audioFileLength_ms;
 	unsigned int uiDesiredDuration_ms;
+	double dVolume;
 
 	// If audioFileLength_ms<desiredDuration_ms and we have a fraction of the audiofile left to play
 	double dFractionOfAudioFileLeftToPlay;

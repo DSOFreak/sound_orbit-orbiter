@@ -76,6 +76,7 @@ namespace Toolbox {
 					float C = 13.3f; // CALIBRATION FACTOR
 					float Lmax = 90.0f;
 					d.loudness = pow(10.0f, (stim_vol_L_real - Lmax + C) / 20.0f);
+					printf("d.loudness %f \n", d.loudness);
 					d.toBeTriggerd = stim_tbt;
 					d.stim_queued = queued_stim_nr == 0;
 				}

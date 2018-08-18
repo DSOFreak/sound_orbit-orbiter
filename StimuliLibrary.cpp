@@ -293,7 +293,10 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 
 	pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);;
 	fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
+
+	printf("\ Setting the volume to: %f \n", volume);
 	channel->setVolume(volume);
+	dVolume = volume;
 	return bRetIsValidStimuli;
 }
 
@@ -321,7 +324,7 @@ void StimuliLibrary::playStimuli()
 		//printf("\intMultiple is %i \n", intMultiple);
 		channel->setLoopCount(intMultiple - 1); // -1: as 1 Loop means playing the sound twice
 		channel->setMode(FMOD_LOOP_NORMAL);
-		channel->setPaused(false);
+		//channel->setPaused(false);
 		// We do have some rest to play
 		//printf("\isLongerFactor is %f \n", isLongerFraction);
 		dFractionOfAudioFileLeftToPlay = isLongerFraction;
@@ -356,20 +359,23 @@ void StimuliLibrary::playStimuli()
 		fsystem->playSound(pAudio, channelgroup, true, &channel);
 		//FMOD_RESULT myResult = channelgroup->setDelay(clockDSP, clockDSP+ iSampleLengthOfAudio,true); CHANGE ..lieber fadeout
 		vSetFadeOutAtSpecificTime(iSampleLengthOfAudio, iRaiseAndFallTimeMS);
-		channel->setPaused(false);
+		//channel->setPaused(false);
 		vSetdFractionOfAudioFileLeftToPlay(0.00);
 	}
 	// Case 3: User piceked (perhaps accidently) a perfect match in durations
 	else
 	{
 		//printf("\n\n (Play full length stimulus) \n\n");
-		channel->setPaused(false);
+		//channel->setPaused(false);
 	}
 
 	// TO DO (fischti)
 	//priority
 		//Default priority for the sound when played on a channel. 0 to 256. 0 = most important, 256 = least important.Default = 128.
 	// -> Wenn sound kommt welcher den alten überschreibt -> setzte höhere Priorität (oder stoppe den alten)
+	
+	// set the volume 
+	channel->setVolume(dVolume);
 
 	channel->setPaused(false);
 
