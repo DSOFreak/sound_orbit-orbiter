@@ -51,7 +51,8 @@ void StimuliLibrary::vSetUp()
 
 	// Init the equalizer objects
 	initEqualizers();
-	veciStimuliToInit = { 1,2,3 };
+	//veciStimuliToInit = { 1,2,3 };
+	veciStimuliToInit = { 2 };
 	initAllStimuli();
 }
 void StimuliLibrary::initAllStimuli()
