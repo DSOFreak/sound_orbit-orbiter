@@ -73,7 +73,7 @@ namespace Toolbox {
 					d.mov_queued = queued_mov_nr == 0;
 					d.stimulusDuration = stim_dur;
 					d.stimulus_nr = stim_nr;
-					float C = 0.0f; // CALIBRATION FACTOR
+					float C = 13.3f; // CALIBRATION FACTOR
 					float Lmax = 90.0f;
 					d.loudness = pow(10.0f, (stim_vol_L_real - Lmax + C) / 20.0f);
 					d.toBeTriggerd = stim_tbt;
