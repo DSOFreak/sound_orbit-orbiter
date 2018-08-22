@@ -1,7 +1,7 @@
 #include "RaspiConfig.h"
 
 
-const int RaspiConfig::ownIndex =1;
+const int RaspiConfig::ownIndex =2;
 RaspiConfig::RaspiConfig()
 {
 }

@@ -41,7 +41,7 @@ CMaxonMotor::CMaxonMotor()
 	uiBaudrate = 1000000;
 
 	usNominalCurrent = 1800;
-	usMaxCurrent = 2000;
+	usMaxCurrent = 2400;
 	usThermalConstant = 4;
 
 	uiEncoderResolution = 1024;
