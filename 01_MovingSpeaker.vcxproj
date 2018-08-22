@@ -42,6 +42,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Remote_GCC_1_0</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -72,6 +73,10 @@
     <TargetExt>.o</TargetExt>
     <IncludePath>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)include\gtk;$(ProjectDir)include\gdk;$(ProjectDir)include\gtk\deprecated;$(ProjectDir)include\ncursesw;$(ProjectDir)include\lirc;$(ProjectDir)include\wiringPi\2.32;$(IncludePath);$(ISensIncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir);$(ProjectDir)include;$(ProjectDir)include\ncursesw</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <RemoteProjectDir>$(RemoteRootDir)/$(ProjectName)</RemoteProjectDir>
+    <SourcesToCopyRemotelyOverride>@(SourcesToCopyRemotely)</SourcesToCopyRemotelyOverride>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="cmaxonmotor.cpp" />

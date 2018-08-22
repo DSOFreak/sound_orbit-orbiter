@@ -512,7 +512,7 @@ void CMaxonMotor::SetPosModeParameter()
 
 
 	//cout << "SetPosModeParameter()" << endl;
-	VCS_SetDcMotorParameter(keyHandle, usNodeID, 1800, 2000, 40, &ErrorCode);
+	VCS_SetDcMotorParameter(keyHandle, usNodeID, usNominalCurrent, usMaxCurrent, usThermalConstant, &ErrorCode);
 	cout << "1.8A" << endl;
 }
 void CMaxonMotor::SetCurModeParameter(int)
