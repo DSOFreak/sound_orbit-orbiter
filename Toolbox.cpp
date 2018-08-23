@@ -69,7 +69,7 @@ namespace Toolbox {
 					d.speakerIDX = transmittedSpeakerID;
 					d.direction = motorDirection;
 					d.speed = (1.0f * speed) + (0.01f * speedDiv100);
-					d.angularDistance = (1.0f * angularDistance) + (0.01f * angularDistanceDiv100);
+					d.fAngularDistance = (1.0f * (float)angularDistance) + (0.01f * (float)angularDistanceDiv100);
 					d.mov_queued = queued_mov_nr == 0;
 					d.stimulusDuration = stim_dur;
 					d.stimulus_nr = stim_nr;
@@ -118,7 +118,7 @@ namespace Toolbox {
 	{
 		structHostData.direction = 0;
 		structHostData.speed = 0;
-		structHostData.angularDistance = 0;
+		structHostData.fAngularDistance = 0.0;
 		structHostData.stimulus_nr = 0;
 		structHostData.stimulusDuration = 0;
 		structHostData.loudness = 0;

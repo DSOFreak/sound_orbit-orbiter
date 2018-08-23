@@ -110,15 +110,15 @@ void vProcessMovement()
 	pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
 
 	
-	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->angularDistance << ", speed = " << hostData->speed << std::endl;
+	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->fAngularDistance << ", speed = " << hostData->speed << std::endl;
 	std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
 
 
 	if (hostData->direction == 1) { // Dir 1 = clockwise
-		iAngleDegree = hostData->angularDistance * -1; // Correct
+		iAngleDegree = hostData->fAngularDistance * -1.0; // Correct
 	}
 	if (hostData->direction == 2) { // Dir 2 = counterclockwise
-		iAngleDegree = hostData->angularDistance;
+		iAngleDegree = hostData->fAngularDistance;
 	}
 	
 
@@ -174,7 +174,7 @@ void TimerFunc() {
 					if (hostData->mov_queued) { // Add new data to queue
 						std::cout << "Add new data to queue" << endl;
 
-						if (hostData->angularDistance > 0.0)
+						if (hostData->fAngularDistance > 0.0)
 						{
 							pMovement->vecMovementqueue.push_back(hostData);
 						}

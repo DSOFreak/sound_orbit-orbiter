@@ -71,9 +71,9 @@ long CMaxonMotor::setCurrentTargetPositionInMotorData(long lTargetPositionInMoto
 	lCurrentTargetPositionInMotorData = lTargetPositionInMotorData;
 }
 
-long CMaxonMotor::lConvertAngleInDegreeToMotorData(int iAngle)
+long CMaxonMotor::lConvertAngleInDegreeToMotorData(float fAngle)
 {
-	long lretVal = 65536 * (float(iAngle) / 360.0) * (RAILPERI / WHEELPERI);
+	long lretVal = 65536.0 * (fAngle / 360.0) * (RAILPERI / WHEELPERI);
 	return lretVal;
 }
 bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls)//debug
@@ -591,10 +591,10 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 		long int liDistanceInMotorData;
 
 		if (pMovement->vecMovementqueue.front()->direction == 1) { // Dir 1 = clockwise
-			liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos) * -1 ; // Correct
+			liDistanceInMotorData = (lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->fAngularDistance) + liLeftOfCurrentWayToTargetPos) * -1.0 ; // Correct
 		}
 		if (pMovement->vecMovementqueue.front()->direction == 2) { // Dir 2 = counterclockwise
-			liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->angularDistance) + liLeftOfCurrentWayToTargetPos;
+			liDistanceInMotorData = lConvertAngleInDegreeToMotorData(pMovement->vecMovementqueue.front()->fAngularDistance) + liLeftOfCurrentWayToTargetPos;
 		}
 
 		//Update the target position

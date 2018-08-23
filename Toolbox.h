@@ -17,7 +17,7 @@ namespace Toolbox
 		u_int8_t speakerIDX;
 		u_int8_t direction;
 		float speed;
-		float angularDistance;
+		float fAngularDistance;
 		u_int8_t stimulus_nr;
 		u_int32_t stimulusDuration;
 		float loudness;

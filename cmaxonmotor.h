@@ -55,7 +55,7 @@ public:
 	long currenTargetPos;
 	long lgetCurrentTargetPositionInMotorData();
 	long setCurrentTargetPositionInMotorData(long lTargetPositionInMotorData);
-	long lConvertAngleInDegreeToMotorData(int iAngle);
+	long lConvertAngleInDegreeToMotorData(float fAngle);
     // ********* I N I T *********
 	CMaxonMotor();
 	bool reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls);
