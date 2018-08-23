@@ -37,13 +37,13 @@ char *ip_addr;
 int port;
 std::shared_ptr<StimuliLibrary> pStimuliLib;
 
-long long llDebugNumOfTCPFuncCalls = 0;
+//long long llDebugNumOfTCPFuncCalls = 0;
 
 void tcp_func() {
 	std::string msg;
 
 	while (!exit_app) {
-		llDebugNumOfTCPFuncCalls++;
+		//llDebugNumOfTCPFuncCalls++;
 		msg = tcp.receive(100);
 		if (msg.length() == 0) {
 			tcp.exit();
@@ -104,7 +104,7 @@ bool movement_skip;
 bool stimuli_skip;
 void vProcessMovement()
 {
-	int iAngleDegree;
+	float fAngleDegree;
 	std::cout << "vProcessMovement:" << std::endl;
 	shared_ptr<Toolbox::HostData> hostData = pMovement->vecMovementqueue.front();
 	pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
@@ -115,29 +115,29 @@ void vProcessMovement()
 
 
 	if (hostData->direction == 1) { // Dir 1 = clockwise
-		iAngleDegree = hostData->fAngularDistance * -1.0; // Correct
+		fAngleDegree = hostData->fAngularDistance * -1.0; // Correct
 	}
 	if (hostData->direction == 2) { // Dir 2 = counterclockwise
-		iAngleDegree = hostData->fAngularDistance;
+		fAngleDegree = hostData->fAngularDistance;
 	}
 	
 
 	if (hostData->direction != 0) { // Dir 0 = no movement
-		long lMotorDataTargetPosition = pMotor->lConvertAngleInDegreeToMotorData(iAngleDegree);
+		long lMotorDataTargetPosition = pMotor->lConvertAngleInDegreeToMotorData(fAngleDegree);
 		pMotor->setCurrentTargetPositionInMotorData(lMotorDataTargetPosition);
 		pMotor->setSpeed(hostData->speed);
 		pMotor->Move(pMotor->lgetCurrentTargetPositionInMotorData());
 		pMotor->currentlyProcessedMovementData = hostData;
 	}
 }
-long long llNumberOfRelevantThreadCalls = 0;
+//long long llNumberOfRelevantThreadCalls = 0;
 void TimerFunc() {
-	long long debug = 0;
+	//long long debug = 0;
 	while (true) //es ist entweder gerade bewegung oder die queue ist leer
 	{
 		
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	llNumberOfRelevantThreadCalls++;
+	//llNumberOfRelevantThreadCalls++;
 	//if ((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty()))
 		std::string host_data_raw;
 		while(!tcp_queue.empty()) {
@@ -150,7 +150,11 @@ void TimerFunc() {
 			int speakerIDX;
 			if (host_data_raw.length() != 0)
 			{ // If a tcp-message has arrived
-				std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
+				if (host_data_raw.find("G_P_A") == std::string::npos)//debug avoid the printfs
+				{
+					std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
+				}
+
 
 				// FIRST: Check if it is a get or set request for raspi data
 				char charIsGetOrSetRequest = host_data_raw.at(0);
@@ -163,7 +167,7 @@ void TimerFunc() {
 
 					tcp.Send(strsAnsnwerToServerRequest);
 					//std::cout << "Battery Voltage" << strsAnsnwerToServerRequest << endl;
-					std::cout << "debug nr: " << debug++ << endl;
+					//std::cout << "debug nr: " << debug++ << endl;
 				}
 				else if (charIsGetOrSetRequest == 'S') // no answer sned needed
 				{
@@ -226,11 +230,11 @@ void vMovementThread(bool &bIsFirstCall)
 	// falls nix geht... mache stimulilib shared pntr !!!!!!!!!!!!
 	std::thread movementThread{ [&]()
 	{
-		long long llNumberOfRelevantThreadCalls = 0;
+		//long long llNumberOfRelevantThreadCalls = 0;
 		while (true)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
-			llNumberOfRelevantThreadCalls++;
+			//llNumberOfRelevantThreadCalls++;
 			//cout << "** MOVMENT THREAD START" << endl;
 		// MOVEMENT PROCESSING 
 			movementTimerMutex.lock();
@@ -240,7 +244,7 @@ void vMovementThread(bool &bIsFirstCall)
 				if (!pMovement->vecMovementqueue.empty())// movement pending 
 				{
 
-					if (pMotor->reachedTarget(llNumberOfRelevantThreadCalls, llNumberOfRelevantThreadCalls, llDebugNumOfTCPFuncCalls) || movement_skip) // (movementFinnished OR Skip_this_movement)
+					if (pMotor->reachedTarget(1337, 1337, 1337) || movement_skip) // (movementFinnished OR Skip_this_movement)
 					{
 						if (movement_skip)
 						{
@@ -348,14 +352,14 @@ int main(int argc, char **argv)
 	while (!exit_app)
 	{
 		usleep(1000000);
-		if (pMotor->bClearFaultIfInFaultState())
+		/*if (pMotor->bClearFaultIfInFaultState()) die idee ist gut die fehler zu cleareen, aber so verursachen wir unendlich viele neustarts
 		{
 			printf("\n\n\n ----------------------- tried to clear a fault state -> restatrt the motor ------------ \n\n\n");
 			// tried to clear a fault state -> restatrt the motor
 			pMotor = std::make_shared<CMaxonMotor>();
 			//pMotor->initializeDevice(); // initialize EPOS2
 			pMotor->initializeDeviceNew(); // initialize EPOS2
-		}
+		}*/
 	}
 	printf("\n Delete motor object quit main!");
 	pMotor->closeDevice(); // close EPOS2
