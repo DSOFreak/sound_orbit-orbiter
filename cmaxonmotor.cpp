@@ -61,6 +61,25 @@ CMaxonMotor::CMaxonMotor()
 	cout << "CMaxxon constructor called success" << endl;
 }
 
+bool CMaxonMotor::bClearFaultIfInFaultState()
+{
+	int IsInFault = FALSE;
+	if (VCS_GetFaultState(keyHandle, usNodeID, &IsInFault, &ErrorCode))
+	{
+		if (IsInFault && !VCS_ClearFault(keyHandle, usNodeID, &ErrorCode))
+		{
+			cout << "Clear fault failed! , error code=" << ErrorCode << endl;
+			return true;
+		}
+		else
+		{
+			cout << "Fault cleared"<< endl;
+			return true;
+		}
+	}
+	return false; // no fault
+}
+
 long CMaxonMotor::lgetCurrentTargetPositionInMotorData()
 {
 	return lCurrentTargetPositionInMotorData;

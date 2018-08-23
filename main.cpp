@@ -132,9 +132,10 @@ void vProcessMovement()
 }
 long long llNumberOfRelevantThreadCalls = 0;
 void TimerFunc() {
-
+	long long debug = 0;
 	while (true) //es ist entweder gerade bewegung oder die queue ist leer
 	{
+		
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	llNumberOfRelevantThreadCalls++;
 	//if ((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty()))
@@ -162,6 +163,7 @@ void TimerFunc() {
 
 					tcp.Send(strsAnsnwerToServerRequest);
 					//std::cout << "Battery Voltage" << strsAnsnwerToServerRequest << endl;
+					std::cout << "debug nr: " << debug++ << endl;
 				}
 				else if (charIsGetOrSetRequest == 'S') // no answer sned needed
 				{
@@ -346,6 +348,14 @@ int main(int argc, char **argv)
 	while (!exit_app)
 	{
 		usleep(1000000);
+		if (pMotor->bClearFaultIfInFaultState())
+		{
+			printf("\n\n\n ----------------------- tried to clear a fault state -> restatrt the motor ------------ \n\n\n");
+			// tried to clear a fault state -> restatrt the motor
+			pMotor = std::make_shared<CMaxonMotor>();
+			//pMotor->initializeDevice(); // initialize EPOS2
+			pMotor->initializeDeviceNew(); // initialize EPOS2
+		}
 	}
 	printf("\n Delete motor object quit main!");
 	pMotor->closeDevice(); // close EPOS2

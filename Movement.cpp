@@ -96,13 +96,13 @@ void Movement::vConcatenateSuccessiveMovements()
 
 			if ((veciConsecutiveMovementsIndices.at(k)+1) == (veciConsecutiveMovementsIndices.at(k+1)))//successive?
 			{
-				fAngularDistance += vecMovementqueue.at(veciConsecutiveMovementsIndices.at(k + 1))->angularDistance;
+				fAngularDistance += vecMovementqueue.at(veciConsecutiveMovementsIndices.at(k + 1))->fAngularDistance;
 				bIsSuccessiveMovement = true;
 			}
 			else
 			{
 				// Store the accumulated data
-				vecTempMovementQueue.back()->angularDistance = fAngularDistance;
+				vecTempMovementQueue.back()->fAngularDistance = fAngularDistance;
 				std::cout << "ecTempMovementQueue.back()->angularDistanc.push_back GOOD" << std::endl;
 				fAngularDistance = 0;
 				//Not a consecutive movement
@@ -112,7 +112,7 @@ void Movement::vConcatenateSuccessiveMovements()
 			if (bIsSuccessiveMovement && ((k + 2) == veciConsecutiveMovementsIndices.size()))
 			{
 				// Store the accumulated data
-				vecTempMovementQueue.back()->angularDistance = fAngularDistance;
+				vecTempMovementQueue.back()->fAngularDistance = fAngularDistance;
 				std::cout << "if we are at the end of the list .. store!" << std::endl;
 				fAngularDistance = 0;
 				//Not a consecutive movement

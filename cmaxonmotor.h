@@ -52,6 +52,7 @@ private:
 
 
 public:
+	bool bClearFaultIfInFaultState();
 	long currenTargetPos;
 	long lgetCurrentTargetPositionInMotorData();
 	long setCurrentTargetPositionInMotorData(long lTargetPositionInMotorData);
