@@ -41,8 +41,8 @@ CMaxonMotor::CMaxonMotor()
 	uiBaudrate = 1000000;
 
 	usNominalCurrent = 1800;
-	usMaxCurrent = 2400;
-	usThermalConstant = 4;
+	usMaxCurrent = usNominalCurrent*2;
+	usThermalConstant = 11.2;
 
 	uiEncoderResolution = 1024;
 	bIsInvertedPolarity = false;
@@ -54,8 +54,8 @@ CMaxonMotor::CMaxonMotor()
 	//const unsigned int uiVelocityCalibrationFactor = 185; 
 
 	iProfileVelocity_m = uiMaxVelocity; // prev. 10000
-	iProfileAcceleration_m = uiMaxAcceleration; //prev. 5000
-	iProfileDeceleration_m = uiMaxDecceleration; //prev. 10000
+	iProfileAcceleration_m = uiMaxAcceleration/2; //prev. 5000
+	iProfileDeceleration_m = uiMaxDecceleration/2; //prev. 10000
 
 
 	cout << "CMaxxon constructor called success" << endl;

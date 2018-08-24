@@ -1,7 +1,10 @@
 #include "RaspiConfig.h"
 
 
-const int RaspiConfig::ownIndex =1;
+//id 0: ending 25
+//id 1: ending 26
+// id 2: ending 22
+const int RaspiConfig::ownIndex =0;
 RaspiConfig::RaspiConfig()
 {
 }
