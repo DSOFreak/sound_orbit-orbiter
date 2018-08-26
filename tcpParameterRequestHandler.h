@@ -20,5 +20,6 @@ private:
 	double dGetBatteryVoltage();
 	double dGetMotorPosition();
 	const std::string strFirstLineOfNewCSVFile = "MotorPosition, RaspiTimeStamp, Name, Surname, TestName, TestSetting, PCTimeStampOfCreation \n";
+	long long llReferenceTimeToBlock;//das ist aus der eile entstanden
 };
 

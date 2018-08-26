@@ -2,11 +2,11 @@
 #include <thread>
 
 DataToCSV* DataToCSV::pInstance = nullptr;
+bool DataToCSV::bContinueTask = false;
 DataToCSV::DataToCSV( ) 
 {
 	strDelimeter = ",";
 	ulLinesCount = 0;
-	bContinueTask = false;
 }
 
 
@@ -22,13 +22,8 @@ DataToCSV*  DataToCSV::getInstance()
 	return pInstance;
 }
 
-void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor)
+void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor, bool bContinueTask_)
 {
-	
-	bool bCopyOfbContinueTask;
-	mutexDataToCSVTaskChecker.lock();
-	bCopyOfbContinueTask = bContinueTask;
-	mutexDataToCSVTaskChecker.unlock();
 	std::vector<std::string> vecstrInputData;
 	// RaspiTimestamp
 	long long  llRaspiTimestamp;
@@ -37,8 +32,9 @@ void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonM
 	int iCurrentPosition;
 	std::thread vTaskCyclicWriteOfMotorDataThread{ [&]()
 	{
-		while (bCopyOfbContinueTask)
+		while (bContinueTask_)
 		{
+			printf("INSIDE TASK");
 			vecstrInputData.clear();
 			// Motordata
 			pMaxonMotor->getCurrentPosition(iCurrentPosition);
@@ -52,9 +48,10 @@ void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonM
 			addDatainRow(vecstrInputData.begin(), vecstrInputData.end());
 
 			mutexDataToCSVTaskChecker.lock();
-			bCopyOfbContinueTask = bContinueTask;
+			bContinueTask_ = DataToCSV::bContinueTask;
 			mutexDataToCSVTaskChecker.unlock();
 			std::this_thread::sleep_for(std::chrono::milliseconds(uiUpdateRateMs));
 		}
+		vCloseFile();
 	} }; vTaskCyclicWriteOfMotorDataThread.detach();	
 }
