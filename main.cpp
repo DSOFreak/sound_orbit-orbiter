@@ -17,6 +17,7 @@
 #include "Toolbox.h"
 #include "StimuliLibrary.h" 
 #include "Movement.h"
+#include "DataToCSV.h"
 #include "tcpParameterRequestHandler.h"
 using namespace std;
 
@@ -328,6 +329,7 @@ int main(int argc, char **argv)
 	//pMotor->initializeDevice(); // initialize EPOS2
 	pMotor->initializeDeviceNew(); // initialize EPOS2
 	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
+
 
 	if (argc == 1)
 	{

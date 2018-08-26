@@ -19,5 +19,6 @@ private:
 	// Get Functions
 	double dGetBatteryVoltage();
 	double dGetMotorPosition();
+	const std::string strFirstLineOfNewCSVFile = "MotorPosition, RaspiTimeStamp, Name, Surname, TestName, TestSetting, PCTimeStampOfCreation \n";
 };
 

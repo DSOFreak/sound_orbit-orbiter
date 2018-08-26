@@ -4,6 +4,7 @@
 #include "Toolbox.h"
 #include "Definitions.h" // Maxon Motor Header file
 #include <ctime>
+#include <mutex>
 #define TRUE 1
 #define FALSE 0
 
@@ -11,6 +12,7 @@
 class CMaxonMotor
 {
 private:
+	std::mutex mutexForGetPosition;
 	// DEBUG
 	std::clock_t start;
 	double duration;

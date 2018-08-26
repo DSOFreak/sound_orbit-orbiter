@@ -80,6 +80,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="cmaxonmotor.cpp" />
+    <ClCompile Include="DataToCSV.cpp" />
     <ClCompile Include="Equalizer.cpp" />
     <ClCompile Include="lirc-0.9.4d\lib\lirc_client.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
@@ -101,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cmaxonmotor.h" />
+    <ClInclude Include="DataToCSV.h" />
     <ClInclude Include="Equalizer.h" />
     <ClInclude Include="Movement.h" />
     <ClInclude Include="MusicScale.h" />

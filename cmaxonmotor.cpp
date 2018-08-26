@@ -471,7 +471,7 @@ void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 
 void CMaxonMotor::getCurrentPosition(int &currentPosition)
 {
-
+	mutexForGetPosition.lock();
 	unsigned int errorCode = 0;
 	std::clock_t start;
 	double duration;
@@ -484,6 +484,7 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
 		usleep(1500);
 	}*/
+	mutexForGetPosition.unlock();
 }
 
 void CMaxonMotor::vResetTargetPositionToCurrentPosition()

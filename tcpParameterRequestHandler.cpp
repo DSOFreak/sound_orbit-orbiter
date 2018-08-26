@@ -2,6 +2,8 @@
 #include <algorithm>
 #include "StimuliLibrary.h"
 #include "Movement.h"
+#include <thread>
+#include "DataToCSV.h"
 const std::string tcpParameterRequestHandler::strEndIndicatorForProtocol = "Q"; // End of Telegram
 tcpParameterRequestHandler::tcpParameterRequestHandler(std::shared_ptr<CMaxonMotor> pMaxonMotor) : m_pMaxonMotor(pMaxonMotor)
 {
@@ -46,7 +48,25 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 			// -> Vielleicht auch auf nullptr setzen und die Bewegung sofort stoppen (Motor->Stop) schicken
 			// -> Dann das Kommando umbenennen in S_C_A Set Clear All
 		}
-		// TO DO: Hier habe ich noch nicht das sich lohnen würde.. nichts zu setzen!
+		else if (strRequest.find("S_N_CSV") != std::string::npos) // Set new CSV
+		{
+			DataToCSV* pDataToCSV = DataToCSV::getInstance();
+			// Stop the task (if started)
+			pDataToCSV->mutexDataToCSVTaskChecker.lock();
+			pDataToCSV->bContinueTask = false;
+			pDataToCSV->mutexDataToCSVTaskChecker.unlock();
+			// Wait
+			std::this_thread::sleep_for(std::chrono::milliseconds(pDataToCSV->uiUpdateRateMs));
+
+			// Create the new file and write the information in strRequest to the file
+			pDataToCSV->vCreateNewCSVFile(strRequest);
+
+			// Start the task 
+			pDataToCSV->mutexDataToCSVTaskChecker.lock();
+			pDataToCSV->bContinueTask = true;
+			pDataToCSV->mutexDataToCSVTaskChecker.unlock();
+			pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);	
+		}
 	}
 	else
 	{
