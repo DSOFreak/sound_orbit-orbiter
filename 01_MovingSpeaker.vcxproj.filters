@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="cmaxonmotor.cpp" />
+    <ClCompile Include="DataToCSV.cpp" />
+    <ClCompile Include="Equalizer.cpp" />
+    <ClCompile Include="lirc-0.9.4d\lib\lirc_client.c" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Movement.cpp" />
+    <ClCompile Include="MusicScale.cpp" />
+    <ClCompile Include="MvngSpkrUI.cpp" />
+    <ClCompile Include="RaspiConfig.cpp" />
+    <ClCompile Include="StimuliLibrary.cpp" />
+    <ClCompile Include="TCPClient.cpp" />
+    <ClCompile Include="tcpParameterRequestHandler.cpp" />
+    <ClCompile Include="Toolbox.cpp" />
+    <ClCompile Include="udpServr.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cmaxonmotor.h" />
+    <ClInclude Include="DataToCSV.h" />
+    <ClInclude Include="Equalizer.h" />
+    <ClInclude Include="Movement.h" />
+    <ClInclude Include="MusicScale.h" />
+    <ClInclude Include="RaspiConfig.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="StimuliLibrary.h" />
+    <ClInclude Include="TCPClient.h" />
+    <ClInclude Include="tcpParameterRequestHandler.h" />
+    <ClInclude Include="Toolbox.h" />
+    <ClInclude Include="udpServr.h" />
+  </ItemGroup>
+</Project>

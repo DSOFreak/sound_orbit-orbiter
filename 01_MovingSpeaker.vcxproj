@@ -97,8 +97,8 @@
     <ClCompile Include="StimuliLibrary.cpp" />
     <ClCompile Include="TCPClient.cpp" />
     <ClCompile Include="tcpParameterRequestHandler.cpp" />
-    <ClCompile Include="TCPServer.cpp" />
     <ClCompile Include="Toolbox.cpp" />
+    <ClCompile Include="udpServr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cmaxonmotor.h" />
@@ -111,8 +111,8 @@
     <ClInclude Include="StimuliLibrary.h" />
     <ClInclude Include="TCPClient.h" />
     <ClInclude Include="tcpParameterRequestHandler.h" />
-    <ClInclude Include="TCPServer.h" />
     <ClInclude Include="Toolbox.h" />
+    <ClInclude Include="udpServr.h" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

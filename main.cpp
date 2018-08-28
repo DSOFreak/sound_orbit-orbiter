@@ -19,6 +19,7 @@
 #include "Movement.h"
 #include "DataToCSV.h"
 #include "tcpParameterRequestHandler.h"
+#include "udpServr.h"
 using namespace std;
 
 
@@ -59,6 +60,29 @@ void tcp_func() {
 		usleep(10000);
 	}
 }
+
+void udp_func() {
+	std::string msg;
+	udpServr* pUdpServer = udpServr::getInstance();
+	while (!exit_app) {
+		//llDebugNumOfTCPFuncCalls++;
+		
+		msg = pUdpServer->vRecvUDP();
+		if (msg.length() == 0) {
+			pUdpServer->vExit();
+			std::cout << "Reconnecting..." << std::endl;
+			pUdpServer->vSetup();
+			sleep(2);
+		}
+		pUdpServer->mutexUDPQueue.lock();
+		//cout << "pushin..... " << msg << endl;
+		pUdpServer->udp_queue.push(msg);
+		pUdpServer->mutexUDPQueue.unlock();
+		usleep(10000);
+	}
+	cout << "LEAVING UDP FUNC" << endl;
+}
+
 
 // LED Pin - wiringPi pin 0 is BCM_GPIO 17.
 // we have to use BCM numbering when initializing with wiringPiSetupSys
@@ -133,6 +157,7 @@ void vProcessMovement()
 }
 //long long llNumberOfRelevantThreadCalls = 0;
 void TimerFunc() {
+	udpServr* pUdpServer = udpServr::getInstance();
 	//long long debug = 0;
 	while (true) //es ist entweder gerade bewegung oder die queue ist leer
 	{
@@ -141,11 +166,13 @@ void TimerFunc() {
 	//llNumberOfRelevantThreadCalls++;
 	//if ((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty()))
 		std::string host_data_raw;
-		while(!tcp_queue.empty()) {
-			tcp_mutex.lock();
-			host_data_raw = tcp_queue.front(); // Get tcp messages
-			tcp_queue.pop();
-			tcp_mutex.unlock();
+		while(!pUdpServer->udp_queue.empty()) {
+
+			pUdpServer->mutexUDPQueue.lock();
+			host_data_raw = pUdpServer->udp_queue.front(); // Get tcp messages
+			pUdpServer->udp_queue.pop();
+			pStimuliLib->mutexStimuli.unlock();
+			std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
 			//std::this_thread::sleep_for(std::chrono::milliseconds(20)); // das istn ur anstelle von 			((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty())) .. damit es etwas feinierter ist
 			/* PROTOCOL INTERPRETATION */
 			int speakerIDX;
@@ -330,7 +357,8 @@ int main(int argc, char **argv)
 	pMotor->initializeDeviceNew(); // initialize EPOS2
 	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
 
-
+	
+	
 	if (argc == 1)
 	{
 		printf("No Ip provided: use: 192.168.178.23\n");
@@ -338,15 +366,35 @@ int main(int argc, char **argv)
 	}
 	ip_addr = argv[1];
 	port = 1234;
+	/*
+	// TCP CONNECTION
 	std::thread tcpThread(tcp_func);
-	std::thread timerThread(TimerFunc);
+	
 	do {
 		printf("Connecting to server at %s:%d ... \n", ip_addr, port);
 		usleep(1000000);
 	} while (!tcp.bGetbIsConnectionEstablished());
-	printf("Connected!");
+	printf("Connected!");*/
 	
+	// UDP CONNECTION
 	exit_app = false;
+	std::thread udpThread(udp_func);
+	std::thread timerThread(TimerFunc);
+	/*udp_client_server::udp_server updClient = udp_client_server::udp_server(ip_addr, port);
+	char* msg;
+	int iMsgLength = 0;
+	while (iMsgLength == 0)
+	{
+		printf("Waiting for UDP Broadcast data \n");
+		iMsgLength = updClient.recv(msg, 100);
+		usleep(1000000);
+		printf("Data: %s\n", msg);
+	}*/
+	
+
+
+	// Start the application
+
 	bool bIsFirstCall = true;
 	bool bRef = &bIsFirstCall;
 	vStimuliThread();
