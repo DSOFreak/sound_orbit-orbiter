@@ -66,7 +66,7 @@ void udp_func() {
 	udpServr* pUdpServer = udpServr::getInstance();
 	while (!exit_app) {
 		//llDebugNumOfTCPFuncCalls++;
-		
+		//cout << "inside udp func..... " << msg << endl;
 		msg = pUdpServer->vRecvUDP();
 		if (msg.length() == 0) {
 			pUdpServer->vExit();
@@ -75,7 +75,7 @@ void udp_func() {
 			sleep(2);
 		}
 		pUdpServer->mutexUDPQueue.lock();
-		//cout << "pushin..... " << msg << endl;
+		cout << "pushin..... " << msg << endl;
 		pUdpServer->udp_queue.push(msg);
 		pUdpServer->mutexUDPQueue.unlock();
 		usleep(10000);
@@ -161,7 +161,7 @@ void TimerFunc() {
 	//long long debug = 0;
 	while (true) //es ist entweder gerade bewegung oder die queue ist leer
 	{
-		
+		//cout << "INSIDE TIMER FUNC" << endl;
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	//llNumberOfRelevantThreadCalls++;
 	//if ((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty()))
@@ -171,7 +171,7 @@ void TimerFunc() {
 			pUdpServer->mutexUDPQueue.lock();
 			host_data_raw = pUdpServer->udp_queue.front(); // Get tcp messages
 			pUdpServer->udp_queue.pop();
-			pStimuliLib->mutexStimuli.unlock();
+			pUdpServer->mutexUDPQueue.unlock();
 			std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
 			//std::this_thread::sleep_for(std::chrono::milliseconds(20)); // das istn ur anstelle von 			((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty())) .. damit es etwas feinierter ist
 			/* PROTOCOL INTERPRETATION */
