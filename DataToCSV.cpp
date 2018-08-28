@@ -2,6 +2,7 @@
 #include <thread>
 
 DataToCSV* DataToCSV::pInstance = nullptr;
+std::mutex DataToCSV::mutexDataToCSVTaskChecker;
 bool DataToCSV::bContinueTask = false;
 DataToCSV::DataToCSV( ) 
 {
@@ -22,24 +23,28 @@ DataToCSV*  DataToCSV::getInstance()
 	return pInstance;
 }
 
-void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor, bool bContinueTask_)
+void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor)
 {
-	std::vector<std::string> vecstrInputData;
-	// RaspiTimestamp
-	long long  llRaspiTimestamp;
-	std::string strRaspiTimestamp;
-	// Motor Data
-	int iCurrentPosition;
 	std::thread vTaskCyclicWriteOfMotorDataThread{ [&]()
 	{
-		while (bContinueTask_)
+		std::vector<std::string> vecstrInputData = {};
+		// RaspiTimestamp
+		long long  llRaspiTimestamp;
+		std::string strRaspiTimestamp;
+		// Motor Data
+		int iCurrentPosition;
+
+		mutexDataToCSVTaskChecker.lock();
+		bool bCopyOfContinueTask = DataToCSV::bContinueTask;
+		mutexDataToCSVTaskChecker.unlock();
+		while (bCopyOfContinueTask)
 		{
-			printf("INSIDE TASK");
+			vOpenFile();
 			vecstrInputData.clear();
 			// Motordata
 			pMaxonMotor->getCurrentPosition(iCurrentPosition);
 			vecstrInputData.push_back(std::to_string(iCurrentPosition));
-
+			cout << "GETTING THE MOTORDATaA YEAH " << iCurrentPosition<<endl;
 			// Timestamp
 			llRaspiTimestamp = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 			std::string strRaspiTimestamp = std::to_string(llRaspiTimestamp);
@@ -48,10 +53,13 @@ void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonM
 			addDatainRow(vecstrInputData.begin(), vecstrInputData.end());
 
 			mutexDataToCSVTaskChecker.lock();
-			bContinueTask_ = DataToCSV::bContinueTask;
+			bCopyOfContinueTask = DataToCSV::bContinueTask;
 			mutexDataToCSVTaskChecker.unlock();
 			std::this_thread::sleep_for(std::chrono::milliseconds(uiUpdateRateMs));
+			vCloseFile();
 		}
-		vCloseFile();
-	} }; vTaskCyclicWriteOfMotorDataThread.detach();	
+		
+		cout << "CIAO THREAD" << endl;
+	 }}; vTaskCyclicWriteOfMotorDataThread.detach();
+
 }

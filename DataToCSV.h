@@ -10,6 +10,7 @@
 #include <chrono>
 #include <mutex>
 #include "cmaxonmotor.h"
+#include "RaspiConfig.h"
 using namespace std::chrono;
 using namespace std;
 class DataToCSV
@@ -26,9 +27,9 @@ public:
 	const unsigned int uiUpdateRateMs = 80;
 	static DataToCSV* pInstance;
 	static DataToCSV * getInstance();
-	void vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor, bool bTaskContinue);
+	void vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor);
 
-	std::mutex mutexDataToCSVTaskChecker;
+	static std::mutex mutexDataToCSVTaskChecker;
 	/*
 	* Member function to store a range as comma seperated value
 	*/
@@ -116,7 +117,7 @@ public:
 		cout << "strRaspiTimestamp " << strRaspiTimestamp << endl;
 
 
-		strFileName = "../../../../" + strTestName + "_" + strTestSetting  +"_" + strName +"_" + +"_"+ strPCTimestamp + ".csv";
+		strFileName = "../../../../" + strTestName + "_" + strTestSetting  +"_" + strName +"_" + +"_"+ strPCTimestamp + "_"+ std::to_string(RaspiConfig::ownIndex) + ".csv";
 		cout << strFileName << endl;
 		std::vector<std::string> vecstrHeadlines = { "MotorPosition", "RaspiTimeStamp", "Name", "Surname", "TestName","TestSetting", "PCTimeStampOfCreation" };
 		std::vector<std::string> vecstrFirstLine= { "-", strRaspiTimestamp, strName, strSurname, strTestName, strTestSetting, strPCTimestamp};

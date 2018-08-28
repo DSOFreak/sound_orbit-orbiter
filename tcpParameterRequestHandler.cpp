@@ -59,7 +59,9 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 				std::cout << "S_N_CSV received " << endl;
 				DataToCSV* pDataToCSV = DataToCSV::getInstance();
 				// Stop the task (if started)
+				DataToCSV::mutexDataToCSVTaskChecker.lock();
 				DataToCSV::bContinueTask = false;
+				DataToCSV::mutexDataToCSVTaskChecker.unlock();
 				// Wait
 				std::this_thread::sleep_for(std::chrono::milliseconds(pDataToCSV->uiUpdateRateMs));
 
@@ -67,11 +69,11 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 				pDataToCSV->vCreateNewCSVFile(strRequest);
 
 				// Start the task ;
+				DataToCSV::mutexDataToCSVTaskChecker.lock();
 				DataToCSV::bContinueTask = true;
-				std::cout << "DataToCSV::bContinueTask " << DataToCSV::bContinueTask << endl;
-				pDataToCSV->mutexDataToCSVTaskChecker.unlock();
-				std::cout << "pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);	" << endl;
-				pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor, DataToCSV::bContinueTask);
+				DataToCSV::mutexDataToCSVTaskChecker.unlock();
+				//std::cout << "DataToCSV::bContinueTask " << DataToCSV::bContinueTask << endl;
+				//pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);
 			}
 
 		}

@@ -471,20 +471,25 @@ void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 
 void CMaxonMotor::getCurrentPosition(int &currentPosition)
 {
-	mutexForGetPosition.lock();
+	//mutexForGetPosition.lock();
 	unsigned int errorCode = 0;
-	std::clock_t start;
-	double duration;
-	start = std::clock();
+	//std::clock_t start;
+	//double duration;
+	//start = std::clock();
+	cout << "get position is called" << endl;
 	if (!VCS_GetPositionIs(keyHandle, usNodeID, &currentPosition, &errorCode)) {
-		//cout << " error while getting current position , error code=" << errorCode << endl;
+		cout << " error while getting current position , error code=" << errorCode <<" " <<&errorCode<< endl;
+	}
+	else
+	{
+		cout << "Current position is (in the functino)" << currentPosition << endl;
 	}
 	/*while (duration < 111) // DEBUG TIME
 	{
 		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
 		usleep(1500);
 	}*/
-	mutexForGetPosition.unlock();
+	//mutexForGetPosition.unlock();
 }
 
 void CMaxonMotor::vResetTargetPositionToCurrentPosition()
