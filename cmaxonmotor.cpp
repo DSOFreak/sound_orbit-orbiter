@@ -282,11 +282,7 @@ void CMaxonMotor::activate_device()
 	EnableDevice();
 
 }
-void CMaxonMotor::initializeDevice() {
-	        closeDevice(); // To close if opend					
-	    activate_device();
-	SetPosModeParameter();
-}
+
 
 
 void CMaxonMotor::vSetMainSensorType()
@@ -439,7 +435,9 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 		cout << "StartMeasurement" << endl;
 		start = std::clock();
 	}
-	if (!VCS_MoveToPosition(keyHandle, usNodeID, addToCurrentPosition, Absolute, iImmediately, &errorCode))
+	// DEBUG FÜR CROS TEST DAMIT NIX FÄHRT
+	cout << " MOTORF FÄHRT NICHT IST DEAKTIVIERT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+	if (false)//!VCS_MoveToPosition(keyHandle, usNodeID, addToCurrentPosition, Absolute, iImmediately, &errorCode))
 	{
 		cout << "Move to position failed!, error code=" << errorCode << endl;
 	}

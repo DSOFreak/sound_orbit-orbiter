@@ -67,7 +67,6 @@ public:
 	double dStatus;
 	std::shared_ptr<Toolbox::HostData> currentlyProcessedMovementData;
 
-    void initializeDevice(); 
 	void vSetMainSensorType();
 	void vSetMotorData();
 	void vSetEncoderParameter();

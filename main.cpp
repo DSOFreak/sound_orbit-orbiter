@@ -121,8 +121,8 @@ float A_freqs[] = { 22.5f, 55.0f,110.0f,220.0f,440.0f,880.0f,1760.0f,3520.0f,704
 void IdleFunc(void) {
 	pMotor->getCurrentPosition(iCurrentPosition);
 	pMotor->ErrorNbr(&cErrorNbr);
-	if (pMotor->ErrorCode == 0x34000007) pMotor->initializeDevice();
-	if (cErrorNbr != 0) pMotor->initializeDevice();
+	//if (pMotor->ErrorCode == 0x34000007) pMotor->initializeDevice();
+	//if (cErrorNbr != 0) pMotor->initializeDevice();
 }
 
 bool movement_skip;
@@ -353,7 +353,6 @@ int main(int argc, char **argv)
 	pMovement = Movement::getInstance();
 	char InterfaceName[] = "USB0";
 	pMotor = std::make_shared<CMaxonMotor>();
-	//pMotor->initializeDevice(); // initialize EPOS2
 	pMotor->initializeDeviceNew(); // initialize EPOS2
 	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
 

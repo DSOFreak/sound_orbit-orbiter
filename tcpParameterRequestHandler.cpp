@@ -73,7 +73,7 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 				DataToCSV::bContinueTask = true;
 				DataToCSV::mutexDataToCSVTaskChecker.unlock();
 				//std::cout << "DataToCSV::bContinueTask " << DataToCSV::bContinueTask << endl;
-				//pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);
+				pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);
 			}
 
 		}

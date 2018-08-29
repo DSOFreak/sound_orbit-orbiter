@@ -10,6 +10,7 @@
 #include <cstring>
 #include <queue>
 #include <mutex>
+#define BUFFERSIZE 150
 using namespace std;
 class udpServr
 {
@@ -31,7 +32,7 @@ private:
 	udpServr();
 	int sd, rc;
 	struct sockaddr_in serveraddr, clientaddr;
-	char buffer[100];
+	char buffer[BUFFERSIZE];
 	socklen_t  clientaddrlen;
 	int serveraddrlen;
 	char *bufptr;
