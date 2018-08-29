@@ -5,7 +5,7 @@
 #include <chrono>
 using namespace std;
 using namespace chrono;
-/* Server's port number, listen at 1234 */
+/* Server's port number, listen at 1234 . */
 #define SERVPORT 1234
 #define NO_MESSAGE_RECEIVED_YET 0
 #define MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS 500
