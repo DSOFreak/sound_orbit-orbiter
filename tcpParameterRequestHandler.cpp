@@ -57,9 +57,9 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 			{
 				llReferenceTimeToBlock = llCurrentTimestamp;
 				llReferenceTimeToBlock = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-				std::cout << "S_N_CSV received " << endl;
+				std::cout << "S_N_CSV received: Start motor data recording " << endl;
 				DataToCSV* pDataToCSV = DataToCSV::getInstance();
-				// Stop the task (if started)
+				// Stop the task (if started..just to make sure)
 				DataToCSV::mutexDataToCSVTaskChecker.lock();
 				DataToCSV::bContinueTask = false;
 				DataToCSV::mutexDataToCSVTaskChecker.unlock();
@@ -76,7 +76,13 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 				//std::cout << "DataToCSV::bContinueTask " << DataToCSV::bContinueTask << endl;
 				pDataToCSV->vTaskCyclicWriteOfMotorData();
 			}
-
+		}
+		else if (strRequest.find("S_S_CSV") != std::string::npos) // Stop CSV recording
+		{
+			std::cout << "S_S_CSV received: Stop motor data recording " << endl;
+			DataToCSV::mutexDataToCSVTaskChecker.lock();
+			DataToCSV::bContinueTask = false;
+			DataToCSV::mutexDataToCSVTaskChecker.unlock();
 		}
 	}
 	else

@@ -338,11 +338,8 @@ void CMaxonMotor::initializeDeviceNew()
 	closeDevice(); 
 	bool bResult = false;
 	// open device
-	//cout << "keyHandle address in initializeDeviceNew" << keyHandle << endl;
 	vOpenDevice();
-	//cout << "keyHandle address in initializeDeviceNew after vOpenDevice " << keyHandle << endl;
 	bResult = VCS_ResetDevice(keyHandle, usNodeID, &ErrorCode);
-	//cout << "keyHandle address in initializeDeviceNew after VCS_ResetDevice " << keyHandle << endl;
 	if (bResult)
 	{
 		cout << "Reset Device OK" << ErrorCode << endl;
@@ -410,7 +407,6 @@ void CMaxonMotor::initializeDeviceNew()
 
 void CMaxonMotor::Move(long addToCurrentPosition)
 {
-	cout << "keyHandle address Move at beginning " << keyHandle << endl;
 	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING" << endl;
 	int curr;
 	getCurrentPosition(curr);
@@ -434,12 +430,10 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
 	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl;
 	currenTargetPos = addToCurrentPosition + curr;
-	cout << "keyHandle address Move at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 {
-	cout << "keyHandle address getCurrentlyProcessedTargetPosition at beginning " << keyHandle << endl;
     unsigned int errorCode = 0;
 	std::clock_t start;
 	double duration;
@@ -452,18 +446,15 @@ void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
 		usleep(1500);
 	}*/
-	cout << "keyHandle address getCurrentlyProcessedTargetPosition at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::getCurrentPosition(int &currentPosition)
 {
-	cout << "keyHandle address getCurrentPosition at beginning " << keyHandle << endl;
 	//mutexForGetPosition.lock();
 	unsigned int errorCode = 0;
 	//std::clock_t start;
 	//double duration;
 	//start = std::clock();
-	cout << "get position is called" << endl;
 	if (!VCS_GetPositionIs(keyHandle, usNodeID, &currentPosition, &errorCode)) {
 		cout << " error while getting current position , error code=" << errorCode <<" " <<&errorCode<< endl;
 	}
@@ -477,7 +468,6 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 		usleep(1500);
 	}*/
 	//mutexForGetPosition.unlock();
-	cout << "keyHandle address getCurrentPosition at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::vResetTargetPositionToCurrentPosition()
@@ -534,7 +524,6 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed)
 {
-	cout << "keyHandle address setSpeed at beginning " << keyHandle << endl;
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
 
 	if (iDesiredVelocity != iProfileVelocity_m)
@@ -550,7 +539,6 @@ void CMaxonMotor::setSpeed(float speed)
 
 		VCS_SetPositionProfile(keyHandle, usNodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
 	}
-	cout << "keyHandle address setSpeed at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {

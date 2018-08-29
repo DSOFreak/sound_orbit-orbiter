@@ -43,11 +43,8 @@ void DataToCSV::vTaskCyclicWriteOfMotorData()
 			vOpenFile();
 			vecstrInputData.clear();
 			// Motordata
-			cout << "CALL INSIDE TASK" << endl;
 			pMotor->getCurrentPosition(iCurrentPosition);
-			cout << "CALL INSIDE TASK DONE"  << endl;
 			vecstrInputData.push_back(std::to_string(iCurrentPosition));
-			cout << "GETTING THE MOTORDATaA YEAH " << iCurrentPosition<<endl;
 			// Timestamp
 			llRaspiTimestamp = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 			std::string strRaspiTimestamp = std::to_string(llRaspiTimestamp);
