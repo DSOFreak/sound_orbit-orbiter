@@ -111,6 +111,14 @@ public:
 		std::string strPCTimestamp = strHeaderData.substr(iPCTimeStampIdxBegin, iPCTimeStampIdxEnd- iPCTimeStampIdxBegin);
 		cout << "strPCTimestamp " << strPCTimestamp << endl;
 
+		// Start of the speaker by GUI
+		stIdx = strHeaderData.find("_", stIdx);
+		float fPositionInDegreeByGuiIdxBegin = stIdx + 1;
+		stIdx = strHeaderData.find("_", stIdx + 1);
+		float fPositionInDegreeByGuiIdxEnd = stIdx;
+		std::string strPositionInDegreeByGuiIdxBegin = strHeaderData.substr(fPositionInDegreeByGuiIdxBegin, fPositionInDegreeByGuiIdxEnd - fPositionInDegreeByGuiIdxBegin);
+		cout << "strPositionInDegreeByGuiIdxBegin " << strPositionInDegreeByGuiIdxBegin << endl;
+
 		// RaspiTimestamp
 		long long  llRaspiTimestamp = duration_cast< milliseconds >(system_clock::now().time_since_epoch()).count();
 		std::string strRaspiTimestamp = std::to_string(llRaspiTimestamp);
@@ -119,8 +127,8 @@ public:
 
 		strFileName = "../../../../" + strTestName + "_" + strTestSetting  +"_" + strName +"_" + +"_"+ strPCTimestamp + "_"+ std::to_string(RaspiConfig::ownIndex) + ".csv";
 		cout << strFileName << endl;
-		std::vector<std::string> vecstrHeadlines = { "MotorPosition", "RaspiTimeStamp", "Name", "Surname", "TestName","TestSetting", "PCTimeStampOfCreation" };
-		std::vector<std::string> vecstrFirstLine= { "-", strRaspiTimestamp, strName, strSurname, strTestName, strTestSetting, strPCTimestamp};
+		std::vector<std::string> vecstrHeadlines = { "MotorPosition", "RaspiTimeStamp", "Name", "Surname", "TestName","TestSetting", "PCTimeStampOfCreation", "PosInDegreeGivenByGUIData"};
+		std::vector<std::string> vecstrFirstLine= { "-", strRaspiTimestamp, strName, strSurname, strTestName, strTestSetting, strPCTimestamp,strPositionInDegreeByGuiIdxBegin };
 		vOpenFile();
 
 		addDatainRow(vecstrHeadlines.begin(), vecstrHeadlines.end());
