@@ -20,7 +20,7 @@ private:
 
     char* pcPortName;
     unsigned short usNodeID;
-    void *keyHandle;//
+    static void *keyHandle;//
 
 	long lCurrentTargetPositionInMotorData;
 
@@ -51,16 +51,19 @@ private:
 	unsigned int uiMaxDecceleration;
 	unsigned int uiMaxAcceleration;
 
-
+	CMaxonMotor();
 
 public:
+	static CMaxonMotor* pInstance;
+	static CMaxonMotor* getInstance();
+	void* vGetKeyHandle();
 	bool bClearFaultIfInFaultState();
 	long currenTargetPos;
 	long lgetCurrentTargetPositionInMotorData();
 	long setCurrentTargetPositionInMotorData(long lTargetPositionInMotorData);
 	long lConvertAngleInDegreeToMotorData(float fAngle);
     // ********* I N I T *********
-	CMaxonMotor();
+
 	bool reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls);
 
 	unsigned int ErrorCode;
@@ -86,7 +89,6 @@ public:
     void getCurrentPosition(int& CurrentPosition);
 	void vResetTargetPositionToCurrentPosition();
     void Halt();
-    void activate_device();
 	void SetPosModeParameter();
 	void SetCurModeParameter(int);
 	void setSpeed(float speed);

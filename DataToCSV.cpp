@@ -42,7 +42,9 @@ void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonM
 			vOpenFile();
 			vecstrInputData.clear();
 			// Motordata
+			cout << "CALL INSIDE TASK" << endl;
 			pMaxonMotor->getCurrentPosition(iCurrentPosition);
+			cout << "CALL INSIDE TASK DONE"  << endl;
 			vecstrInputData.push_back(std::to_string(iCurrentPosition));
 			cout << "GETTING THE MOTORDATaA YEAH " << iCurrentPosition<<endl;
 			// Timestamp

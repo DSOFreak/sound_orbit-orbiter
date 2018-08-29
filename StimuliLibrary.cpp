@@ -18,6 +18,7 @@ std::shared_ptr<StimuliLibrary> StimuliLibrary::pInstance = nullptr;
 StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
 	printf("StimuliLibrary constructor\n");
+	pMotor = CMaxonMotor::getInstance();
 	vSetUp();
 }
 void StimuliLibrary::vSetResetStimuliLib(bool bIsPlannedToReset)
@@ -400,7 +401,7 @@ void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 	}
 }
 
-bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue, std::shared_ptr<CMaxonMotor> pMotor)
+bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue)
 {
 	//printf("\n Going IN: bAdaptStimulusParametersDueToHijacking\n");
 	bool bRetVal = false;

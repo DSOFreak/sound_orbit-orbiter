@@ -5,9 +5,10 @@
 #include <thread>
 #include "DataToCSV.h"
 const std::string tcpParameterRequestHandler::strEndIndicatorForProtocol = "Q"; // End of Telegram
-tcpParameterRequestHandler::tcpParameterRequestHandler(std::shared_ptr<CMaxonMotor> pMaxonMotor) : m_pMaxonMotor(pMaxonMotor)
+tcpParameterRequestHandler::tcpParameterRequestHandler()
 {
 	llReferenceTimeToBlock = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	m_pMaxonMotor = CMaxonMotor::getInstance();
 }
 
 
@@ -73,7 +74,7 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 				DataToCSV::bContinueTask = true;
 				DataToCSV::mutexDataToCSVTaskChecker.unlock();
 				//std::cout << "DataToCSV::bContinueTask " << DataToCSV::bContinueTask << endl;
-				pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);
+				//pDataToCSV->vTaskCyclicWriteOfMotorData(m_pMaxonMotor);
 			}
 
 		}

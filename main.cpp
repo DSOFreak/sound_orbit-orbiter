@@ -27,7 +27,7 @@ using namespace std;
 unsigned short iVoltage;
 int iCurrentPosition, iNumbOffs;
 unsigned char cErrorNbr, cNumb[3]; // Motor errors
-std::shared_ptr<CMaxonMotor>  pMotor;
+CMaxonMotor*  pMotor;
 std::shared_ptr<tcpParameterRequestHandler> pTCPParameterRequestHandler;
 std::shared_ptr<Movement> pMovement;
 bool exit_app;
@@ -314,7 +314,7 @@ void vStimuliThread()
 				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
 				//std::cout << "Check if there is a protocol hicjacking" << endl;
-				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue, pMotor)) // not protocl adaption, process as usual
+				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue)) // not protocl adaption, process as usual
 				{
 					//std::cout << "Check if there is a protocol hicjacking DONE" << endl;
 					//cout << "No Hijacking" << endl;
@@ -352,9 +352,10 @@ int main(int argc, char **argv)
 	printf("Starting Orbiter Program.");
 	pMovement = Movement::getInstance();
 	char InterfaceName[] = "USB0";
-	pMotor = std::make_shared<CMaxonMotor>();
+	pMotor = CMaxonMotor::getInstance();
 	pMotor->initializeDeviceNew(); // initialize EPOS2
-	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>(pMotor);
+
+	pTCPParameterRequestHandler = std::make_shared<tcpParameterRequestHandler>();
 
 	
 	
@@ -400,6 +401,10 @@ int main(int argc, char **argv)
 	vMovementThread(bRef);
 	while (!exit_app)
 	{
+		//DEBUG
+		//cout << "CALL FROM MAIN" << endl;
+		//pMotor->getCurrentPosition(iCurrentPosition); WORKS
+
 		usleep(1000000);
 		/*if (pMotor->bClearFaultIfInFaultState()) die idee ist gut die fehler zu cleareen, aber so verursachen wir unendlich viele neustarts
 		{

@@ -22,7 +22,8 @@
 using namespace std;
 
 
-
+void * CMaxonMotor::keyHandle = nullptr;
+CMaxonMotor* CMaxonMotor::pInstance = nullptr;
 CMaxonMotor::CMaxonMotor()
 {
 	// DEBUG
@@ -59,6 +60,20 @@ CMaxonMotor::CMaxonMotor()
 
 
 	cout << "CMaxxon constructor called success" << endl;
+}
+
+CMaxonMotor * CMaxonMotor::getInstance()
+{
+	if (!pInstance)
+	{
+		pInstance = new CMaxonMotor();
+	}
+	return pInstance;
+}
+
+void * CMaxonMotor::vGetKeyHandle()
+{
+	return keyHandle;
 }
 
 bool CMaxonMotor::bClearFaultIfInFaultState()
@@ -235,6 +250,7 @@ void CMaxonMotor::DisableDevice()
 void CMaxonMotor::vOpenDevice()
 {
 	keyHandle = VCS_OpenDevice(pcDeviceName, pcProtocolStackName, pcInterfaceName, pcPortName, &ErrorCode);
+	cout << "keyHandle address in vOpenDevice" << keyHandle << endl;
 
 	if (keyHandle == 0)
 	{
@@ -253,36 +269,6 @@ void CMaxonMotor::vSetCommunicationSettings()
 		closeDevice();
 	}
 }
-
-void CMaxonMotor::activate_device()
-{
-
-	unsigned int ErrorCode = 0x00;
-
-
-	cout << "Try to open the motor device .... " << endl;
-	keyHandle = VCS_OpenDevice(pcDeviceName, pcProtocolStackName, pcInterfaceName, pcPortName, &ErrorCode);
-
-	if (keyHandle == 0)
-	{
-		cout << "Open device failure, error code=" << ErrorCode << endl;
-	}
-	else
-	{
-		cout << "Open device success!" << endl;
-	}
-
-
-	if (!VCS_SetProtocolStackSettings(keyHandle, uiBaudrate, uiTimeout, &ErrorCode))
-	{
-		cout << "Set protocol stack settings failed!, error code=" << ErrorCode << endl;
-		closeDevice();
-	}
-
-	EnableDevice();
-
-}
-
 
 
 void CMaxonMotor::vSetMainSensorType()
@@ -352,8 +338,11 @@ void CMaxonMotor::initializeDeviceNew()
 	closeDevice(); 
 	bool bResult = false;
 	// open device
+	//cout << "keyHandle address in initializeDeviceNew" << keyHandle << endl;
 	vOpenDevice();
+	//cout << "keyHandle address in initializeDeviceNew after vOpenDevice " << keyHandle << endl;
 	bResult = VCS_ResetDevice(keyHandle, usNodeID, &ErrorCode);
+	//cout << "keyHandle address in initializeDeviceNew after VCS_ResetDevice " << keyHandle << endl;
 	if (bResult)
 	{
 		cout << "Reset Device OK" << ErrorCode << endl;
@@ -416,12 +405,12 @@ void CMaxonMotor::initializeDeviceNew()
 	{
 		cout << "Reset Device Fail with code " << bResult << endl;
 	}
-
+	
 }
 
 void CMaxonMotor::Move(long addToCurrentPosition)
 {
-
+	cout << "keyHandle address Move at beginning " << keyHandle << endl;
 	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING" << endl;
 	int curr;
 	getCurrentPosition(curr);
@@ -435,9 +424,7 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 		cout << "StartMeasurement" << endl;
 		start = std::clock();
 	}
-	// DEBUG FÜR CROS TEST DAMIT NIX FÄHRT
-	cout << " MOTORF FÄHRT NICHT IST DEAKTIVIERT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-	if (false)//!VCS_MoveToPosition(keyHandle, usNodeID, addToCurrentPosition, Absolute, iImmediately, &errorCode))
+	if (!VCS_MoveToPosition(keyHandle, usNodeID, addToCurrentPosition, Absolute, iImmediately, &errorCode))
 	{
 		cout << "Move to position failed!, error code=" << errorCode << endl;
 	}
@@ -447,12 +434,12 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
 	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl;
 	currenTargetPos = addToCurrentPosition + curr;
-	
+	cout << "keyHandle address Move at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 {
-
+	cout << "keyHandle address getCurrentlyProcessedTargetPosition at beginning " << keyHandle << endl;
     unsigned int errorCode = 0;
 	std::clock_t start;
 	double duration;
@@ -465,10 +452,12 @@ void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
 		usleep(1500);
 	}*/
+	cout << "keyHandle address getCurrentlyProcessedTargetPosition at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::getCurrentPosition(int &currentPosition)
 {
+	cout << "keyHandle address getCurrentPosition at beginning " << keyHandle << endl;
 	//mutexForGetPosition.lock();
 	unsigned int errorCode = 0;
 	//std::clock_t start;
@@ -488,6 +477,7 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 		usleep(1500);
 	}*/
 	//mutexForGetPosition.unlock();
+	cout << "keyHandle address getCurrentPosition at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::vResetTargetPositionToCurrentPosition()
@@ -544,6 +534,7 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed)
 {
+	cout << "keyHandle address setSpeed at beginning " << keyHandle << endl;
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
 
 	if (iDesiredVelocity != iProfileVelocity_m)
@@ -559,6 +550,7 @@ void CMaxonMotor::setSpeed(float speed)
 
 		VCS_SetPositionProfile(keyHandle, usNodeID, iProfileVelocity_m, iProfileAcceleration_m, iProfileDeceleration_m, &ErrorCode);
 	}
+	cout << "keyHandle address setSpeed at end " << keyHandle << endl;
 }
 
 void CMaxonMotor::GetSupply(unsigned short &  piVoltage, short int& piCurrent) {
@@ -589,7 +581,7 @@ int CMaxonMotor::GetCPULoad(float &load) {
 
 bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 {
-
+	
 	shared_ptr<Movement> pMovement = Movement::getInstance();
 	if (pMovement->vecMovementqueue.empty() || (currentlyProcessedMovementData == nullptr) || (pMovement->vecMovementqueue.front()->direction == 0))
 	{
@@ -627,6 +619,8 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 
 		// delete the first element of the movement queue
 		pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
+
+		
 		return true;
 	}
 	else
