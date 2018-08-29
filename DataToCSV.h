@@ -113,11 +113,25 @@ public:
 
 		// Start of the speaker by GUI
 		stIdx = strHeaderData.find("_", stIdx);
-		float fPositionInDegreeByGuiIdxBegin = stIdx + 1;
+		float fPositionSpkr0InDegreeByGuiIdxBegin = stIdx + 1;
 		stIdx = strHeaderData.find("_", stIdx + 1);
-		float fPositionInDegreeByGuiIdxEnd = stIdx;
-		std::string strPositionInDegreeByGuiIdxBegin = strHeaderData.substr(fPositionInDegreeByGuiIdxBegin, fPositionInDegreeByGuiIdxEnd - fPositionInDegreeByGuiIdxBegin);
-		cout << "strPositionInDegreeByGuiIdxBegin " << strPositionInDegreeByGuiIdxBegin << endl;
+		float fPositionSpkr0InDegreeByGuiIdxEnd = stIdx;
+		std::string strPositionSpkr0InDegreeByGui = strHeaderData.substr(fPositionSpkr0InDegreeByGuiIdxBegin, fPositionSpkr0InDegreeByGuiIdxEnd - fPositionSpkr0InDegreeByGuiIdxBegin);
+		cout << "strPositionSpkr0InDegreeByGuiIdxBegin " << strPositionSpkr0InDegreeByGui << endl;
+
+		stIdx = strHeaderData.find("_", stIdx);
+		float fPositionSpkr1InDegreeByGuiIdxBegin = stIdx + 1;
+		stIdx = strHeaderData.find("_", stIdx + 1);
+		float fPositionSpkr1InDegreeByGuiIdxEnd = stIdx;
+		std::string strPositionSpkr1InDegreeByGui = strHeaderData.substr(fPositionSpkr1InDegreeByGuiIdxBegin, fPositionSpkr1InDegreeByGuiIdxEnd - fPositionSpkr1InDegreeByGuiIdxBegin);
+		cout << "strPositionSpkr1InDegreeByGui " << strPositionSpkr1InDegreeByGui << endl;
+
+		stIdx = strHeaderData.find("_", stIdx);
+		float fPositionSpkr2InDegreeByGuiIdxBegin = stIdx + 1;
+		stIdx = strHeaderData.find("_", stIdx + 1);
+		float fPositionSpkr2InDegreeByGuiIdxEnd = stIdx;
+		std::string strPositionSpkr2InDegreeByGui = strHeaderData.substr(fPositionSpkr2InDegreeByGuiIdxBegin, fPositionSpkr2InDegreeByGuiIdxEnd - fPositionSpkr2InDegreeByGuiIdxBegin);
+		cout << "strPositionSpkr2InDegreeByGui " << strPositionSpkr2InDegreeByGui << endl;
 
 		// RaspiTimestamp
 		long long  llRaspiTimestamp = duration_cast< milliseconds >(system_clock::now().time_since_epoch()).count();
@@ -127,8 +141,8 @@ public:
 
 		strFileName = "../../../../" + strTestName + "_" + strTestSetting  +"_" + strName +"_" + +"_"+ strPCTimestamp + "_"+ std::to_string(RaspiConfig::ownIndex) + ".csv";
 		cout << strFileName << endl;
-		std::vector<std::string> vecstrHeadlines = { "MotorPosition", "RaspiTimeStamp", "Name", "Surname", "TestName","TestSetting", "PCTimeStampOfCreation", "PosInDegreeGivenByGUIData"};
-		std::vector<std::string> vecstrFirstLine= { "-", strRaspiTimestamp, strName, strSurname, strTestName, strTestSetting, strPCTimestamp,strPositionInDegreeByGuiIdxBegin };
+		std::vector<std::string> vecstrHeadlines = { "MotorPosition", "RaspiTimeStamp", "Name", "Surname", "TestName","TestSetting", "PCTimeStampOfCreation", "PosInDegreeSpkr0GivenByGUIData", "PosInDegreeSpkr1GivenByGUIData" , "PosInDegreeSpkr2GivenByGUIData" };
+		std::vector<std::string> vecstrFirstLine= { "-", strRaspiTimestamp, strName, strSurname, strTestName, strTestSetting, strPCTimestamp,strPositionSpkr0InDegreeByGui,strPositionSpkr1InDegreeByGui,strPositionSpkr2InDegreeByGui };
 		vOpenFile();
 
 		addDatainRow(vecstrHeadlines.begin(), vecstrHeadlines.end());
