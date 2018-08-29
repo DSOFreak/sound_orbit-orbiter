@@ -23,7 +23,7 @@ DataToCSV*  DataToCSV::getInstance()
 	return pInstance;
 }
 
-void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor)
+void DataToCSV::vTaskCyclicWriteOfMotorData()
 {
 	std::thread vTaskCyclicWriteOfMotorDataThread{ [&]()
 	{
@@ -37,13 +37,14 @@ void DataToCSV::vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonM
 		mutexDataToCSVTaskChecker.lock();
 		bool bCopyOfContinueTask = DataToCSV::bContinueTask;
 		mutexDataToCSVTaskChecker.unlock();
+		CMaxonMotor* pMotor = CMaxonMotor::getInstance();
 		while (bCopyOfContinueTask)
 		{
 			vOpenFile();
 			vecstrInputData.clear();
 			// Motordata
 			cout << "CALL INSIDE TASK" << endl;
-			pMaxonMotor->getCurrentPosition(iCurrentPosition);
+			pMotor->getCurrentPosition(iCurrentPosition);
 			cout << "CALL INSIDE TASK DONE"  << endl;
 			vecstrInputData.push_back(std::to_string(iCurrentPosition));
 			cout << "GETTING THE MOTORDATaA YEAH " << iCurrentPosition<<endl;

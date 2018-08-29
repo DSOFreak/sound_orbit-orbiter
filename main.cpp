@@ -403,7 +403,7 @@ int main(int argc, char **argv)
 	{
 		//DEBUG
 		//cout << "CALL FROM MAIN" << endl;
-		//pMotor->getCurrentPosition(iCurrentPosition); WORKS
+		//pMotor->getCurrentPosition(iCurrentPosition); 
 
 		usleep(1000000);
 		/*if (pMotor->bClearFaultIfInFaultState()) die idee ist gut die fehler zu cleareen, aber so verursachen wir unendlich viele neustarts

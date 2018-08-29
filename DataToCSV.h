@@ -27,7 +27,7 @@ public:
 	const unsigned int uiUpdateRateMs = 80;
 	static DataToCSV* pInstance;
 	static DataToCSV * getInstance();
-	void vTaskCyclicWriteOfMotorData(std::shared_ptr<CMaxonMotor> pMaxonMotor);
+	void vTaskCyclicWriteOfMotorData();
 
 	static std::mutex mutexDataToCSVTaskChecker;
 	/*
