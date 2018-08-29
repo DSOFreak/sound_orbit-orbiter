@@ -76,6 +76,7 @@ void udp_func() {
 		}
 		else if (msg.compare(IGNORE_MESSAGE_INDICATOR) != 0) // is it a safety repeat message ?
 		{
+			// non safety repeat message
 			pUdpServer->mutexUDPQueue.lock();
 			cout << "pushin..... " << msg << endl;
 			pUdpServer->udp_queue.push(msg);

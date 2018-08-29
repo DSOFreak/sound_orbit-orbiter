@@ -8,7 +8,7 @@ using namespace chrono;
 /* Server's port number, listen at 1234 */
 #define SERVPORT 1234
 #define NO_MESSAGE_RECEIVED_YET 0
-#define MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS 400
+#define MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS 500
 udpServr* udpServr::pInstance = nullptr;
 std::mutex udpServr::mutexInternal;
 udpServr::udpServr() : llTimestampOfPreviouslyReceivedMessage(NO_MESSAGE_RECEIVED_YET), strCopyOfReceive(std::to_string(NO_MESSAGE_RECEIVED_YET))
