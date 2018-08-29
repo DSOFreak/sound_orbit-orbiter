@@ -11,6 +11,7 @@
 #include <queue>
 #include <mutex>
 #define BUFFERSIZE 150
+#define IGNORE_MESSAGE_INDICATOR "this is a safety repeater - ingore me"
 using namespace std;
 class udpServr
 {
@@ -28,6 +29,8 @@ public:
 	
 
 private:
+	std::string strCopyOfReceive;
+	long long llTimestampOfPreviouslyReceivedMessage;
 	static std::mutex mutexInternal;
 	udpServr();
 	int sd, rc;

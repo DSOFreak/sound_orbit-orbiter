@@ -74,10 +74,13 @@ void udp_func() {
 			pUdpServer->vSetup();
 			sleep(2);
 		}
-		pUdpServer->mutexUDPQueue.lock();
-		cout << "pushin..... " << msg << endl;
-		pUdpServer->udp_queue.push(msg);
-		pUdpServer->mutexUDPQueue.unlock();
+		else if (msg.compare(IGNORE_MESSAGE_INDICATOR) != 0) // is it a safety repeat message ?
+		{
+			pUdpServer->mutexUDPQueue.lock();
+			cout << "pushin..... " << msg << endl;
+			pUdpServer->udp_queue.push(msg);
+			pUdpServer->mutexUDPQueue.unlock();
+		}
 		usleep(10000);
 	}
 	cout << "LEAVING UDP FUNC" << endl;

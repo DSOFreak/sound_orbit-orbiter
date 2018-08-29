@@ -7,9 +7,11 @@ using namespace std;
 using namespace chrono;
 /* Server's port number, listen at 1234 */
 #define SERVPORT 1234
+#define NO_MESSAGE_RECEIVED_YET 0
+#define MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS 400
 udpServr* udpServr::pInstance = nullptr;
 std::mutex udpServr::mutexInternal;
-udpServr::udpServr()
+udpServr::udpServr() : llTimestampOfPreviouslyReceivedMessage(NO_MESSAGE_RECEIVED_YET), strCopyOfReceive(std::to_string(NO_MESSAGE_RECEIVED_YET))
 {
 	vSetup();
 }
@@ -95,7 +97,9 @@ void udpServr::vExit()
 
 std::string udpServr::vRecvUDP()
 {
-		std::string strCopyOfReceive;
+		
+		
+
 		memset(&bufptr[0], 0, buflen);
 		/* Wait on client requests. */
 		rc = recvfrom(sd, bufptr, buflen, 0, (struct sockaddr *)&clientaddr, &clientaddrlen);
@@ -112,11 +116,43 @@ std::string udpServr::vRecvUDP()
 		//printf("UDP Server received the following:\n \"%s\" message\n", bufptr);
 		//printf("Message has the length %d \n", rc);
 		//printf("from port %d and address %s.\n", ntohs(clientaddr.sin_port), inet_ntoa(clientaddr.sin_addr));
-		strCopyOfReceive = (std::string)bufptr;
+		
+		long long llCurrentTimestamp = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+		if (llTimestampOfPreviouslyReceivedMessage == NO_MESSAGE_RECEIVED_YET)
+		{
+			// First message -> OK!
+			strCopyOfReceive = (std::string)bufptr;
+		}
+		else
+		{
+			// are the messages identical ?
+			if (strCopyOfReceive == (std::string)bufptr)
+			{
+				// is the time criterium met?
+				if ((llCurrentTimestamp - llTimestampOfPreviouslyReceivedMessage) < MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS)
+				{
+					// ignore this message! this is a safety repeat message of the Udp sender
+					strCopyOfReceive = IGNORE_MESSAGE_INDICATOR;
+				}
+				else
+				{
+					// Not met -> Send them!
+					strCopyOfReceive = (std::string)bufptr;
+				}
+			}
+			else
+			{
+				// messages are not the same -> Send them!
+				strCopyOfReceive = (std::string)bufptr;
+			}
+		}
+		llTimestampOfPreviouslyReceivedMessage = llCurrentTimestamp; // store the timestamp
 		return strCopyOfReceive;
 		//cout << "WE RECEIVED " << strCopyOfReceive << endl;
 		//std::this_thread::sleep_for(milliseconds(100));
 }
+
+
 void udpServr::testIt()
 {
 	/* Use the recvfrom() function to receive the */
