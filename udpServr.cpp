@@ -8,7 +8,8 @@ using namespace chrono;
 /* Server's port number, listen at 1234 . */
 #define SERVPORT 1234
 #define NO_MESSAGE_RECEIVED_YET 0
-#define MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS 500
+#define MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS 600
+#define RING_BUFFER_SIZE_OF_OLD_MESSAGES 15
 udpServr* udpServr::pInstance = nullptr;
 std::mutex udpServr::mutexInternal;
 udpServr::udpServr() : llTimestampOfPreviouslyReceivedMessage(NO_MESSAGE_RECEIVED_YET), strCopyOfReceive(std::to_string(NO_MESSAGE_RECEIVED_YET))
@@ -112,44 +113,60 @@ std::string udpServr::vRecvUDP()
 		else
 		{
 			//printf("UDP Server - recvfrom() is OK...\n");
+			// DAS IST NUR DRIN WENN UNTIGES DEBUG DEAKTVIERT IST!!!
+			//strCopyOfReceive = (std::string)bufptr;
+			//return strCopyOfReceive;
 		}
-		//printf("UDP Server received the following:\n \"%s\" message\n", bufptr);
-		//printf("Message has the length %d \n", rc);
-		//printf("from port %d and address %s.\n", ntohs(clientaddr.sin_port), inet_ntoa(clientaddr.sin_addr));
-		
+
+
+		// Push the message in the vector
 		long long llCurrentTimestamp = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-		if (llTimestampOfPreviouslyReceivedMessage == NO_MESSAGE_RECEIVED_YET)
+		if (!vecpairMessageComparer.empty())
 		{
-			// First message -> OK!
-			strCopyOfReceive = (std::string)bufptr;
+			if (vecpairMessageComparer.size() >= RING_BUFFER_SIZE_OF_OLD_MESSAGES)
+			{
+				vecpairMessageComparer.erase(vecpairMessageComparer.begin());
+			}
+		}
+
+		vecpairMessageComparer.push_back(std::make_pair(llCurrentTimestamp, (std::string)bufptr));
+
+		// is the message already in the vector and in a critical distnace?
+		if (bMessageIsSecurityDoublicate(llCurrentTimestamp, bufptr))
+		{
+			strCopyOfReceive = IGNORE_MESSAGE_INDICATOR;
 		}
 		else
 		{
-			// are the messages identical ?
-			if (strCopyOfReceive == (std::string)bufptr)
+			strCopyOfReceive = (std::string)bufptr;
+		}
+		return strCopyOfReceive;
+}
+
+bool udpServr::bMessageIsSecurityDoublicate(long long &llCurrentTimestamp, char* pcMsg)
+{
+	bool bIsJustADuplicate = false;
+	// Delete all messages which are older than  MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS
+	while ((llCurrentTimestamp - vecpairMessageComparer.front().first) > MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS)
+	{
+		vecpairMessageComparer.erase(vecpairMessageComparer.begin());
+	}
+
+	// now check for duplicates
+	for (int i = 0; i < vecpairMessageComparer.size(); i++)
+	{
+		if (vecpairMessageComparer.at(i).second.compare((std::string) pcMsg) == 0)
+		{
+			// Theese strings are identical
+			if (llCurrentTimestamp != vecpairMessageComparer.at(i).first)
 			{
-				// is the time criterium met?
-				if ((llCurrentTimestamp - llTimestampOfPreviouslyReceivedMessage) < MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS)
-				{
-					// ignore this message! this is a safety repeat message of the Udp sender
-					strCopyOfReceive = IGNORE_MESSAGE_INDICATOR;
-				}
-				else
-				{
-					// Not met -> Send them!
-					strCopyOfReceive = (std::string)bufptr;
-				}
-			}
-			else
-			{
-				// messages are not the same -> Send them!
-				strCopyOfReceive = (std::string)bufptr;
+				// And the timestamps are not the same -> We saw this exact message already! Discard it!
+				bIsJustADuplicate = true;
+				return bIsJustADuplicate;
 			}
 		}
-		llTimestampOfPreviouslyReceivedMessage = llCurrentTimestamp; // store the timestamp
-		return strCopyOfReceive;
-		//cout << "WE RECEIVED " << strCopyOfReceive << endl;
-		//std::this_thread::sleep_for(milliseconds(100));
+	}
+	return bIsJustADuplicate;
 }
 
 

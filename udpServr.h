@@ -24,11 +24,13 @@ public:
 	void testIt();
 	void vInitUdpServer();
 	std::string vRecvUDP();
+	bool bMessageIsSecurityDoublicate(long long &llCurrentTimestamp,char* pcMsg);
 	std::queue<std::string> udp_queue;
 	std::mutex mutexUDPQueue;
 	
 
 private:
+	std::vector<std::pair<long long, std::string>> vecpairMessageComparer; // size = 10
 	std::string strCopyOfReceive;
 	long long llTimestampOfPreviouslyReceivedMessage;
 	static std::mutex mutexInternal;
