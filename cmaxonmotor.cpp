@@ -55,8 +55,8 @@ CMaxonMotor::CMaxonMotor()
 	//const unsigned int uiVelocityCalibrationFactor = 185; 
 
 	iProfileVelocity_m = uiMaxVelocity; // prev. 10000
-	iProfileAcceleration_m = uiMaxAcceleration/2; //prev. 5000
-	iProfileDeceleration_m = uiMaxDecceleration/2; //prev. 10000
+	iProfileAcceleration_m = uiMaxAcceleration; //prev. 5000
+	iProfileDeceleration_m = uiMaxDecceleration; //prev. 10000
 
 
 	cout << "CMaxxon constructor called success" << endl;
@@ -460,7 +460,7 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 	}
 	else
 	{
-		cout << "Current position is (in the functino)" << currentPosition << endl;
+		//cout << "Current position is (in the functino)" << currentPosition << endl;
 	}
 	/*while (duration < 111) // DEBUG TIME
 	{
