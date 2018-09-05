@@ -51,9 +51,16 @@ private:
 	unsigned int uiMaxDecceleration;
 	unsigned int uiMaxAcceleration;
 
+	unsigned int uiDefaultProfileVelocity_m;
+	unsigned int uiDefaultProfileAcceleration_m;
+	unsigned int uiDefaultProfileDeceleration_m
+
 	CMaxonMotor();
 
+	bool bIsAnMAATest;
 public:
+	bool bGetIsAnMAATestFlag();
+	void vSetIsAnMAATestFlag(bool bIsMAATest);
 	static CMaxonMotor* pInstance;
 	static CMaxonMotor* getInstance();
 	void* vGetKeyHandle();
@@ -91,7 +98,7 @@ public:
     void Halt();
 	void SetPosModeParameter();
 	void SetCurModeParameter(int);
-	void setSpeed(float speed);
+	void setSpeed(float speed, float fAngleDegree);
 	void Error(unsigned int ErrorCode);
 	void ErrorNbr(unsigned char * cErrorCode);
 

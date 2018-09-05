@@ -75,6 +75,17 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 				DataToCSV::mutexDataToCSVTaskChecker.unlock();
 				//std::cout << "DataToCSV::bContinueTask " << DataToCSV::bContinueTask << endl;
 				pDataToCSV->vTaskCyclicWriteOfMotorData();
+
+				// set the testflag for MAA
+				if (pDataToCSV->strTestName.find("MAA") != std::string::npos)
+				{
+					m_pMaxonMotor->vSetIsAnMAATestFlag(true);
+				}
+				else
+				{
+					m_pMaxonMotor->vSetIsAnMAATestFlag(false);
+				}
+
 			}
 		}
 		else if (strRequest.find("S_S_CSV") != std::string::npos) // Stop CSV recording

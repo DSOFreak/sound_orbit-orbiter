@@ -21,6 +21,7 @@ class DataToCSV
 	unsigned long ulLinesCount;
 
 public:
+	std::string strTestName;
 	DataToCSV();
 	~DataToCSV();
 	static bool bContinueTask;
@@ -92,7 +93,7 @@ public:
 		int iTestNameIdxBegin = stIdx + 1;
 		stIdx = strHeaderData.find("_", stIdx + 1);
 		int iTestNameIdxEnd = stIdx;
-		std::string strTestName = strHeaderData.substr(iTestNameIdxBegin, iTestNameIdxEnd- iTestNameIdxBegin);
+		strTestName = strHeaderData.substr(iTestNameIdxBegin, iTestNameIdxEnd- iTestNameIdxBegin);
 		cout << "strTestName " << strTestName << endl;
 
 		//TestSetting

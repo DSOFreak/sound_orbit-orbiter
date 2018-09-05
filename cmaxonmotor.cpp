@@ -14,7 +14,7 @@
 
 #define NOT_STARTET_YET -43// DEBUG
 
-
+#define NO_COLLISION_ANGLE_FROM_GUI 18.3 // this is given from the size of the wagons. and set in movementcontrol.c in the GUI application ... you cannot find this here
 #define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
 #define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
 //#include <curses.h>
@@ -24,7 +24,7 @@ using namespace std;
 
 void * CMaxonMotor::keyHandle = nullptr;
 CMaxonMotor* CMaxonMotor::pInstance = nullptr;
-CMaxonMotor::CMaxonMotor()
+CMaxonMotor::CMaxonMotor() : bIsAnMAATest(false)
 {
 	// DEBUG
 	dOverallDuration = 0;
@@ -49,17 +49,31 @@ CMaxonMotor::CMaxonMotor()
 	bIsInvertedPolarity = false;
 	uiMaxFollowingError = 2000;
 
-	uiMaxVelocity = 5000; // wegen debug mal runter von 5000 auf 3000
-	uiMaxDecceleration = 10000;
-	uiMaxAcceleration = 6000;
+	uiMaxVelocity = 7000; 
+	uiMaxDecceleration = 14000;
+	uiMaxAcceleration = 14000;  
 	//const unsigned int uiVelocityCalibrationFactor = 185; 
 
-	iProfileVelocity_m = uiMaxVelocity; // prev. 10000
-	iProfileAcceleration_m = uiMaxAcceleration; //prev. 5000
-	iProfileDeceleration_m = uiMaxDecceleration; //prev. 10000
+	uiDefaultProfileVelocity_m = uiMaxVelocity * 0.7;
+	uiDefaultProfileAcceleration_m = uiMaxAcceleration / 2;
+	uiDefaultProfileDeceleration_m = uiMaxDecceleration / 2;
+
+	iProfileVelocity_m = uiDefaultProfileVelocity_m;
+	iProfileAcceleration_m = uiDefaultProfileAcceleration_m;
+	iProfileDeceleration_m = uiDefaultProfileDeceleration_m;
 
 
 	cout << "CMaxxon constructor called success" << endl;
+}
+
+bool CMaxonMotor::bGetIsAnMAATestFlag()
+{
+	return bIsAnMAATest;
+}
+
+void CMaxonMotor::vSetIsAnMAATestFlag(bool bIsMAATest)
+{
+	bIsAnMAATest = bIsMAATest;
 }
 
 CMaxonMotor * CMaxonMotor::getInstance()
@@ -522,9 +536,29 @@ void CMaxonMotor::SetCurModeParameter(int)
 {
 }
 
-void CMaxonMotor::setSpeed(float speed)
+void CMaxonMotor::setSpeed(float speed, float fAngleDegree)
 {
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
+
+	// special treetment for maa
+	if (bGetIsAnMAATestFlag() && (fAngleDegree <= NO_COLLISION_ANGLE_FROM_GUI)) // ==> Adapt only if we have a small master movement (and masking speakers)
+	{
+		const float fIntraStimulusTimeSeconds = 1.0;
+		const float fShareForAccelerationAndDecelaration = 0.5; // THIS IS CONSTANT
+		/* We are inside here, because we have a time critical, small master movement in between the stimuli (1s only)*/
+		//Calculate acceleration and decelration from the distance of the maximum distance. Assume 0.5s = 50 for acceleration and 0.5s for decceleration
+		// => We integrate over the velocity and therefore need to accelerate in 50% of the time to the double velocity 
+		float fAccAndDecelaration = (float)iDesiredVelocity / (float)(fIntraStimulusTimeSeconds*fShareForAccelerationAndDecelaration);
+		iProfileAcceleration_m = ceil(fAccAndDecelaration); 
+		iProfileDeceleration_m = ceil(fAccAndDecelaration); 
+		// -> Actually the speed then is double, but we (should) never reach the top value
+		iDesiredVelocity = (float)iDesiredVelocity / fShareForAccelerationAndDecelaration;
+	}
+	else
+	{
+		iProfileAcceleration_m = uiDefaultProfileAcceleration_m;
+		iProfileDeceleration_m = uiDefaultProfileDeceleration_m;
+	}
 
 	if (iDesiredVelocity != iProfileVelocity_m)
 	{

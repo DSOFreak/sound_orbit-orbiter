@@ -154,7 +154,7 @@ void vProcessMovement()
 	if (hostData->direction != 0) { // Dir 0 = no movement
 		long lMotorDataTargetPosition = pMotor->lConvertAngleInDegreeToMotorData(fAngleDegree);
 		pMotor->setCurrentTargetPositionInMotorData(lMotorDataTargetPosition);
-		pMotor->setSpeed(hostData->speed);
+		pMotor->setSpeed(hostData->speed, fAngleDegree);
 		pMotor->Move(pMotor->lgetCurrentTargetPositionInMotorData());
 		pMotor->currentlyProcessedMovementData = hostData;
 	}
