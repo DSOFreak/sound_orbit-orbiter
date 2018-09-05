@@ -53,7 +53,7 @@ private:
 
 	unsigned int uiDefaultProfileVelocity_m;
 	unsigned int uiDefaultProfileAcceleration_m;
-	unsigned int uiDefaultProfileDeceleration_m
+	unsigned int uiDefaultProfileDeceleration_m;
 
 	CMaxonMotor();
 
