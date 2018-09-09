@@ -549,8 +549,10 @@ void CMaxonMotor::setSpeed(float speed, float fAngleDegree)
 		//Calculate acceleration and decelration from the distance of the maximum distance. Assume 0.5s = 50 for acceleration and 0.5s for decceleration
 		// => We integrate over the velocity and therefore need to accelerate in 50% of the time to the double velocity 
 		float fAccAndDecelaration = (float)iDesiredVelocity / (float)(fIntraStimulusTimeSeconds*fShareForAccelerationAndDecelaration);
-		iProfileAcceleration_m = ceil(fAccAndDecelaration); 
-		iProfileDeceleration_m = ceil(fAccAndDecelaration); 
+		iProfileAcceleration_m = ceil(fAccAndDecelaration*2.0); 
+		iProfileDeceleration_m = ceil(fAccAndDecelaration*2.0); 
+		cout << "Acc is adapted to: " << iProfileAcceleration_m << endl;
+		cout << "Decc is adapted to: " << iProfileDeceleration_m << endl;
 		// -> Actually the speed then is double, but we (should) never reach the top value
 		iDesiredVelocity = (float)iDesiredVelocity / fShareForAccelerationAndDecelaration;
 	}
