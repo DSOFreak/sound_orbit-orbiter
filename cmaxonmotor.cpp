@@ -15,7 +15,6 @@
 #define NOT_STARTET_YET -43// DEBUG
 
 #define NO_COLLISION_ANGLE_FROM_GUI 18.3 // this is given from the size of the wagons. and set in movementcontrol.c in the GUI application ... you cannot find this here
-#define WHEELPERI float(0.03 * 3.1415) // Antriebsrad (Durchmesser[m] * Pi) .30mm
 #define RAILPERI  float(2.048 * 3.1415)   // Kreisumfnag (Durchmesser[m] * Pi)
 //#include <curses.h>
 
@@ -121,7 +120,7 @@ long CMaxonMotor::setCurrentTargetPositionInMotorData(long lTargetPositionInMoto
 
 long CMaxonMotor::lConvertAngleInDegreeToMotorData(float fAngle)
 {
-	long lretVal = 65536.0 * (fAngle / 360.0) * (RAILPERI / WHEELPERI);
+	long lretVal = 65536.0 * (fAngle / 360.0) * (RAILPERI / RaspiConfig::fWheelPerimeterRaspi);
 	return lretVal;
 }
 bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls)//debug

@@ -352,6 +352,7 @@ void vStimuliThread()
 
 int main(int argc, char **argv)
 {
+	RaspiConfig rRaspiConfig = RaspiConfig();
 	pStimuliLib = StimuliLibrary::getInstance();
 	printf("Starting Orbiter Program.");
 	pMovement = Movement::getInstance();
