@@ -28,7 +28,7 @@ private:
 	int iProfileVelocity_m; // prev. 10000
 	int iProfileAcceleration_m; //prev. 5000
 	int iProfileDeceleration_m; //prev. 10000
-	const unsigned int uiVelocityCalibrationFactor = 185;
+	const unsigned int uiVelocityCalibrationFactor = 150;
 
 	// Configuring EPOS for analog motor control
 	char* pcDeviceName;

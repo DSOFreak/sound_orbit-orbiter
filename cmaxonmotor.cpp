@@ -51,7 +51,6 @@ CMaxonMotor::CMaxonMotor() : bIsAnMAATest(false)
 	uiMaxVelocity = 7000; 
 	uiMaxDecceleration = 14000;
 	uiMaxAcceleration = 14000;  
-	//const unsigned int uiVelocityCalibrationFactor = 185; 
 
 	uiDefaultProfileVelocity_m = uiMaxVelocity * 0.7;
 	uiDefaultProfileAcceleration_m = uiMaxAcceleration / 2;
