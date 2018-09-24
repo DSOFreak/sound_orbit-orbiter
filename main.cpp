@@ -276,7 +276,7 @@ void vMovementThread(bool &bIsFirstCall)
 					{
 						if (movement_skip)
 						{
-							cout << "############################++We did not reach the target .... WHY THE FUCK DO WE MOVE!" << endl;
+							//cout << "skip the movement" << endl;
 						}
 
 						vProcessMovement();

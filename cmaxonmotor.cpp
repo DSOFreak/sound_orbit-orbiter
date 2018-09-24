@@ -419,7 +419,7 @@ void CMaxonMotor::initializeDeviceNew()
 
 void CMaxonMotor::Move(long addToCurrentPosition)
 {
-	cout << "+++++++++++++++++++++++++++++++++++++++++++++++++MOTOR IS MOVING" << endl;
+	cout << "+++ Motor is moving" << endl;
 	int curr;
 	getCurrentPosition(curr);
 	//std::cout << "current position: " << curr << std::endl;
@@ -617,11 +617,11 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 		getCurrentlyProcessedTargetPosition(liCurrentlyProcessedAddToPosition);
 		int iCurrentPosition;
 		getCurrentPosition(iCurrentPosition);
-		cout << "iCurrentPosition " << iCurrentPosition << endl;
-		cout << "iCurrentTargetPosition " << currenTargetPos << endl;
-		cout << "liCurrentlyProcessedAddToPosition " << liCurrentlyProcessedAddToPosition << endl;
+		//cout << "iCurrentPosition " << iCurrentPosition << endl;
+		//cout << "iCurrentTargetPosition " << currenTargetPos << endl;
+		//cout << "liCurrentlyProcessedAddToPosition " << liCurrentlyProcessedAddToPosition << endl;
 		long int liLeftOfCurrentWayToTargetPos = abs(currenTargetPos - iCurrentPosition);
-		cout << "liLeftOfCurrentWayToTargetPos " << liLeftOfCurrentWayToTargetPos << endl;
+		//cout << "liLeftOfCurrentWayToTargetPos " << liLeftOfCurrentWayToTargetPos << endl;
 
 
 

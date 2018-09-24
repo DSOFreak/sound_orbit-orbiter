@@ -304,7 +304,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 void StimuliLibrary::playStimuli()
 {
 
-	printf("playStimulus() \n");
+	printf(" +++ playStimulus() \n");
 	if (audioFileLength_ms == 0)
 	{
 		//printf("\n audioFileLength_ms == 0 -> stopStimuli() \n");

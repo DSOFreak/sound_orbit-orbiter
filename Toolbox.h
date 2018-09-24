@@ -30,7 +30,7 @@ namespace Toolbox
 
 	HostData decodeHostData(std::string hostData);
 
-	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, unsigned int speakerID,int iStimulusNumber, int iStimulusDuration, int iAngularDistance);
+	bool bCheckForValidity(HostData &refHostData, int iStimulusToBeTriggered, std::string &strHostData, unsigned int speakerID,int iStimulusNumber, int iStimulusDuration, int iAngularDistance);
 
 	void vSetHostDataToZero(HostData &structHostData);
 };

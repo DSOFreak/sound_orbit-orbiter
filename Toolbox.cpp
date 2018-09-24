@@ -63,7 +63,7 @@ namespace Toolbox {
 				int queued_stim_nr = std::stoi(hostData.substr(startIdx + 27, 1), nullptr, 10);
 
 
-				if (bCheckForValidity(d, hostData, transmittedSpeakerID, stim_nr, stim_dur, angularDistance))
+				if (bCheckForValidity(d, stim_tbt, hostData, transmittedSpeakerID, stim_nr, stim_dur, angularDistance))
 				{
 					//printf("This protocol is valid \n");
 					d.speakerIDX = transmittedSpeakerID;
@@ -94,21 +94,27 @@ namespace Toolbox {
 	}
 		return d;
 	}
-	bool bCheckForValidity(HostData &refHostData, std::string &strHostData, unsigned int transmittedSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance)
+	bool bCheckForValidity(HostData &refHostData, int iStimulusToBeTriggered, std::string &strHostData, unsigned int transmittedSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance)
 	{
+
 		if (transmittedSpeakerID != RaspiConfig::ownIndex)
 		{
-			//printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
+			printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
 		else
 		{
-			//printf("Check for validity \n");
 			// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
-			if ((MAX_SPEAKER_NUMBER< transmittedSpeakerID) || (transmittedSpeakerID < 0) || (MAX_STIMULUS_NUMBER < iStimulusNumber) || (iStimulusNumber <= 0) || ((iStimulusDuration == 0) && (iAngularDistance == 0)))
+			if ((iStimulusToBeTriggered == 0) && (iAngularDistance == 0))
 			{
-				//printf("Check for validity: This protocol is nothing to process for the motor / audio control... \n");
+				printf("Nothing to do here: No Movement and No Stimulus \n");
+				vSetHostDataToZero(refHostData);
+				return false;
+			}
+			else if ((MAX_SPEAKER_NUMBER< transmittedSpeakerID) || (transmittedSpeakerID < 0) || (MAX_STIMULUS_NUMBER < iStimulusNumber) || (iStimulusNumber <= 0))
+			{
+				printf("Check for validity: This protocol is nothing to process for the motor / audio control... \n");
 				vSetHostDataToZero(refHostData);
 				return false;
 			}
