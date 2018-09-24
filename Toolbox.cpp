@@ -65,7 +65,7 @@ namespace Toolbox {
 
 				if (bCheckForValidity(d, hostData, transmittedSpeakerID, stim_nr, stim_dur, angularDistance))
 				{
-					printf("This protocol is valid \n");
+					//printf("This protocol is valid \n");
 					d.speakerIDX = transmittedSpeakerID;
 					d.direction = motorDirection;
 					d.speed = (1.0f * speed) + (0.01f * speedDiv100);
@@ -76,9 +76,15 @@ namespace Toolbox {
 					float C = 13.3f; // CALIBRATION FACTOR
 					float Lmax = 90.0f;
 					d.loudness = pow(10.0f, (stim_vol_L_real - Lmax + C) / 20.0f);
-					printf("d.loudness %f \n", d.loudness);
+					//printf("d.loudness %f \n", d.loudness);
 					d.toBeTriggerd = stim_tbt;
 					d.stim_queued = queued_stim_nr == 0;
+
+
+					std::cout << "hostData: " << "dir = " << static_cast<int>(d.direction) << ", angleToMove = " <<d.fAngularDistance << ", speed = " << d.speed << std::endl;
+					std::cout << "stim_nr = " << static_cast<int>(d.stimulus_nr) << ", stim_dur = " << d.stimulusDuration << ", vol = " << d.loudness << ", stimulusToBeTriggerd = " << d.toBeTriggerd << std::endl;
+
+
 				}
 			}
 			catch (std::exception e) {
@@ -92,7 +98,7 @@ namespace Toolbox {
 	{
 		if (transmittedSpeakerID != RaspiConfig::ownIndex)
 		{
-			printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
+			//printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
 			vSetHostDataToZero(refHostData);
 			return false;
 		}
@@ -102,13 +108,13 @@ namespace Toolbox {
 			// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
 			if ((MAX_SPEAKER_NUMBER< transmittedSpeakerID) || (transmittedSpeakerID < 0) || (MAX_STIMULUS_NUMBER < iStimulusNumber) || (iStimulusNumber <= 0) || ((iStimulusDuration == 0) && (iAngularDistance == 0)))
 			{
-				printf("Check for validity: This protocol is nothing to process for the motor / audio control... \n");
+				//printf("Check for validity: This protocol is nothing to process for the motor / audio control... \n");
 				vSetHostDataToZero(refHostData);
 				return false;
 			}
 			else
 			{
-				printf("I am speaker number %d, I take the protocol with the transmittedSpeakerID %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
+				//printf("I am speaker number %d, I take the protocol with the transmittedSpeakerID %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
 				return true;
 			}
 		}

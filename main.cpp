@@ -78,7 +78,7 @@ void udp_func() {
 		{
 			// non safety repeat message -> VALID message .. up to this point
 			pUdpServer->mutexUDPQueue.lock();
-			cout << "pushin..... " << msg << endl;
+			//cout << "pushin..... " << msg << endl;
 			pUdpServer->udp_queue.push(msg);
 			pUdpServer->mutexUDPQueue.unlock();
 			usleep(10000);
@@ -134,13 +134,9 @@ bool stimuli_skip;
 void vProcessMovement()
 {
 	float fAngleDegree;
-	std::cout << "vProcessMovement:" << std::endl;
+	//std::cout << "vProcessMovement:" << std::endl;
 	shared_ptr<Toolbox::HostData> hostData = pMovement->vecMovementqueue.front();
 	pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
-
-	
-	std::cout << "hostData: " << "dir = " << static_cast<int>(hostData->direction) << ", angleToMove = " << hostData->fAngularDistance << ", speed = " << hostData->speed << std::endl;
-	std::cout << "stim_nr = " << static_cast<int>(hostData->stimulus_nr) << ", stim_dur = " << hostData->stimulusDuration << ", vol = " << hostData->loudness << ", toBeTriggerd = " << hostData->toBeTriggerd << std::endl;
 
 
 	if (hostData->direction == 1) { // Dir 1 = clockwise
@@ -184,7 +180,7 @@ void TimerFunc() {
 			{ // If a tcp-message has arrived
 				if (host_data_raw.find("G_P_A") == std::string::npos)//debug avoid the printfs
 				{
-					std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
+				//	std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
 				}
 
 
@@ -210,7 +206,7 @@ void TimerFunc() {
 				{
 					shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
 					if (hostData->mov_queued) { // Add new data to queue
-						std::cout << "Add new data to queue" << endl;
+						//std::cout << "Add new data to queue" << endl;
 
 						if (hostData->fAngularDistance > 0.0)
 						{
@@ -219,7 +215,7 @@ void TimerFunc() {
 						movement_skip = false;
 					}
 					else { // Clear Queue and Add new Data to Queue
-						std::cout << " Clear Queue and Add new Data to Queuee" << endl;
+						//std::cout << " Clear Queue and Add new Data to Queuee" << endl;
 						movement_skip = true;
 						while (!pMovement->vecMovementqueue.empty())
 						{
@@ -248,7 +244,7 @@ void TimerFunc() {
 					pStimuliLib->stimuli_queue.push(hostData);
 					pStimuliLib->mutexStimuli.unlock();
 					}
-					std::cout << "Add new data to queue DONE" << endl;
+					//std::cout << "Add new data to queue DONE" << endl;
 					
 				}
 				movementTimerMutex.unlock();

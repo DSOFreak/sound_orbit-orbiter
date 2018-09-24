@@ -11,7 +11,7 @@
 
 #include "Toolbox.h"
 #include <memory>
-
+#define MAA_VELOCITY_IF_CAMERA_POSITION_CORRECTION 10.10
 #define NOT_STARTET_YET -43// DEBUG
 
 #define NO_COLLISION_ANGLE_FROM_GUI 18.3 // this is given from the size of the wagons. and set in movementcontrol.c in the GUI application ... you cannot find this here
@@ -144,14 +144,14 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 	
 	if (targetReached != 0) // We reached the target position
 	{
-		cout << "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu     TARGET REACHED in " << duration << "s" << endl;
+		//cout << "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu     TARGET REACHED in " << duration << "s" << endl;
 		// Debug first movement rausnehmen
 		if (duration < 25)
 		{
 			dOverallDuration += duration;
 		}
 		
-		cout << "Overall duration of movements: " << dOverallDuration << endl;
+		//cout << "Overall duration of movements: " << dOverallDuration << endl;
 		//cout << "number of numberOfTimerCalls" << numberOfTimerCalls << endl;
 		//cout << "number of numberOfMovementcalls" << numberOfMovementcalls << endl;
 		//cout << "number of numberOfTCPCalls" << numberOfTCPCalls << endl;
@@ -429,7 +429,7 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 
 
 	if (duration == NOT_STARTET_YET) { // measurement till target reached
-		cout << "StartMeasurement" << endl;
+		//cout << "StartMeasurement" << endl;
 		start = std::clock();
 	}
 	if (!VCS_MoveToPosition(keyHandle, usNodeID, addToCurrentPosition, Absolute, iImmediately, &errorCode))
@@ -440,7 +440,7 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 
 
 	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
-	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl;
+	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl << std::endl;
 	currenTargetPos = addToCurrentPosition + curr;
 }
 
@@ -537,9 +537,9 @@ void CMaxonMotor::SetCurModeParameter(int)
 void CMaxonMotor::setSpeed(float speed, float fAngleDegree)
 {
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
-
+	cout << "speed is:" << speed << endl;
 	// special treetment for maa
-	if (bGetIsAnMAATestFlag() && (fAngleDegree <= NO_COLLISION_ANGLE_FROM_GUI)) // ==> Adapt only if we have a small master movement (and masking speakers)
+	if (bGetIsAnMAATestFlag() && (fAngleDegree <= NO_COLLISION_ANGLE_FROM_GUI) && (abs(speed-MAA_VELOCITY_IF_CAMERA_POSITION_CORRECTION) < 0.1 )) // ==> Adapt only if we have a small master movement (and masking speakers)
 	{
 		const float fIntraStimulusTimeSeconds = 1.0;
 		const float fShareForAccelerationAndDecelaration = 0.5; // THIS IS CONSTANT

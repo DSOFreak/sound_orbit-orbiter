@@ -295,7 +295,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);;
 	fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
 
-	printf("\ Setting the volume to: %f \n", volume);
+	//printf("\ Setting the volume to: %f \n", volume);
 	channel->setVolume(volume);
 	dVolume = volume;
 	return bRetIsValidStimuli;
@@ -304,10 +304,10 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 void StimuliLibrary::playStimuli()
 {
 
-	printf("\n playStimuli() \n");
+	printf("playStimulus() \n");
 	if (audioFileLength_ms == 0)
 	{
-		printf("\n audioFileLength_ms == 0 -> stopStimuli() \n");
+		//printf("\n audioFileLength_ms == 0 -> stopStimuli() \n");
 		stopStimuli();
 	}
 	//printf("\n audioFileLength_ms %i \n", audioFileLength_ms);
@@ -337,7 +337,7 @@ void StimuliLibrary::playStimuli()
 	// Case 2: Stimulus is longer than desired length
 	else if (audioFileLength_ms > uiDesiredDuration_ms)
 	{
-		printf("\n\n (audioFileLength_ms > desiredDuration_ms) \n\n");
+		//printf("\n\n (audioFileLength_ms > desiredDuration_ms) \n\n");
 
 		unsigned int audioFileLength_Samples;
 		pAudio->getLength(&audioFileLength_Samples, FMOD_TIMEUNIT_PCM);
@@ -347,8 +347,8 @@ void StimuliLibrary::playStimuli()
 		double dSampleLengthOfDesiredMsLength = dMsLengthOfOneSample*uiDesiredDuration_ms;
 		// Cut the values
 		int iSampleLengthOfAudio = (int)dSampleLengthOfDesiredMsLength;
-		printf("audioFileLength_Samples: %i \n", audioFileLength_Samples);
-		printf("we play samples: %i \n", iSampleLengthOfAudio);		
+		////printf("audioFileLength_Samples: %i \n", audioFileLength_Samples);
+		//printf("we play samples: %i \n", iSampleLengthOfAudio);		
 
 		fsystem->getMasterChannelGroup(&channelgroup);
 
@@ -392,7 +392,7 @@ void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 
 	if (hostData->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 	{
-		printf("vPlayStimulusIfToBeTriggered() \n");
+		//printf("vPlayStimulusIfToBeTriggered() \n");
 		bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 		if (bIsValidStimulus)
 		{
@@ -548,7 +548,7 @@ FMOD_RESULT F_CALLBACK StimuliLibrary::EndOfSong(FMOD_CHANNELCONTROL*channelCont
 {
 	if (controlType == FMOD_CHANNELCONTROL_CHANNEL&&callbackType == FMOD_CHANNELCONTROL_CALLBACK_END) {
 		
-		printf("\n\n CALLBACK \n\n");
+		//printf("\n\n CALLBACK \n\n");
 
 
 
