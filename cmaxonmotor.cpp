@@ -534,12 +534,22 @@ void CMaxonMotor::SetCurModeParameter(int)
 {
 }
 
-void CMaxonMotor::setSpeed(float speed, float fAngleDegree)
+void CMaxonMotor::setSpeed(float speed, float fAngleToMoveInDegree)
 {
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
 	cout << "speed is:" << speed << endl;
 	// special treetment for maa
-	if (bGetIsAnMAATestFlag() && (fAngleDegree <= NO_COLLISION_ANGLE_FROM_GUI) && (abs(speed-MAA_VELOCITY_IF_CAMERA_POSITION_CORRECTION) < 0.1 )) // ==> Adapt only if we have a small master movement (and masking speakers)
+
+	//camera correction
+	if (abs(speed - MAA_VELOCITY_IF_CAMERA_POSITION_CORRECTION) < 0.01)
+	{
+		cout << "speed parameters for camera correction set. "<< endl;
+		iProfileAcceleration_m = uiDefaultProfileAcceleration_m / 3;
+		iProfileDeceleration_m = uiDefaultProfileDeceleration_m/3;
+		iDesiredVelocity = uiDefaultProfileVelocity_m / 3;
+	}
+	// intra stimulus movemnet
+	else if (bGetIsAnMAATestFlag() && (abs(fAngleToMoveInDegree) <= NO_COLLISION_ANGLE_FROM_GUI) )
 	{
 		const float fIntraStimulusTimeSeconds = 1.0;
 		const float fShareForAccelerationAndDecelaration = 0.5; // THIS IS CONSTANT
@@ -549,6 +559,7 @@ void CMaxonMotor::setSpeed(float speed, float fAngleDegree)
 		float fAccAndDecelaration = (float)iDesiredVelocity / (float)(fIntraStimulusTimeSeconds*fShareForAccelerationAndDecelaration);
 		iProfileAcceleration_m = ceil(fAccAndDecelaration*2.0); 
 		iProfileDeceleration_m = ceil(fAccAndDecelaration*2.0); 
+		cout << "speed parameters for intra stimulus movement set. " << endl;
 		cout << "Acc is adapted to: " << iProfileAcceleration_m << endl;
 		cout << "Decc is adapted to: " << iProfileDeceleration_m << endl;
 		// -> Actually the speed then is double, but we (should) never reach the top value
@@ -556,6 +567,7 @@ void CMaxonMotor::setSpeed(float speed, float fAngleDegree)
 	}
 	else
 	{
+		cout << "speed parameters set to default" << endl;
 		iProfileAcceleration_m = uiDefaultProfileAcceleration_m;
 		iProfileDeceleration_m = uiDefaultProfileDeceleration_m;
 	}
