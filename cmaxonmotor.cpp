@@ -536,6 +536,7 @@ void CMaxonMotor::SetCurModeParameter(int)
 
 void CMaxonMotor::setSpeed(float speed, float fAngleToMoveInDegree)
 {
+	fAngleToMoveInDegree = abs(fAngleToMoveInDegree);
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
 	cout << "speed is:" << speed << endl;
 	// special treetment for maa
@@ -549,10 +550,11 @@ void CMaxonMotor::setSpeed(float speed, float fAngleToMoveInDegree)
 		iDesiredVelocity = uiDefaultProfileVelocity_m / 3;
 	}
 	// intra stimulus movemnet
-	else if (bGetIsAnMAATestFlag() && (abs(fAngleToMoveInDegree) <= NO_COLLISION_ANGLE_FROM_GUI) )
+	else if (bGetIsAnMAATestFlag() && (fAngleToMoveInDegree <= NO_COLLISION_ANGLE_FROM_GUI) )
 	{
 		const float fIntraStimulusTimeSeconds = 1.0;
 		const float fShareForAccelerationAndDecelaration = 0.5; // THIS IS CONSTANT
+		iDesiredVelocity = fAngleToMoveInDegree * uiVelocityCalibrationFactor;
 		/* We are inside here, because we have a time critical, small master movement in between the stimuli (1s only)*/
 		//Calculate acceleration and decelration from the distance of the maximum distance. Assume 0.5s = 50 for acceleration and 0.5s for decceleration
 		// => We integrate over the velocity and therefore need to accelerate in 50% of the time to the double velocity 
@@ -564,12 +566,14 @@ void CMaxonMotor::setSpeed(float speed, float fAngleToMoveInDegree)
 		cout << "Decc is adapted to: " << iProfileDeceleration_m << endl;
 		// -> Actually the speed then is double, but we (should) never reach the top value
 		iDesiredVelocity = (float)iDesiredVelocity / fShareForAccelerationAndDecelaration;
+		cout << "speed is adapted to:" << fAngleToMoveInDegree << endl;
 	}
 	else
 	{
 		cout << "speed parameters set to default" << endl;
 		iProfileAcceleration_m = uiDefaultProfileAcceleration_m;
 		iProfileDeceleration_m = uiDefaultProfileDeceleration_m;
+		iDesiredVelocity = uiDefaultProfileVelocity_m;
 	}
 
 	if (iDesiredVelocity != iProfileVelocity_m)
