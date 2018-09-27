@@ -5,6 +5,7 @@
 #include "RaspiConfig.h"
 #define MAX_STIMULUS_NUMBER 3
 #define MAX_SPEAKER_NUMBER 2
+#define SMALLEST_ACCEPTED_ANGLE_DEGREE 0.25
 #define VALUE_NOT_SET -1
 using namespace std;
 /**
@@ -52,7 +53,7 @@ namespace Toolbox {
 
 				int angularDistance = std::stoi(hostData.substr(startIdx + 9, 3), nullptr, 10);
 				int angularDistanceDiv100 = std::stoi(hostData.substr(startIdx + 13, 2), nullptr, 10);
-
+				float fAngularDist = (1.0f * (float)angularDistance) + (0.01f * (float)angularDistanceDiv100);;
 				int queued_mov_nr = std::stoi(hostData.substr(startIdx + 15, 1), nullptr, 10);
 
 				int stim_nr = std::stoi(hostData.substr(startIdx + 16, 2), nullptr, 10);
@@ -63,7 +64,7 @@ namespace Toolbox {
 				int queued_stim_nr = std::stoi(hostData.substr(startIdx + 27, 1), nullptr, 10);
 
 
-				if (bCheckForValidity(d, stim_tbt, hostData, transmittedSpeakerID, stim_nr, stim_dur, angularDistance))
+				if (bCheckForValidity(d, stim_tbt, hostData, transmittedSpeakerID, stim_nr, stim_dur, fAngularDist))
 				{
 					//printf("This protocol is valid \n");
 					d.speakerIDX = transmittedSpeakerID;
@@ -94,7 +95,7 @@ namespace Toolbox {
 	}
 		return d;
 	}
-	bool bCheckForValidity(HostData &refHostData, int iStimulusToBeTriggered, std::string &strHostData, unsigned int transmittedSpeakerID, int iStimulusNumber, int iStimulusDuration, int iAngularDistance)
+	bool bCheckForValidity(HostData &refHostData, int iStimulusToBeTriggered, std::string &strHostData, unsigned int transmittedSpeakerID, int iStimulusNumber, int iStimulusDuration, float fAngularDistance)
 	{
 
 		if (transmittedSpeakerID != RaspiConfig::ownIndex)
@@ -106,7 +107,7 @@ namespace Toolbox {
 		else
 		{
 			// DUMMY: Dieser check ist nicht wasserdicht. wenn das protokoll steht finalisieren.
-			if ((iStimulusToBeTriggered == 0) && (iAngularDistance == 0))
+			if ((iStimulusToBeTriggered == 0) && (fAngularDistance < SMALLEST_ACCEPTED_ANGLE_DEGREE))
 			{
 				printf("Nothing to do here: No Movement and No Stimulus \n");
 				vSetHostDataToZero(refHostData);
