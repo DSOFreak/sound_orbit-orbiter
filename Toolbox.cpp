@@ -99,7 +99,7 @@ namespace Toolbox {
 
 		if (transmittedSpeakerID != RaspiConfig::ownIndex)
 		{
-			printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
+			//printf("This is a protocol not for my speaker ID. I am %d and this is %d \n", RaspiConfig::ownIndex, transmittedSpeakerID);
 			vSetHostDataToZero(refHostData);
 			return false;
 		}

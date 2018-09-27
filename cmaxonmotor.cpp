@@ -568,7 +568,7 @@ void CMaxonMotor::setSpeed(float speed, float fAngleToMoveInDegree)
 		iDesiredVelocity = (float)iDesiredVelocity / fShareForAccelerationAndDecelaration;
 		cout << "speed is adapted to:" << fAngleToMoveInDegree << endl;
 	}
-	else
+	else if (bGetIsAnMAATestFlag())
 	{
 		cout << "speed parameters set to default" << endl;
 		iProfileAcceleration_m = uiDefaultProfileAcceleration_m;

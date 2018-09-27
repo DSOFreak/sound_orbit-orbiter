@@ -25,7 +25,7 @@ public:
 	DataToCSV();
 	~DataToCSV();
 	static bool bContinueTask;
-	const unsigned int uiUpdateRateMs = 80;
+	const unsigned int uiUpdateRateMs = 180;
 	static DataToCSV* pInstance;
 	static DataToCSV * getInstance();
 	void vTaskCyclicWriteOfMotorData();
