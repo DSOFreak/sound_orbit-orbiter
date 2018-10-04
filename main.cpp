@@ -134,9 +134,17 @@ bool stimuli_skip;
 void vProcessMovement()
 {
 	float fAngleDegree;
-	//std::cout << "vProcessMovement:" << std::endl;
-	shared_ptr<Toolbox::HostData> hostData = pMovement->vecMovementqueue.front();
-	pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
+	std::cout << "vProcessMovement:" << std::endl;
+	shared_ptr<Toolbox::HostData> hostData;
+	if (!pMovement->vecMovementqueue.empty())
+	{
+		hostData = pMovement->vecMovementqueue.front();
+		pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
+	}
+	else
+	{
+		return;
+	}
 
 
 	if (hostData->direction == 1) { // Dir 1 = clockwise
@@ -186,7 +194,7 @@ void TimerFunc() {
 
 				// FIRST: Check if it is a get or set request for raspi data
 				char charIsGetOrSetRequest = host_data_raw.at(0);
-				//std::cout << "charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
+				std::cout << "DEBUG charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
 				movementTimerMutex.lock();
 				if (charIsGetOrSetRequest == 'G')
 				{
@@ -195,7 +203,7 @@ void TimerFunc() {
 
 					tcp.Send(strsAnsnwerToServerRequest);
 					//std::cout << "Battery Voltage" << strsAnsnwerToServerRequest << endl;
-					//std::cout << "debug nr: " << debug++ << endl;
+					std::cout << "DEBUG debug nr: "<< endl;
 				}
 				else if (charIsGetOrSetRequest == 'S') // no answer sned needed
 				{
@@ -206,7 +214,7 @@ void TimerFunc() {
 				{
 					shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
 					if (hostData->mov_queued) { // Add new data to queue
-						//std::cout << "Add new data to queue" << endl;
+						std::cout << "Add new data to queue" << endl;
 
 						if (hostData->fAngularDistance > 0.0)
 						{
@@ -215,36 +223,45 @@ void TimerFunc() {
 						movement_skip = false;
 					}
 					else { // Clear Queue and Add new Data to Queue
-						//std::cout << " Clear Queue and Add new Data to Queuee" << endl;
+						std::cout << " Clear Queue and Add new Data to Queuee" << endl;
 						movement_skip = true;
 						while (!pMovement->vecMovementqueue.empty())
 						{
+							std::cout << " try to delete queue begin" << endl;
 							pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
+							std::cout << " delete queue begin OK" << endl;
 						}
+						std::cout << " try to vecMovementqueue pushback begin" << endl;
 						pMovement->vecMovementqueue.push_back(hostData);
+						std::cout << " vecMovementqueue pushback begin OK" << endl;
 					}
 					
 					if (hostData->stim_queued) { // Add new data to queue
+					std::cout << "1" << endl;
 					pStimuliLib->mutexStimuli.lock();
 					if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
 					{
 					pStimuliLib->stimuli_queue.push(hostData);
 					}
 					stimuli_skip = false;
+					std::cout << "2" << endl;
 					pStimuliLib->mutexStimuli.unlock();
 					}
 					else { // Clear Queue and Add new Data to Queue
 					pStimuliLib->mutexStimuli.lock();
-
+					std::cout << "3" << endl;
 					stimuli_skip = true;
+					std::cout << "4" << endl;
 					while (!pStimuliLib->stimuli_queue.empty())
 					{
+						std::cout << "5" << endl;
 					pStimuliLib->stimuli_queue.pop();
 					}
+					std::cout << "6" << endl;
 					pStimuliLib->stimuli_queue.push(hostData);
 					pStimuliLib->mutexStimuli.unlock();
 					}
-					//std::cout << "Add new data to queue DONE" << endl;
+					std::cout << "Add new data to queue DONE" << endl;
 					
 				}
 				movementTimerMutex.unlock();

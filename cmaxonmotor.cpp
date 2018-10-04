@@ -419,6 +419,7 @@ void CMaxonMotor::initializeDeviceNew()
 
 void CMaxonMotor::Move(long addToCurrentPosition)
 {
+	mutexForMotorMove.lock();
 	cout << "+++ Motor is moving" << endl;
 	int curr;
 	getCurrentPosition(curr);
@@ -442,6 +443,7 @@ void CMaxonMotor::Move(long addToCurrentPosition)
 	std::cout << "apply change of: " << addToCurrentPosition << " to current position " << curr << std::endl;
 	std::cout << "New position should be: " << addToCurrentPosition + curr << std::endl << std::endl;
 	currenTargetPos = addToCurrentPosition + curr;
+	mutexForMotorMove.unlock();
 }
 
 void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
@@ -462,7 +464,7 @@ void CMaxonMotor::getCurrentlyProcessedTargetPosition(long int &targetPosition)
 
 void CMaxonMotor::getCurrentPosition(int &currentPosition)
 {
-	//mutexForGetPosition.lock();
+	mutexForGetPosition.lock();
 	unsigned int errorCode = 0;
 	//std::clock_t start;
 	//double duration;
@@ -479,7 +481,7 @@ void CMaxonMotor::getCurrentPosition(int &currentPosition)
 		duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
 		usleep(1500);
 	}*/
-	//mutexForGetPosition.unlock();
+	mutexForGetPosition.unlock();
 }
 
 void CMaxonMotor::vResetTargetPositionToCurrentPosition()
@@ -490,10 +492,8 @@ void CMaxonMotor::vResetTargetPositionToCurrentPosition()
 
 void CMaxonMotor::Halt()
 {
+	mutexForMotorHalt.lock();
         unsigned int ErrorCode = 0;
-		std::clock_t start;
-		double duration;
-		start = std::clock();
         if( !VCS_HaltPositionMovement(keyHandle, usNodeID, &ErrorCode) )
         {
                 cout<<"Halt position movement failed!, error code="<<ErrorCode<<endl;
@@ -503,6 +503,7 @@ void CMaxonMotor::Halt()
 			duration = ((std::clock() - start) / (double)CLOCKS_PER_SEC) * 1000;
 			usleep(1500);
 		}*/
+	mutexForMotorHalt.unlock();
 }
 void CMaxonMotor::Error(unsigned int ErrorInfo)
 {
@@ -621,10 +622,17 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 {
 	
 	shared_ptr<Movement> pMovement = Movement::getInstance();
-	if (pMovement->vecMovementqueue.empty() || (currentlyProcessedMovementData == nullptr) || (pMovement->vecMovementqueue.front()->direction == 0))
+	cout << "bTryToAddMovementDataToCurrentMovement" << endl;
+	if (pMovement->vecMovementqueue.empty())
+	{
+		cout << "bTryToAddMovementDataToCurrentMovement RET FALSE" << endl;
+		return false;
+	}
+	else if ((currentlyProcessedMovementData == nullptr) || (pMovement->vecMovementqueue.front()->direction == 0))
 	{
 		return false;
 	}
+	cout << "bTryToAddMovementDataToCurrentMovement RET FALSE NO" << endl;
 	// movement pending 
 	if ((currentlyProcessedMovementData->direction == pMovement->vecMovementqueue.front()->direction) && (currentlyProcessedMovementData->speed == pMovement->vecMovementqueue.front()->speed))
 	{// we have a match
@@ -663,6 +671,7 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
 	}
 	else
 	{
+		cout << "bTryToAddMovementDataToCurrentMovement RET fasaaasaaaaaaaaa" << endl;
 		return false;
 	}
 }

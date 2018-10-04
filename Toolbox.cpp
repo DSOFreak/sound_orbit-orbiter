@@ -84,8 +84,6 @@ namespace Toolbox {
 
 					std::cout << "hostData: " << "dir = " << static_cast<int>(d.direction) << ", angleToMove = " <<d.fAngularDistance << ", speed = " << d.speed << std::endl;
 					std::cout << "stim_nr = " << static_cast<int>(d.stimulus_nr) << ", stim_dur = " << d.stimulusDuration << ", vol = " << d.loudness << ", stimulusToBeTriggerd = " << d.toBeTriggerd << std::endl;
-
-
 				}
 			}
 			catch (std::exception e) {
@@ -129,6 +127,7 @@ namespace Toolbox {
 	}
 	void vSetHostDataToZero(HostData &structHostData)
 	{
+		printf("setting host data to zero \n");
 		structHostData.direction = 0;
 		structHostData.speed = 0;
 		structHostData.fAngularDistance = 0.0;

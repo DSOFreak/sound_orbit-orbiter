@@ -12,6 +12,8 @@
 class CMaxonMotor
 {
 private:
+	std::mutex mutexForMotorMove;
+	std::mutex mutexForMotorHalt;
 	std::mutex mutexForGetPosition;
 	// DEBUG
 	std::clock_t start;

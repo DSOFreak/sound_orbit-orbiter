@@ -76,7 +76,10 @@ void StimuliLibrary::initAllStimuli()
 			//Stimulus2
 			//printf("initAllStimuli - Stimulus2(); \n");
 			fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus2);
-			//printf("initAllStimuli - Stimulus2()playSound; \n");
+			printf("pAudio_Stimulus2 %d:  \n", pAudio_Stimulus2);
+			printf("channelgroup %d:  \n", channelgroup);
+			printf("isPlaybackPaused %d:  \n", isPlaybackPaused);
+			printf("channel_Stimulus2 %d:  \n", &channel_Stimulus2);
 			FMOD_RESULT res0 = fsystem->playSound(pAudio_Stimulus2, channelgroup, isPlaybackPaused, &channel_Stimulus2);
 			if (res0 != FMOD_OK)
 			{

@@ -102,21 +102,24 @@ std::string tcpParameterRequestHandler::interpretRequest( std::string & strReque
 		printf("ERROR: No reason to be in interpretRequest. Protocol interpretation is wrong \n");
 		exit(-1);
 	}
-
+	printf("DEBUG:A \n");
 	// convert to str
 	std::string answerToServerRequest;
 	if (!vecdResult.empty())
 	{
+		printf("DEBUG:B \n");
 		strResultTemp << vecdResult.at(0);
 		answerToServerRequest = strResultTemp.str();
-
+		printf("DEBUG:C\n");
 		//Add telegram delimiter
 		answerToServerRequest.append(tcpParameterRequestHandler::strEndIndicatorForProtocol);
 		//Add own speaker ID
 		strResultTemp.str("");
 		strResultTemp << RaspiConfig::ownIndex;
+		printf("DEBUG:D \n");
 		std::string strSpeakerIdentification = strRequest + "_ID_" + strResultTemp.str() + "_";
 		answerToServerRequest.insert(0, strSpeakerIdentification);
+		printf("DEBUG:E \n");
 	}
 	else
 	{
