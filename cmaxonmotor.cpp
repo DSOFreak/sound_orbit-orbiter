@@ -1,5 +1,5 @@
 #include "cmaxonmotor.h"
-#include "Movement.h"
+
 #include <string.h>
 #include <iostream>
 #include <cstdio>
@@ -10,7 +10,7 @@
 #include <fcntl.h>
 
 #include "Toolbox.h"
-#include <memory>
+
 #define MAA_VELOCITY_IF_CAMERA_POSITION_CORRECTION 10.10
 #define NOT_STARTET_YET -43// DEBUG
 
@@ -124,6 +124,7 @@ long CMaxonMotor::lConvertAngleInDegreeToMotorData(float fAngle)
 }
 bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOfMovementcalls, long long numberOfTCPCalls)//debug
 {
+	mutexForReachedTarget.lock();
 	bool bRetVal = false;
 	int targetReached;
 	unsigned int uiErrorCode;
@@ -144,6 +145,7 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 	
 	if (targetReached != 0) // We reached the target position
 	{
+		cout << "DEBUG target reached" << endl;
 		//cout << "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu     TARGET REACHED in " << duration << "s" << endl;
 		// Debug first movement rausnehmen
 		if (duration < 25)
@@ -163,17 +165,19 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 			currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
 		}
 		
-		
+		cout << "DEBUG target reached ciao" << endl;
 	}
 	else
 	{
-		//cout << "~~~~~~~~~~~~~~~~We did NOT reached the target position" << endl;
+		//cout << "DEBUG reachedTarget ONE" << endl;
+		cout << "~~~~~~~~~~~~~~~~We did NOT reached the target position" << endl;
 		bRetVal = false;
 	}
 	if (uiErrorCode != 0)
 	{
 		cout << "ERROR IN ReachedTarget() number: " << uiErrorCode << endl;
 	}
+	mutexForReachedTarget.unlock();
 	return bRetVal;
 }
 
@@ -618,14 +622,10 @@ int CMaxonMotor::GetCPULoad(float &load) {
 }
 
 
-bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement()
+bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement(shared_ptr<Movement> pMovement)
 {
-	
-	shared_ptr<Movement> pMovement = Movement::getInstance();
-	cout << "bTryToAddMovementDataToCurrentMovement" << endl;
 	if (pMovement->vecMovementqueue.empty())
 	{
-		cout << "bTryToAddMovementDataToCurrentMovement RET FALSE" << endl;
 		return false;
 	}
 	else if ((currentlyProcessedMovementData == nullptr) || (pMovement->vecMovementqueue.front()->direction == 0))

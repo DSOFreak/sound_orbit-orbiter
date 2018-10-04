@@ -4,7 +4,9 @@
 #include "Toolbox.h"
 #include "Definitions.h" // Maxon Motor Header file
 #include <ctime>
+#include "Movement.h"
 #include <mutex>
+#include <memory>
 #define TRUE 1
 #define FALSE 0
 
@@ -15,6 +17,7 @@ private:
 	std::mutex mutexForMotorMove;
 	std::mutex mutexForMotorHalt;
 	std::mutex mutexForGetPosition;
+	std::mutex mutexForReachedTarget;
 	// DEBUG
 	std::clock_t start;
 	double duration;
@@ -106,7 +109,7 @@ public:
 
 	void GetSupply(unsigned short& piVoltage, short int& piCurrent);
 
-	bool bTryToAddMovementDataToCurrentMovement(); // if the direction and speed and speaker is ok -> increase current movement distance
+	bool bTryToAddMovementDataToCurrentMovement(std::shared_ptr<Movement> pMovement); // if the direction and speed and speaker is ok -> increase current movement distance
 	//DEBUG
 	int GetCPULoad(float &load);
 };

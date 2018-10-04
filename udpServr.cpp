@@ -98,8 +98,6 @@ void udpServr::vExit()
 
 std::string udpServr::vRecvUDP()
 {
-		
-		
 
 		memset(&bufptr[0], 0, buflen);
 		/* Wait on client requests. */
@@ -146,26 +144,30 @@ std::string udpServr::vRecvUDP()
 bool udpServr::bMessageIsSecurityDoublicate(long long &llCurrentTimestamp, char* pcMsg)
 {
 	bool bIsJustADuplicate = false;
-	// Delete all messages which are older than  MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS
-	while ((llCurrentTimestamp - vecpairMessageComparer.front().first) > MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS)
+	if (!vecpairMessageComparer.empty())
 	{
-		vecpairMessageComparer.erase(vecpairMessageComparer.begin());
-	}
-
-	// now check for duplicates
-	for (int i = 0; i < vecpairMessageComparer.size(); i++)
-	{
-		if (vecpairMessageComparer.at(i).second.compare((std::string) pcMsg) == 0)
+		// Delete all messages which are older than  MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS
+		while ((llCurrentTimestamp - vecpairMessageComparer.front().first) > MIN_TIME_BETWEEN_IDENTICAL_MESSAGES_MS)
 		{
-			// Theese strings are identical
-			if (llCurrentTimestamp != vecpairMessageComparer.at(i).first)
+			vecpairMessageComparer.erase(vecpairMessageComparer.begin());
+		}
+
+		// now check for duplicates
+		for (int i = 0; i < vecpairMessageComparer.size(); i++)
+		{
+			if (vecpairMessageComparer.at(i).second.compare((std::string) pcMsg) == 0)
 			{
-				// And the timestamps are not the same -> We saw this exact message already! Discard it!
-				bIsJustADuplicate = true;
-				return bIsJustADuplicate;
+				// Theese strings are identical
+				if (llCurrentTimestamp != vecpairMessageComparer.at(i).first)
+				{
+					// And the timestamps are not the same -> We saw this exact message already! Discard it!
+					bIsJustADuplicate = true;
+					return bIsJustADuplicate;
+				}
 			}
 		}
 	}
+
 	return bIsJustADuplicate;
 }
 

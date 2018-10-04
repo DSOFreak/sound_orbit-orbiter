@@ -69,8 +69,8 @@ void udp_func() {
 		//cout << "inside udp func..... " << msg << endl;
 		msg = pUdpServer->vRecvUDP();
 		if (msg.length() == 0) {
-			pUdpServer->vExit();
 			std::cout << "Reconnecting..." << std::endl;
+			pUdpServer->vExit();
 			pUdpServer->vSetup();
 			sleep(2);
 		}
@@ -174,6 +174,7 @@ void TimerFunc() {
 	//llNumberOfRelevantThreadCalls++;
 	//if ((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty()))
 		std::string host_data_raw;
+		std::string host_data_raw_Copy;
 		while(!pUdpServer->udp_queue.empty()) {
 
 			pUdpServer->mutexUDPQueue.lock();
@@ -184,22 +185,23 @@ void TimerFunc() {
 			//std::this_thread::sleep_for(std::chrono::milliseconds(20)); // das istn ur anstelle von 			((pMotor->lgetCurrentTargetPositionInMotorData() != NO_MOVEMENT_IN_PROCESS) || (pMovement->vecMovementqueue.empty())) .. damit es etwas feinierter ist
 			/* PROTOCOL INTERPRETATION */
 			int speakerIDX;
-			if (host_data_raw.length() != 0)
+			if (host_data_raw.length() > 0)
 			{ // If a tcp-message has arrived
-				if (host_data_raw.find("G_P_A") == std::string::npos)//debug avoid the printfs
+				host_data_raw_Copy = host_data_raw;
+				movementTimerMutex.lock();
+				if (host_data_raw_Copy.find("G_P_A") == std::string::npos)//debug avoid the printfs
 				{
-				//	std::cout << "\n Raw hostData input: " << host_data_raw << std::endl;
+				//	std::cout << "\n Raw hostData input: " << host_data_raw_Copy << std::endl;
 				}
 
 
 				// FIRST: Check if it is a get or set request for raspi data
-				char charIsGetOrSetRequest = host_data_raw.at(0);
+				char charIsGetOrSetRequest = host_data_raw_Copy.at(0);
 				std::cout << "DEBUG charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
-				movementTimerMutex.lock();
 				if (charIsGetOrSetRequest == 'G')
 				{
 					std::string strsAnsnwerToServerRequest;
-					strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+					strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw_Copy);
 
 					tcp.Send(strsAnsnwerToServerRequest);
 					//std::cout << "Battery Voltage" << strsAnsnwerToServerRequest << endl;
@@ -208,11 +210,11 @@ void TimerFunc() {
 				else if (charIsGetOrSetRequest == 'S') // no answer sned needed
 				{
 					std::string strsAnsnwerToServerRequest;
-					strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw);
+					strsAnsnwerToServerRequest = pTCPParameterRequestHandler->interpretRequest(host_data_raw_Copy);
 				}
 				else
 				{
-					shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw))); // decode host data
+					shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw_Copy))); // decode host data
 					if (hostData->mov_queued) { // Add new data to queue
 						std::cout << "Add new data to queue" << endl;
 
@@ -255,7 +257,7 @@ void TimerFunc() {
 					while (!pStimuliLib->stimuli_queue.empty())
 					{
 						std::cout << "5" << endl;
-					pStimuliLib->stimuli_queue.pop();
+						pStimuliLib->stimuli_queue.pop();
 					}
 					std::cout << "6" << endl;
 					pStimuliLib->stimuli_queue.push(hostData);
@@ -283,20 +285,23 @@ void vMovementThread(bool &bIsFirstCall)
 			//cout << "** MOVMENT THREAD START" << endl;
 		// MOVEMENT PROCESSING 
 			movementTimerMutex.lock();
-			if (!pMotor->bTryToAddMovementDataToCurrentMovement())
+			cout << "trying to call bTryToAddMovementDataToCurrentMovement"<<endl;
+			if (!pMotor->bTryToAddMovementDataToCurrentMovement(pMovement))
 			{
 
 				if (!pMovement->vecMovementqueue.empty())// movement pending 
 				{
-
+					cout << "inside vMovementThread" << endl;
 					if (pMotor->reachedTarget(1337, 1337, 1337) || movement_skip) // (movementFinnished OR Skip_this_movement)
 					{
+						cout << "DEBUG reaced target 123" << endl;
 						if (movement_skip)
 						{
-							//cout << "skip the movement" << endl;
+							cout << "skip the movement" << endl;
 						}
-
+						cout << "DEBUG reaced target 1234" << endl;
 						vProcessMovement();
+						cout << "DEBUG reaced target 12345" << endl;
 					}
 					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
 					else if ((bIsFirstCall == true) && (pMotor->lgetCurrentTargetPositionInMotorData() == NO_MOVEMENT_IN_PROCESS))
@@ -327,22 +332,22 @@ void vStimuliThread()
 			pStimuliLib->mutexStimuli.lock();
 			if ((pStimuliLib->pInstance != nullptr))
 			{
-				//std::cout << "pStimuliLib->updateFSystem();" << endl;
+				std::cout << "pStimuliLib->updateFSystem();" << endl;
 				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
-				//std::cout << "Check if there is a protocol hicjacking" << endl;
+				std::cout << "Check if there is a protocol hicjacking" << endl;
 				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue)) // not protocl adaption, process as usual
 				{
 					//std::cout << "Check if there is a protocol hicjacking DONE" << endl;
 					//cout << "No Hijacking" << endl;
 					if (pStimuliLib->bGetIsThereAFractionLeftToPlay())
 					{
-						//printf("\n We have a fraction left to play of %d milliseconds\n", stimuliLib->uiGetDesiredStimuliDuration_ms());
+						printf("\n We have a fraction left to play of %d milliseconds\n");
 						pStimuliLib->playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
 					}
 					else if (!pStimuliLib->stimuli_queue.empty())
 					{
-						//cout << "We try to play a stimulus if it has to be triggered" << endl;
+						cout << "We try to play a stimulus if it has to be triggered" << endl;
 						pStimuliLib->vPlayStimulusIfToBeTriggered();
 					}
 				}

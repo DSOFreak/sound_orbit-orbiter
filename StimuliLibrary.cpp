@@ -273,17 +273,20 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	switch (nr)
 	{
 	case 1:
+		printf("DEBUG pAudio_Stimulus1 \n");
 		pAudio = pAudio_Stimulus1;
 		veciStimuliToInit.push_back(1);
 		break;
 	case 2:
 	{
+		printf("DEBUG pAudio_Stimulus2 \n");
 		pAudio = pAudio_Stimulus2;
 		channel = channel_Stimulus2;
 		veciStimuliToInit.push_back(2);
 		break;
 	}
 	case 3:
+		printf("DEBUG pAudio_Stimulus3 \n");
 		pAudio = pAudio_Stimulus3;
 		veciStimuliToInit.push_back(3);
 		break;
@@ -294,11 +297,11 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	}
 	//delete duplicates
 	std::unique(veciStimuliToInit.begin(), veciStimuliToInit.end());
-
+	printf("DEBUG pAudio->getLength \n");
 	pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);;
 	fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
 
-	//printf("\ Setting the volume to: %f \n", volume);
+	printf("\ Setting the volume to: %f \n", volume);
 	channel->setVolume(volume);
 	dVolume = volume;
 	return bRetIsValidStimuli;
@@ -390,12 +393,17 @@ void StimuliLibrary::playStimuli()
 
 void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 {
-	shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
-	stimuli_queue.pop(); // Delete the stimulus either way.
-
+	shared_ptr<Toolbox::HostData> hostData;
+	hostData->toBeTriggerd = 0;
+	if (!stimuli_queue.empty())
+	{
+		hostData = stimuli_queue.front();
+		stimuli_queue.pop(); // Delete the stimulus either way.
+	}
+	printf("Try  DEBUG vPlayStimulusIfToBeTriggered() \n");
 	if (hostData->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 	{
-		//printf("vPlayStimulusIfToBeTriggered() \n");
+		printf("vPlayStimulusIfToBeTriggered() \n");
 		bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 		if (bIsValidStimulus)
 		{
@@ -419,9 +427,19 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		bRetVal = true;
 		if (!bCurrentlyAHijackedProtcolIsProcessed()) // there is noprocess going gon
 		{
-			hostDataOfHijackedProtocol = stimuli_queue.front();
-			stimuli_queue.pop(); // Delete the stimulus either way.
-			bool bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+			bool bIsValidStimulus;
+			std::cout << "5" << endl;
+			if (!stimuli_queue.empty())
+			{
+				hostDataOfHijackedProtocol = stimuli_queue.front();
+				stimuli_queue.pop(); // Delete the stimulus either way.
+				bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+			}
+			else
+			{
+				bIsValidStimulus = false;
+			}
+			
 		}
 
 		if (!movementQueue.empty())
@@ -433,6 +451,7 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		}
 		else if (!pMotor->reachedTarget(1337, 1337, 1337)) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
 		{
+			cout << "DEBUG reachedTarget ONE" << endl;
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{
 				vSetChannelToInvinitePlay();
@@ -445,6 +464,7 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 			if (!movementQueue.empty() || !pMotor->reachedTarget(1337,1337,1337))
 			{
+				cout << "DEBUG reachedTarget ONESSS" << endl;
 				vSetChannelToInvinitePlay();
 				return bRetVal;
 			}
@@ -472,7 +492,11 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 	{
 		// Only Load if necessary
 		bool bIsCurrentlyPlaying;
-		channel->getPaused(&bIsCurrentlyPlaying);
+		FMOD_RESULT fmodResult = channel->getPaused(&bIsCurrentlyPlaying);
+		if (fmodResult != FMOD_OK)
+		{
+			cout << "ERROR IN CHANNEL GET PAUSED" << endl;
+		}
 		if (!bIsCurrentlyPlaying)
 		{
 			//printf("YEEEEEEEEEEEEEEEEES\n");
@@ -541,6 +565,7 @@ void StimuliLibrary::vSetHijackedProtocolIsCompletelyProcessed()
 
 void StimuliLibrary::vClearStimuliQueue()
 {
+	cout << "DEBUG: vClearStimuliQueue" << endl;
 	std::queue<shared_ptr<Toolbox::HostData >> empty;
 	std::swap(stimuli_queue, empty);
 }

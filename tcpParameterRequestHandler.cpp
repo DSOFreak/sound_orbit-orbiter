@@ -18,6 +18,7 @@ tcpParameterRequestHandler::~tcpParameterRequestHandler()
 
 std::string tcpParameterRequestHandler::interpretRequest( std::string & strRequest)
 {
+
 	// ANSWER PROTOCL IS "REQUEST_ID_idnr_Value" e.g. G_V_A_ID_0_12.392
 	std::ostringstream strResultTemp;
 	std::vector<double> vecdResult;
