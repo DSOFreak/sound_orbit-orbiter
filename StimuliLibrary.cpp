@@ -17,7 +17,7 @@ std::shared_ptr<StimuliLibrary> StimuliLibrary::pInstance = nullptr;
 
 StimuliLibrary::StimuliLibrary() : extradriverdata(nullptr), dFractionOfAudioFileLeftToPlay(0.00), hostDataOfHijackedProtocol(nullptr)
 {
-	printf("StimuliLibrary constructor0\n");
+	printf("StimuliLibrary constructor\n");
 	pMotor = CMaxonMotor::getInstance();
 	vSetUp();
 }
@@ -67,33 +67,35 @@ void StimuliLibrary::initAllStimuli()
 		case (1):
 		{
 			//Stimulus1
-			//printf("initAllStimuli - Stimulus1(); \n");
 			fsystem->createSound(pathToAudio_01WhiteNoise.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus1);
 			break;
 		}
 		case(2):
 		{
 			//Stimulus2
-			//printf("initAllStimuli - Stimulus2(); \n");
-			fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus2);
+			FMOD_RESULT res9 =fsystem->createSound(pathToAudio_02PinkNoise.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus2);
 			printf("pAudio_Stimulus2 %d:  \n", pAudio_Stimulus2);
 			printf("channelgroup %d:  \n", channelgroup);
 			printf("isPlaybackPaused %d:  \n", isPlaybackPaused);
 			printf("channel_Stimulus2 %d:  \n", &channel_Stimulus2);
+			if (res9 != FMOD_OK)
+			{
+				printf("FMOD error res9! (%d)\n", res9);
+				exit(-1);
+			}
+
 			FMOD_RESULT res0 = fsystem->playSound(pAudio_Stimulus2, channelgroup, isPlaybackPaused, &channel_Stimulus2);
 			if (res0 != FMOD_OK)
 			{
 				printf("FMOD error res0! (%d)\n", res0);
 				exit(-1);
 			}
-			//printf("initAllStimuli - Stimulus2()initDSPWithEQSettings; \n");
 			pEqSpeakerPN->initDSPWithEQSettings(channel_Stimulus2, channelgroup, fsystem);
 			break;
 		}
 		case (3):
 		{
 			//Stimulus3
-			//printf("initAllStimuli - Stimulus3(); \n");
 			fsystem->createSound(pathToAudio_03Sin500.c_str(), FMOD_DEFAULT, 0, &pAudio_Stimulus3);
 			break;
 		}
@@ -273,20 +275,17 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	switch (nr)
 	{
 	case 1:
-		printf("DEBUG pAudio_Stimulus1 \n");
 		pAudio = pAudio_Stimulus1;
 		veciStimuliToInit.push_back(1);
 		break;
 	case 2:
 	{
-		printf("DEBUG pAudio_Stimulus2 \n");
 		pAudio = pAudio_Stimulus2;
 		channel = channel_Stimulus2;
 		veciStimuliToInit.push_back(2);
 		break;
 	}
 	case 3:
-		printf("DEBUG pAudio_Stimulus3 \n");
 		pAudio = pAudio_Stimulus3;
 		veciStimuliToInit.push_back(3);
 		break;
@@ -297,11 +296,10 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 	}
 	//delete duplicates
 	std::unique(veciStimuliToInit.begin(), veciStimuliToInit.end());
-	printf("DEBUG pAudio->getLength \n");
 	pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);;
 	fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
 
-	printf("\ Setting the volume to: %f \n", volume);
+	//printf("\ Setting the volume to: %f \n", volume);
 	channel->setVolume(volume);
 	dVolume = volume;
 	return bRetIsValidStimuli;
@@ -393,22 +391,13 @@ void StimuliLibrary::playStimuli()
 
 void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 {
-	cout << "insideDEBUG vPlayStimulusIfToBeTriggered" << endl;
 	shared_ptr<Toolbox::HostData> hostData;
-	cout << "insideDEBUG vPlayStimulusIfToBeTriggered OK" << endl;
-	cout << "insideDEBUG vPlayStimulusIfToBeTriggered OKKKK" << endl;
-	cout << "insideDEBUG toBeTriggerd" << endl;
 	if (!stimuli_queue.empty())
 	{
-		cout << "insideDEBUG stimuli_queue" << endl;
 		hostData = stimuli_queue.front();
-		cout << "inside DEBUG vPlayStimulusIfToBeTriggered stimuli_queue.pop(); " << endl;
 		stimuli_queue.pop(); // Delete the stimulus either way.
-		cout << "insideDEBUG vPlayStimulusIfToBeTriggered stimuli_queue.pop(); OK " << endl;
-
 		if (hostData->toBeTriggerd) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 		{
-			printf("DEBUG vPlayStimulusIfToBeTriggered() \n");
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
 			if (bIsValidStimulus)
 			{
@@ -416,9 +405,6 @@ void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 			}
 		}
 	}
-	printf("Try  DEBUG vPlayStimulusIfToBeTriggered() \n");
-
-	cout << "DEBUG LEAVING vPlayStimulusIfToBeTriggered" << endl;
 }
 
 bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue)
@@ -437,7 +423,6 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		if (!bCurrentlyAHijackedProtcolIsProcessed()) // there is noprocess going gon
 		{
 			bool bIsValidStimulus;
-			std::cout << "5" << endl;
 			if (!stimuli_queue.empty())
 			{
 				hostDataOfHijackedProtocol = stimuli_queue.front();
@@ -460,7 +445,6 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		}
 		else if (!pMotor->reachedTarget(1337, 1337, 1337)) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
 		{
-			cout << "DEBUG reachedTarget ONE" << endl;
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{
 				vSetChannelToInvinitePlay();
@@ -469,11 +453,10 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		else
 		{
 			// Wait for some time to check if if everything is really finnished
-			cout << "---------------------------------------------- Wait for some time to check if if everything is really finnished" << endl;
+			//cout << "---------------------------------------------- Wait for some time to check if if everything is really finnished" << endl;
 			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 			if (!movementQueue.empty() || !pMotor->reachedTarget(1337,1337,1337))
 			{
-				cout << "DEBUG reachedTarget ONESSS" << endl;
 				vSetChannelToInvinitePlay();
 				return bRetVal;
 			}
@@ -574,7 +557,6 @@ void StimuliLibrary::vSetHijackedProtocolIsCompletelyProcessed()
 
 void StimuliLibrary::vClearStimuliQueue()
 {
-	cout << "DEBUG: vClearStimuliQueue" << endl;
 	std::queue<shared_ptr<Toolbox::HostData >> empty;
 	std::swap(stimuli_queue, empty);
 }

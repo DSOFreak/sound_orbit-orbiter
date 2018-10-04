@@ -134,7 +134,7 @@ bool stimuli_skip;
 void vProcessMovement()
 {
 	float fAngleDegree;
-	std::cout << "vProcessMovement:" << std::endl;
+	//std::cout << "vProcessMovement:" << std::endl;
 	shared_ptr<Toolbox::HostData> hostData;
 	if (!pMovement->vecMovementqueue.empty())
 	{
@@ -197,7 +197,6 @@ void TimerFunc() {
 
 				// FIRST: Check if it is a get or set request for raspi data
 				char charIsGetOrSetRequest = host_data_raw_Copy.at(0);
-				std::cout << "DEBUG charIsGetOrSetRequest " << charIsGetOrSetRequest << std::endl;
 				if (charIsGetOrSetRequest == 'G')
 				{
 					std::string strsAnsnwerToServerRequest;
@@ -205,7 +204,6 @@ void TimerFunc() {
 
 					tcp.Send(strsAnsnwerToServerRequest);
 					//std::cout << "Battery Voltage" << strsAnsnwerToServerRequest << endl;
-					std::cout << "DEBUG debug nr: "<< endl;
 				}
 				else if (charIsGetOrSetRequest == 'S') // no answer sned needed
 				{
@@ -216,7 +214,7 @@ void TimerFunc() {
 				{
 					shared_ptr<Toolbox::HostData> hostData(new Toolbox::HostData(Toolbox::decodeHostData(host_data_raw_Copy))); // decode host data
 					if (hostData->mov_queued) { // Add new data to queue
-						std::cout << "Add new data to queue" << endl;
+						//std::cout << "Add new data to queue" << endl;
 
 						if (hostData->fAngularDistance > 0.0)
 						{
@@ -225,45 +223,35 @@ void TimerFunc() {
 						movement_skip = false;
 					}
 					else { // Clear Queue and Add new Data to Queue
-						std::cout << " Clear Queue and Add new Data to Queuee" << endl;
+						//std::cout << " Clear Queue and Add new Data to Queuee" << endl;
 						movement_skip = true;
 						while (!pMovement->vecMovementqueue.empty())
 						{
-							std::cout << " try to delete queue begin" << endl;
 							pMovement->vecMovementqueue.erase(pMovement->vecMovementqueue.begin());
-							std::cout << " delete queue begin OK" << endl;
 						}
-						std::cout << " try to vecMovementqueue pushback begin" << endl;
 						pMovement->vecMovementqueue.push_back(hostData);
-						std::cout << " vecMovementqueue pushback begin OK" << endl;
 					}
 					
 					if (hostData->stim_queued) { // Add new data to queue
-					std::cout << "1" << endl;
 					pStimuliLib->mutexStimuli.lock();
 					if (hostData->toBeTriggerd == 1) // only if it i a stimulus which also should be played (and not a dummy placeholder protocol values)
 					{
 					pStimuliLib->stimuli_queue.push(hostData);
 					}
 					stimuli_skip = false;
-					std::cout << "2" << endl;
 					pStimuliLib->mutexStimuli.unlock();
 					}
 					else { // Clear Queue and Add new Data to Queue
 					pStimuliLib->mutexStimuli.lock();
-					std::cout << "3" << endl;
 					stimuli_skip = true;
-					std::cout << "4" << endl;
 					while (!pStimuliLib->stimuli_queue.empty())
 					{
-						std::cout << "5" << endl;
 						pStimuliLib->stimuli_queue.pop();
 					}
-					std::cout << "6" << endl;
 					pStimuliLib->stimuli_queue.push(hostData);
 					pStimuliLib->mutexStimuli.unlock();
 					}
-					std::cout << "Add new data to queue DONE" << endl;
+					//std::cout << "Add new data to queue DONE" << endl;
 					
 				}
 				movementTimerMutex.unlock();
@@ -285,23 +273,19 @@ void vMovementThread(bool &bIsFirstCall)
 			//cout << "** MOVMENT THREAD START" << endl;
 		// MOVEMENT PROCESSING 
 			movementTimerMutex.lock();
-			cout << "trying to call bTryToAddMovementDataToCurrentMovement"<<endl;
+			//cout << "trying to call bTryToAddMovementDataToCurrentMovement"<<endl;
 			if (!pMotor->bTryToAddMovementDataToCurrentMovement(pMovement))
 			{
 
 				if (!pMovement->vecMovementqueue.empty())// movement pending 
-				{
-					cout << "inside vMovementThread" << endl;
+				{				
 					if (pMotor->reachedTarget(1337, 1337, 1337) || movement_skip) // (movementFinnished OR Skip_this_movement)
 					{
-						cout << "DEBUG reaced target 123" << endl;
-						if (movement_skip)
+						/*if (movement_skip)
 						{
-							cout << "skip the movement" << endl;
-						}
-						cout << "DEBUG reaced target 1234" << endl;
+							//cout << "skip the movement" << endl;
+						}*/
 						vProcessMovement();
-						cout << "DEBUG reaced target 12345" << endl;
 					}
 					// Here we ware if we have some movements in our queue which we want to do but still other movements are going on
 					else if ((bIsFirstCall == true) && (pMotor->lgetCurrentTargetPositionInMotorData() == NO_MOVEMENT_IN_PROCESS))
@@ -332,22 +316,22 @@ void vStimuliThread()
 			pStimuliLib->mutexStimuli.lock();
 			if ((pStimuliLib->pInstance != nullptr))
 			{
-				std::cout << "pStimuliLib->updateFSystem();" << endl;
+				//std::cout << "pStimuliLib->updateFSystem();" << endl;
 				pStimuliLib->updateFSystem();
 				// Check if there is a protocol hicjacking
-				std::cout << "Check if there is a protocol hicjacking" << endl;
+				//std::cout << "Check if there is a protocol hicjacking" << endl;
 				if (!pStimuliLib->bAdaptStimulusParametersDueToHijacking(pMovement->vecMovementqueue)) // not protocl adaption, process as usual
 				{
 					//std::cout << "Check if there is a protocol hicjacking DONE" << endl;
 					//cout << "No Hijacking" << endl;
 					if (pStimuliLib->bGetIsThereAFractionLeftToPlay())
 					{
-						printf("\n We have a fraction left to play of %d milliseconds\n");
+						//printf("\n We have a fraction left to play of %d milliseconds\n");
 						pStimuliLib->playStimuli(); // Enter here only if (audioFileLength_ms < desiredDuration_ms)
 					}
 					else if (!pStimuliLib->stimuli_queue.empty())
 					{
-						cout << "We try to play a stimulus if it has to be triggered" << endl;
+						//cout << "We try to play a stimulus if it has to be triggered" << endl;
 						pStimuliLib->vPlayStimulusIfToBeTriggered();
 					}
 				}

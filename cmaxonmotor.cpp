@@ -145,7 +145,6 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 	
 	if (targetReached != 0) // We reached the target position
 	{
-		cout << "DEBUG target reached" << endl;
 		//cout << "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu     TARGET REACHED in " << duration << "s" << endl;
 		// Debug first movement rausnehmen
 		if (duration < 25)
@@ -165,12 +164,10 @@ bool CMaxonMotor::reachedTarget(long long numberOfTimerCalls, long long numberOf
 			currentlyProcessedMovementData->direction = NO_MOVEMENT_IN_PROCESS;
 		}
 		
-		cout << "DEBUG target reached ciao" << endl;
 	}
 	else
 	{
-		//cout << "DEBUG reachedTarget ONE" << endl;
-		cout << "~~~~~~~~~~~~~~~~We did NOT reached the target position" << endl;
+		//cout << "~~~~~~~~~~~~~~~~We did NOT reached the target position" << endl;
 		bRetVal = false;
 	}
 	if (uiErrorCode != 0)
@@ -543,7 +540,7 @@ void CMaxonMotor::setSpeed(float speed, float fAngleToMoveInDegree)
 {
 	fAngleToMoveInDegree = abs(fAngleToMoveInDegree);
 	int iDesiredVelocity = uiVelocityCalibrationFactor * speed; // THIS IS THE CALIBRATION FOR THE MOTOR SPEED OF THE RASPII
-	cout << "speed is:" << speed << endl;
+	//cout << "speed is:" << speed << endl;
 	// special treetment for maa
 
 	//camera correction
@@ -632,7 +629,6 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement(shared_ptr<Movement> pM
 	{
 		return false;
 	}
-	cout << "bTryToAddMovementDataToCurrentMovement RET FALSE NO" << endl;
 	// movement pending 
 	if ((currentlyProcessedMovementData->direction == pMovement->vecMovementqueue.front()->direction) && (currentlyProcessedMovementData->speed == pMovement->vecMovementqueue.front()->speed))
 	{// we have a match
@@ -671,7 +667,6 @@ bool CMaxonMotor::bTryToAddMovementDataToCurrentMovement(shared_ptr<Movement> pM
 	}
 	else
 	{
-		cout << "bTryToAddMovementDataToCurrentMovement RET fasaaasaaaaaaaaa" << endl;
 		return false;
 	}
 }

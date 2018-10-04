@@ -127,7 +127,7 @@ namespace Toolbox {
 	}
 	void vSetHostDataToZero(HostData &structHostData)
 	{
-		printf("setting host data to zero \n");
+	//	printf("setting host data to zero \n");
 		structHostData.direction = 0;
 		structHostData.speed = 0;
 		structHostData.fAngularDistance = 0.0;
