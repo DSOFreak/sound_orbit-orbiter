@@ -393,23 +393,32 @@ void StimuliLibrary::playStimuli()
 
 void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 {
+	cout << "insideDEBUG vPlayStimulusIfToBeTriggered" << endl;
 	shared_ptr<Toolbox::HostData> hostData;
-	hostData->toBeTriggerd = 0;
+	cout << "insideDEBUG vPlayStimulusIfToBeTriggered OK" << endl;
+	cout << "insideDEBUG vPlayStimulusIfToBeTriggered OKKKK" << endl;
+	cout << "insideDEBUG toBeTriggerd" << endl;
 	if (!stimuli_queue.empty())
 	{
+		cout << "insideDEBUG stimuli_queue" << endl;
 		hostData = stimuli_queue.front();
+		cout << "inside DEBUG vPlayStimulusIfToBeTriggered stimuli_queue.pop(); " << endl;
 		stimuli_queue.pop(); // Delete the stimulus either way.
-	}
-	printf("Try  DEBUG vPlayStimulusIfToBeTriggered() \n");
-	if (hostData->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
-	{
-		printf("vPlayStimulusIfToBeTriggered() \n");
-		bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
-		if (bIsValidStimulus)
+		cout << "insideDEBUG vPlayStimulusIfToBeTriggered stimuli_queue.pop(); OK " << endl;
+
+		if (hostData->toBeTriggerd) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 		{
-			playStimuli();
+			printf("DEBUG vPlayStimulusIfToBeTriggered() \n");
+			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+			if (bIsValidStimulus)
+			{
+				playStimuli();
+			}
 		}
 	}
+	printf("Try  DEBUG vPlayStimulusIfToBeTriggered() \n");
+
+	cout << "DEBUG LEAVING vPlayStimulusIfToBeTriggered" << endl;
 }
 
 bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue)
