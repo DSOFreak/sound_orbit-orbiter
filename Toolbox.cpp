@@ -87,8 +87,8 @@ namespace Toolbox {
 				}
 			}
 			catch (std::exception e) {
-				vSetHostDataToZero(d);
 				printf("Catch: This protocol is nothing to process for the motor / audio control. \n");
+				vSetHostDataToZero(d);			
 		}
 	}
 		return d;

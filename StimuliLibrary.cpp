@@ -158,8 +158,9 @@ void StimuliLibrary::vSetdFractionOfAudioFileLeftToPlay(double dValue)
 
 void StimuliLibrary::updateFSystem()
 {
+	cout << "DEBUG updateFSystem Start" << endl;
 	fsystem->update();
-
+	cout << "DEBUG updateFSystem end" << endl;
 }
 
 void StimuliLibrary::initEqualizers()
@@ -268,6 +269,7 @@ void StimuliLibrary::stopStimuli()
 
 bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 {
+	cout << "DEBUG B1" << endl;
 	bool bRetIsValidStimuli = true;
 	uiDesiredDuration_ms = duration;
 	dFractionOfAudioFileLeftToPlay = 0.00;
@@ -280,9 +282,13 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		break;
 	case 2:
 	{
+		cout << "DEBUG B2" << endl;
 		pAudio = pAudio_Stimulus2;
+		cout << "DEBUG B3" << endl;
 		channel = channel_Stimulus2;
+		cout << "DEBUG B4" << endl;
 		veciStimuliToInit.push_back(2);
+		cout << "DEBUG B5" << endl;
 		break;
 	}
 	case 3:
@@ -294,14 +300,27 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 		bRetIsValidStimuli = false;
 		break;
 	}
-	//delete duplicates
-	std::unique(veciStimuliToInit.begin(), veciStimuliToInit.end());
-	pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);;
-	fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
+	if (bRetIsValidStimuli)
+	{
+		//delete duplicates
+		cout << "DEBUG B6" << endl;
+		std::unique(veciStimuliToInit.begin(), veciStimuliToInit.end());
+		cout << "DEBUG B7" << endl;
+		pAudio->getLength(&audioFileLength_ms, FMOD_TIMEUNIT_MS);
+		cout << "DEBUG B8" << endl;
 
-	//printf("\ Setting the volume to: %f \n", volume);
-	channel->setVolume(volume);
-	dVolume = volume;
+		FMOD_RESULT resPlay = fsystem->playSound(pAudio, channelgroup, isPlaybackPaused, &channel);
+		if (resPlay != FMOD_OK)
+		{
+			printf("FMOD error fsystem->playSound (%d)\n", resPlay);
+		}
+		cout << "DEBUG B9" << endl;
+		//printf("\ Setting the volume to: %f \n", volume);
+		channel->setVolume(volume);
+		cout << "DEBUG B99" << endl;
+		dVolume = volume;
+	}
+
 	return bRetIsValidStimuli;
 }
 
@@ -392,24 +411,33 @@ void StimuliLibrary::playStimuli()
 void StimuliLibrary::vPlayStimulusIfToBeTriggered()
 {
 	shared_ptr<Toolbox::HostData> hostData;
+	cout << "DEBUG vPlayStimulusIfToBeTriggered" << endl;
 	if (!stimuli_queue.empty())
 	{
+		cout << "DEBUG vPlayStimulusIfToBeTriggered1" << endl;
 		hostData = stimuli_queue.front();
+		cout << "DEBUG vPlayStimulusIfToBeTriggered2" << endl;
 		stimuli_queue.pop(); // Delete the stimulus either way.
+		cout << "DEBUG vPlayStimulusIfToBeTriggered3" << endl;
 		if (hostData->toBeTriggerd) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 		{
+			cout << "DEBUG vPlayStimulusIfToBeTriggered4" << endl;
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+			cout << "DEBUG vPlayStimulusIfToBeTriggered5" << endl;
 			if (bIsValidStimulus)
 			{
+				cout << "DEBUG vPlayStimulusIfToBeTriggered6" << endl;
 				playStimuli();
+				cout << "DEBUG vPlayStimulusIfToBeTriggered7" << endl;
 			}
 		}
 	}
+	cout << "DEBUG vPlayStimulusIfToBeTriggered DONE" << endl;
 }
 
 bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_ptr<Toolbox::HostData>> &movementQueue)
 {
-	//printf("\n Going IN: bAdaptStimulusParametersDueToHijacking\n");
+	printf("\n Going IN: bAdaptStimulusParametersDueToHijacking\n");
 	bool bRetVal = false;
 	bool isPaused = false;
 	if (bCurrentlyAHijackedProtcolIsProcessed())
@@ -417,14 +445,18 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		bRetVal = true;
 	}
 	// Check for all protocl hicjacking options (currently only one)
+	cout << "DEBUG A" << endl;
 	if (bIsStimulusToPlayAsLongAsMovementsPending())
 	{
+		cout << "DEBUG B" << endl;
 		bRetVal = true;
 		if (!bCurrentlyAHijackedProtcolIsProcessed()) // there is noprocess going gon
 		{
+			cout << "DEBUG C" << endl;
 			bool bIsValidStimulus;
 			if (!stimuli_queue.empty())
 			{
+				cout << "DEBUG D" << endl;
 				hostDataOfHijackedProtocol = stimuli_queue.front();
 				stimuli_queue.pop(); // Delete the stimulus either way.
 				bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
@@ -435,7 +467,7 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 			}
 			
 		}
-
+		cout << "DEBUG E" << endl;
 		if (!movementQueue.empty())
 		{
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
@@ -443,10 +475,13 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 				vSetChannelToInvinitePlay();
 			}
 		}
+
 		else if (!pMotor->reachedTarget(1337, 1337, 1337)) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
 		{
+			cout << "DEBUG F" << endl;
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{
+				cout << "DEBUG G" << endl;
 				vSetChannelToInvinitePlay();
 			}
 		}
@@ -455,13 +490,16 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 			// Wait for some time to check if if everything is really finnished
 			//cout << "---------------------------------------------- Wait for some time to check if if everything is really finnished" << endl;
 			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+			cout << "DEBUG H" << endl;
 			if (!movementQueue.empty() || !pMotor->reachedTarget(1337,1337,1337))
 			{
+				cout << "DEBUG I" << endl;
 				vSetChannelToInvinitePlay();
 				return bRetVal;
 			}
 			else
 			{
+				cout << "DEBUG J" << endl;
 				vSetHijackedProtocolIsCompletelyProcessed();
 				stopStimuli();
 			}
@@ -472,6 +510,7 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 	{
 		bRetVal = false;
 	}
+	printf("\n DEBUG Going OUT: bAdaptStimulusParametersDueToHijacking\n");
 	return bRetVal;
 }
 
@@ -480,11 +519,15 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 {
 	bool bIsValidStimulus;
+	cout << "DEBUG A1" << endl;
 	if (bCurrentlyAHijackedProtcolIsProcessed())
 	{
+		cout << "DEBUG A2" << endl;
 		// Only Load if necessary
 		bool bIsCurrentlyPlaying;
+		cout << "DEBUG A3" << endl;
 		FMOD_RESULT fmodResult = channel->getPaused(&bIsCurrentlyPlaying);
+		cout << "DEBUG A4" << endl;
 		if (fmodResult != FMOD_OK)
 		{
 			cout << "ERROR IN CHANNEL GET PAUSED" << endl;
@@ -492,7 +535,9 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 		if (!bIsCurrentlyPlaying)
 		{
 			//printf("YEEEEEEEEEEEEEEEEES\n");
+			cout << "DEBUG A5" << endl;
 			bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
+			cout << "DEBUG A6" << endl;
 		}
 		//else
 		//{
@@ -513,11 +558,15 @@ bool StimuliLibrary::bIsStimulusToPlayAsLongAsMovementsPending()
 	}
 	else
 	{
+		cout << "DEBUG A77" << endl;
 		if (!stimuli_queue.empty())
 		{
+			cout << "DEBUG A7" << endl;
 			shared_ptr<Toolbox::HostData> hostData = stimuli_queue.front();
 			//printf("\nbLoadStimuli \n");
+			cout << "DEBUG A8" << endl;
 			bool bIsValidStimulus = bLoadStimuli(hostData->stimulus_nr, hostData->loudness, hostData->stimulusDuration);
+			cout << "DEBUG A9" << endl;
 			//printf("DESIRED DURATION %i \n", uiDesiredDuration_ms);
 			//printf("iPlayStimulusAsLongAsMovementsPending %i \n", iPlayStimulusAsLongAsMovementsPending);
 			if (uiDesiredDuration_ms == iPlayStimulusAsLongAsMovementsPending)
