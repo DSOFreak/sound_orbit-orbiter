@@ -75,8 +75,8 @@ public:
 		int iNameIdxBegin = stIdx + 4;
 		stIdx = strHeaderData.find("_", iNameIdxBegin);
 		int iNameIdxEnd = stIdx;
-		cout << "iNameIdxBegin " << iNameIdxBegin << endl;
-		cout << "iNameIdxEnd " << iNameIdxEnd << endl;
+		//cout << "iNameIdxBegin " << iNameIdxBegin << endl;
+		//cout << "iNameIdxEnd " << iNameIdxEnd << endl;
 		std::string strName = strHeaderData.substr(iNameIdxBegin, iNameIdxEnd- iNameIdxBegin);
 		cout <<"strName "<< strName << endl;
 

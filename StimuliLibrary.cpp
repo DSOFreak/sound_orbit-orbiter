@@ -315,7 +315,7 @@ bool StimuliLibrary::bLoadStimuli(int nr, float volume, unsigned int duration)
 void StimuliLibrary::playStimuli()
 {
 
-	//printf(" +++ playStimulus() \n");
+	printf(" +++ playStimulus() \n");
 	if (audioFileLength_ms == 0)
 	{
 		//printf("\n audioFileLength_ms == 0 -> stopStimuli() \n");
@@ -424,18 +424,14 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 		bRetVal = true;
 	}
 	// Check for all protocl hicjacking options (currently only one)
-	cout << "DEBUG A" << endl;
 	if (bIsStimulusToPlayAsLongAsMovementsPending())
 	{
-		cout << "DEBUG B" << endl;
 		bRetVal = true;
 		if (!bCurrentlyAHijackedProtcolIsProcessed()) // there is noprocess going gon
 		{
-			cout << "DEBUG C" << endl;
 			bool bIsValidStimulus;
 			if (!stimuli_queue.empty())
 			{
-				cout << "DEBUG D" << endl;
 				hostDataOfHijackedProtocol = stimuli_queue.front();
 				stimuli_queue.pop(); // Delete the stimulus either way.
 				bIsValidStimulus = bLoadStimuli(hostDataOfHijackedProtocol->stimulus_nr, hostDataOfHijackedProtocol->loudness, hostDataOfHijackedProtocol->stimulusDuration);
@@ -446,7 +442,6 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 			}
 			
 		}
-		cout << "DEBUG E" << endl;
 		if (!movementQueue.empty())
 		{
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
@@ -457,10 +452,8 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 
 		else if (!pMotor->reachedTarget(1337, 1337, 1337)) // just for performance reasons this is not a OR with the above .. same code .. sorry.. keine zeit ! :/
 		{
-			cout << "DEBUG F" << endl;
 			if (hostDataOfHijackedProtocol->toBeTriggerd == 1) // This is a check: Actually no stimulus should be in the queue which has not to be triggered.. makes no sense
 			{
-				cout << "DEBUG G" << endl;
 				vSetChannelToInvinitePlay();
 			}
 		}
@@ -469,16 +462,13 @@ bool StimuliLibrary::bAdaptStimulusParametersDueToHijacking(std::vector<shared_p
 			// Wait for some time to check if if everything is really finnished
 			//cout << "---------------------------------------------- Wait for some time to check if if everything is really finnished" << endl;
 			std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-			cout << "DEBUG H" << endl;
 			if (!movementQueue.empty() || !pMotor->reachedTarget(1337,1337,1337))
 			{
-				cout << "DEBUG I" << endl;
 				vSetChannelToInvinitePlay();
 				return bRetVal;
 			}
 			else
 			{
-				cout << "DEBUG J" << endl;
 				vSetHijackedProtocolIsCompletelyProcessed();
 				stopStimuli();
 			}

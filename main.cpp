@@ -265,7 +265,7 @@ void vMovementThread(bool &bIsFirstCall)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			//llNumberOfRelevantThreadCalls++;
-			cout << "** MOVMENT THREAD START" << endl;
+			//cout << "** MOVMENT THREAD START" << endl;
 		// MOVEMENT PROCESSING 
 			movementTimerMutex.lock();
 			//cout << "trying to call bTryToAddMovementDataToCurrentMovement"<<endl;
@@ -294,7 +294,7 @@ void vMovementThread(bool &bIsFirstCall)
 					}
 				}
 			}
-			cout << "** MOVMENT THREAD END" << endl;
+			//cout << "** MOVMENT THREAD END" << endl;
 			movementTimerMutex.unlock();
 		}
 		}}; movementThread.detach();
